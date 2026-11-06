@@ -12,6 +12,8 @@ const Session = require('@/lib/models/Session');
 const Match = require('@/lib/models/Match');
 const MatchParticipation = require('@/lib/models/MatchParticipation');
 
+import { executePlayerDeletionCascade } from '@/lib/utils/playerCascade';
+
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
@@ -157,15 +159,18 @@ export async function PUT(
   return handleUpdate(req, params);
 }
 
-// DELETE /api/players/:id (admin only)
+/**
+ * DELETE /api/players/:id (Admin only)
+ * Permanent deletion with full cascade
+ */
 export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await authenticateRequest(req, ['admin']);
-  if (auth.errorResponse) return auth.errorResponse;
-
   try {
+    const auth = await authenticateRequest(req, ['admin']);
+    if (auth.errorResponse) return auth.errorResponse;
+
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid player ID format' }, { status: 400 });
@@ -177,92 +182,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Player not found or already deleted' }, { status: 404 });
     }
 
-    const playerId = player._id;
-    const playerUsername = (player.playerId || player.username || '').toLowerCase();
-    const playerName = player.name;
-
-    // 1. Audit log
-    console.log(
-      `[AUDIT] Admin ${auth.user.name} (${auth.user.id}) executed permanent deletion of player "${playerName}" (ID: ${playerId}) at ${new Date().toISOString()}`
-    );
-
-    // Transaction attempt if replica set supports it
-    let mongoSession: any = null;
-    const forceFallback = req.headers.get('x-test-force-no-tx') === 'true';
-    if (!forceFallback) {
-      try {
-        mongoSession = await mongoose.startSession();
-        mongoSession.startTransaction();
-      } catch {
-        mongoSession = null;
-        console.warn('[WARN] MongoDB replica set transaction not available; falling back to non-transactional player deletion cascade');
-      }
-    } else {
-      console.warn('[WARN] MongoDB replica set transaction not available (simulated); falling back to non-transactional player deletion cascade');
-    }
-
-    try {
-      const opts = mongoSession ? { session: mongoSession } : {};
-
-      // 2. Permanently delete associated user login account(s)
-      const userFilter: any[] = [{ playerId: playerId }];
-      if (playerUsername) {
-        userFilter.push({ username: playerUsername });
-      }
-      await User.deleteMany({ $or: userFilter }, opts);
-
-      // 3. Remove player from mutable draft/unsaved session rosters
-      await Session.updateMany(
-        { saved: { $ne: true }, locked: { $ne: true } },
-        {
-          $pull: {
-            attendance: { player: playerId },
-            initialRosterPlayerIds: playerId,
-          },
-        },
-        opts
-      );
-
-      // 4. Remove player from upcoming/uncompleted matches
-      await Match.updateMany(
-        { status: 'upcoming' },
-        { $pull: { selectedPlayers: playerId } },
-        opts
-      );
-      await MatchParticipation.deleteMany(
-        { player: playerId, played: null },
-        opts
-      );
-
-      // 5. Annotate completed historical MatchParticipation records to preserve history
-      await MatchParticipation.updateMany(
-        { player: playerId },
-        { $set: { remarks: 'Archived historical participant' } },
-        opts
-      );
-
-      // 6. Permanently delete Player document
-      await Player.findByIdAndDelete(playerId, opts);
-
-      if (mongoSession) {
-        await mongoSession.commitTransaction();
-      }
-    } catch (txErr) {
-      if (mongoSession) {
-        await mongoSession.abortTransaction().catch(() => {});
-      }
-      throw txErr;
-    } finally {
-      if (mongoSession) {
-        mongoSession.endSession().catch(() => {});
-      }
-    }
-
-    await bumpSync('player:deleted');
+    const result = await executePlayerDeletionCascade(player, auth.user);
 
     return NextResponse.json({
-      message: `Player "${playerName}" and associated login account permanently removed.`,
-      playerId: playerId.toString(),
+      message: `Player "${result.playerName}" and associated login account permanently removed.`,
+      playerId: result.playerId.toString(),
     });
   } catch (err: any) {
     console.error('Player deletion error:', err);

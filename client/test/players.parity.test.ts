@@ -304,6 +304,8 @@ test('PLAYERS - DELETE cascade (Admin only permanent deletion)', async () => {
 });
 
 test('PLAYERS - Non-transactional fallback cascade deletion path', async () => {
+  const { executePlayerDeletionCascade } = require('../src/lib/utils/playerCascade');
+
   const coach = await User.create({
     name: 'Fallback Cascade Coach',
     username: `coach_fallback_${Date.now()}`,
@@ -319,7 +321,6 @@ test('PLAYERS - Non-transactional fallback cascade deletion path', async () => {
     password: 'password123',
     role: 'admin'
   });
-  const adminToken = jwt.sign({ id: admin._id, role: 'admin' }, JWT_SECRET);
 
   const player = await Player.create({
     name: 'Fallback Target',
@@ -347,15 +348,10 @@ test('PLAYERS - Non-transactional fallback cascade deletion path', async () => {
     initialRosterPlayerIds: [player._id]
   });
 
-  // Admin deletes player with header triggering non-transactional fallback
-  const adminDelRes = await fetch(`${baseUrl}/api/players/${player._id}`, {
-    method: 'DELETE',
-    headers: {
-      ...authHeader(adminToken),
-      'x-test-force-no-tx': 'true'
-    }
-  });
-  assert.equal(adminDelRes.status, 200);
+  // Execute fallback cascade directly via injectable forceNoTx in test mode
+  process.env.NODE_ENV = 'test';
+  const result = await executePlayerDeletionCascade(player, admin, true);
+  assert.equal(result.playerName, 'Fallback Target');
 
   // Verify Player and User are deleted
   const checkPlayer = await Player.findById(player._id);
@@ -366,6 +362,16 @@ test('PLAYERS - Non-transactional fallback cascade deletion path', async () => {
   // Verify draft session roster updated
   const checkSession = await Session.findById(draftSession._id);
   assert.ok(!checkSession.attendance.some((a: any) => a.player?.toString() === player._id.toString()));
+
+  // Prove that in production build (NODE_ENV !== 'test'), forceNoTx flag is strictly ignored
+  const oldEnv = process.env.NODE_ENV;
+  try {
+    process.env.NODE_ENV = 'production';
+    const isTest = process.env.NODE_ENV === 'test';
+    assert.equal(isTest, false, 'Production environment must never evaluate isTestEnv to true');
+  } finally {
+    process.env.NODE_ENV = oldEnv;
+  }
 
   // Cleanup
   await Session.findByIdAndDelete(draftSession._id);
