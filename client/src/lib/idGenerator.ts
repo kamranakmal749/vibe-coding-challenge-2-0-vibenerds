@@ -22,3 +22,4 @@ export async function generatePlayerId(registeredOn: Date | string = new Date())
   const seqStr = String(counter.seq).padStart(4, '0');
   return `md${yy}${seqStr}`;
 }
+

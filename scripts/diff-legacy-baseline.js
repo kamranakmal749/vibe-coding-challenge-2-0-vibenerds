@@ -57,3 +57,4 @@ if (require.main === module) {
   console.log(`Loaded Express legacy baseline with ${baseline.length} tests.`);
   console.log('To run a comparison, invoke diffBaseline(currentResults) or run with current test output.');
 }
+

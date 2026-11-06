@@ -16,3 +16,4 @@ export async function resolveCoachId(req: any, explicitCoachId?: any) {
   const firstCoach = await User.findOne({ role: 'coach' }).sort({ createdAt: 1 }).select('_id');
   return firstCoach ? firstCoach._id : null;
 }
+

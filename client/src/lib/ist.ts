@@ -78,3 +78,4 @@ export function getWidenedDateWindow(dateInput: Date | string | number): { minDa
     maxDate: new Date(maxTime),
   };
 }
+

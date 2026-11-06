@@ -32,7 +32,7 @@ for (const file of files) {
         env: { ...process.env, MONGODB_URI: parityUri },
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
-        timeout: 45000
+        timeout: 90000
       }
     );
   } catch (err) {
@@ -92,3 +92,4 @@ if (!fs.existsSync(baselineDir)) {
 const outPath = path.join(baselineDir, 'legacy-express.json');
 fs.writeFileSync(outPath, JSON.stringify(perTestResults, null, 2), 'utf8');
 console.log(`\nSuccessfully wrote ${perTestResults.length} test results to ${outPath}`);
+

@@ -1,5 +1,5 @@
 // client/src/lib/sync.ts
-import mongoose, { Document, Model, Schema } from 'mongoose';
+import mongoose, { Model, Schema } from 'mongoose';
 import connectToDatabase from './db';
 
 export interface ISyncState {
@@ -12,7 +12,7 @@ export interface ISyncState {
 const syncStateSchema = new Schema<ISyncState>(
   {
     _id: { type: String, default: 'global' },
-    version: { type: Number, default: 0, required: true },
+    version: { type: Number, required: true },
     lastEvent: { type: String, default: '' },
   },
   {
@@ -27,28 +27,54 @@ export const SyncState: Model<ISyncState> =
 
 /**
  * Returns current sync version from MongoDB syncstates collection and clientsCount = 0.
+ * If no document exists yet, initializes the "global" doc with version = Date.now().
  */
 export async function getVersion(): Promise<{ version: number; clientsCount: number }> {
   await connectToDatabase();
-  const doc = await SyncState.findById('global').lean();
+  let doc = await SyncState.findById('global').lean();
+  if (!doc) {
+    const initVersion = Date.now();
+    doc = await SyncState.findOneAndUpdate(
+      { _id: 'global' },
+      {
+        $setOnInsert: { version: initVersion, lastEvent: 'init' },
+      },
+      { upsert: true, returnDocument: 'after' }
+    ).lean();
+  }
   return {
-    version: doc?.version ?? 0,
+    version: doc?.version ?? Date.now(),
     clientsCount: 0,
   };
 }
 
 /**
  * Atomically increments the global sync version in MongoDB and records the triggering event.
+ * On first use, initializes the document with version = Date.now(). Afterwards, performs $inc: { version: 1 }.
  */
 export async function bumpSync(event: string = 'mutation'): Promise<number> {
   await connectToDatabase();
+  const existing = await SyncState.findById('global');
+  if (!existing) {
+    const initVersion = Date.now();
+    const initDoc = await SyncState.findOneAndUpdate(
+      { _id: 'global' },
+      {
+        $setOnInsert: { version: initVersion },
+        $set: { lastEvent: event, updatedAt: new Date() },
+      },
+      { upsert: true, returnDocument: 'after' }
+    );
+    return initDoc.version;
+  }
+
   const updated = await SyncState.findOneAndUpdate(
     { _id: 'global' },
     {
       $inc: { version: 1 },
       $set: { lastEvent: event, updatedAt: new Date() },
     },
-    { upsert: true, returnDocument: 'after' }
+    { returnDocument: 'after' }
   );
-  return updated ? updated.version : 1;
+  return updated ? updated.version : Date.now();
 }

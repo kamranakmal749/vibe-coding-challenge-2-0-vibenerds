@@ -4,3 +4,4 @@ export function sportRegex(sport?: string): RegExp {
   const escaped = String(sport || '').trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return new RegExp(`^${escaped}$`, 'i');
 }
+

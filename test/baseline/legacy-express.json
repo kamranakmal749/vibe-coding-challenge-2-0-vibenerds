@@ -350,6 +350,11 @@
     "status": "PASS"
   },
   {
+    "file": "player-identity.test.js",
+    "test": "5. Migration script is idempotent on repeat runs",
+    "status": "PASS"
+  },
+  {
     "file": "player-removal-unit.test.js",
     "test": "1. Auth Middleware: allow(\"admin\") strictly blocks non-admin roles",
     "status": "PASS"

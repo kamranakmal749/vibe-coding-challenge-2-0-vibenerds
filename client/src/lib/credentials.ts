@@ -33,3 +33,4 @@ export function generateSecureTemporaryPassword(length: number = 10): string {
 
   return chars.join('');
 }
+
