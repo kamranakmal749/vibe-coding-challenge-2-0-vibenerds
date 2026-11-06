@@ -6,7 +6,15 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 function notFound() {
-  return NextResponse.json({ error: 'Route not found' }, { status: 404 });
+  return NextResponse.json(
+    { error: 'Route not found', notPorted: true },
+    {
+      status: 404,
+      headers: {
+        'x-route-status': 'not-ported',
+      },
+    }
+  );
 }
 
 export async function GET() { return notFound(); }
@@ -14,3 +22,4 @@ export async function POST() { return notFound(); }
 export async function PUT() { return notFound(); }
 export async function PATCH() { return notFound(); }
 export async function DELETE() { return notFound(); }
+

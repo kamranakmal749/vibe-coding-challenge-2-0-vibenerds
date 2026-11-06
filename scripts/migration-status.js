@@ -1,6 +1,9 @@
 // scripts/migration-status.js
-// Runs every parity test file against BASE_URL (Next.js server) and prints a table of pass/fail status
-// Classifies every failure as ROUTE_NOT_PORTED (HTTP 404 / unported domain) or MISMATCH (logic bug / contract drift).
+// Runs every parity test file against BASE_URL (Next.js server) and prints a table of pass/fail status.
+// Enforces strict classification:
+// - ROUTE_NOT_PORTED: Only if the failing test received x-route-status: not-ported marker.
+// - MISMATCH: Any failure that did NOT receive the marker (logic bug / contract drift).
+// - Fails if any route in the committed PORTED_ROUTES list returned the unported marker.
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
@@ -16,18 +19,29 @@ const files = fs.readdirSync(parityDir)
   .filter(f => f.endsWith('.parity.test.js'))
   .sort();
 
+// Committed list of ported routes (expanded phase by phase)
+const PORTED_ROUTES = [
+  '/api/health',
+  '/api/sync/version',
+  '/api/auth/login',
+  '/api/auth/player-account',
+  '/api/auth/change-password',
+  '/api/auth/me',
+  '/api/auth/coaches',
+  '/api/players'
+];
+
 console.log(`\n=== NEXT.JS MIGRATION PARITY STATUS ===`);
-console.log(`Target URL: ${baseUrl}`);
-console.log(`Database:   ${parityUri.replace(/\/\/.*@/, '//***:***@')}`);
+console.log(`Target URL:     ${baseUrl}`);
+console.log(`Database:       ${parityUri.replace(/\/\/.*@/, '//***:***@')}`);
+console.log(`Ported Routes:  ${PORTED_ROUTES.length} endpoints committed`);
 console.log(`Found ${files.length} parity test suites.\n`);
 
 const results = [];
 let totalPass = 0;
 let totalNotPorted = 0;
 let totalMismatch = 0;
-
-// Ported domains as of Phase 3
-const PORTED_ENDPOINTS = ['/api/auth', '/api/health', '/api/sync/version'];
+let portedRouteViolations = [];
 
 for (const file of files) {
   const filePath = path.join(parityDir, file);
@@ -36,7 +50,7 @@ for (const file of files) {
   let output = '';
   try {
     output = execSync(
-      `node -r ./scripts/dns-preload.js --test --test-force-exit "${filePath}"`,
+      `node -r ./scripts/dns-preload.js -r ./scripts/track-not-ported.js --test --test-force-exit "${filePath}"`,
       {
         env: {
           ...process.env,
@@ -53,6 +67,22 @@ for (const file of files) {
     output = (err.stdout || '') + '\n' + (err.stderr || '');
   }
 
+  // Check for ported route violations (a ported route must NEVER return not-ported marker)
+  const notPortedHits = [];
+  const hitMatches = output.matchAll(/\[NOT_PORTED_HIT\]\s+([A-Z]+)\s+([^\s\n]+)/g);
+  for (const match of hitMatches) {
+    const hitMethod = match[1];
+    const hitUrl = match[2];
+    notPortedHits.push({ method: hitMethod, url: hitUrl });
+
+    // Check if hitUrl matches any committed ported route
+    for (const ported of PORTED_ROUTES) {
+      if (hitUrl.includes(ported)) {
+        portedRouteViolations.push({ file, method: hitMethod, url: hitUrl, portedRoute: ported });
+      }
+    }
+  }
+
   // Parse failure sections: extract test name, actual status, first error line
   const failureDetails = new Map();
   const failureSectionMatch = output.match(/✖ failing tests:([\s\S]*)/);
@@ -65,7 +95,7 @@ for (const file of files) {
       const testName = nameMatch[1].trim();
 
       // Find actual HTTP status from error message / diff
-      let actualStatus = '404';
+      let actualStatus = 'N/A';
       const statusComparison = block.match(/(\d{3})\s+!==\s+(\d{3})/);
       const actualProp = block.match(/actual:\s*(\d{3})/);
       if (statusComparison) {
@@ -86,14 +116,12 @@ for (const file of files) {
         }
       }
 
-      // Classification:
-      // If the file/test targets unported domains (sessions, matches, players, scout), or if actualStatus === 404,
-      // it is cleanly classified as ROUTE_NOT_PORTED.
-      // If a failure occurs on a ported endpoint with status != 404 (e.g. 500, body mismatch), it is MISMATCH.
-      let classification = 'ROUTE_NOT_PORTED';
-      if (actualStatus !== '404' && actualStatus !== 'undefined' && actualStatus !== 'N/A') {
-        classification = 'MISMATCH';
-      }
+      // STRICT CLASSIFICATION RULE:
+      // Must have received the explicit not-ported marker ([NOT_PORTED_HIT])
+      const receivedMarker = notPortedHits.length > 0;
+      const classification = (receivedMarker && (actualStatus === '404' || actualStatus === 'N/A' || errorLine.includes('TypeError')))
+        ? 'ROUTE_NOT_PORTED'
+        : 'MISMATCH';
 
       failureDetails.set(testName, { actualStatus, errorLine, classification });
     }
@@ -128,7 +156,7 @@ for (const file of files) {
         const detail = failureDetails.get(testName) || {
           actualStatus: '404',
           errorLine: 'Route not ported yet',
-          classification: 'ROUTE_NOT_PORTED'
+          classification: notPortedHits.length > 0 ? 'ROUTE_NOT_PORTED' : 'MISMATCH'
         };
 
         results.push({
@@ -156,7 +184,7 @@ for (const file of files) {
       test: `${file} suite execution`,
       status: 'FAIL',
       httpStatus: '404',
-      classification: 'ROUTE_NOT_PORTED',
+      classification: notPortedHits.length > 0 ? 'ROUTE_NOT_PORTED' : 'MISMATCH',
       errorLine: 'Suite execution targets unported routes'
     });
     fileFail++;
@@ -178,9 +206,15 @@ console.table(results.map(r => ({
 
 console.log(`\n=== SUMMARY: ${totalPass} PASSED, ${totalNotPorted} ROUTE_NOT_PORTED, ${totalMismatch} MISMATCH (TOTAL: ${results.length}) ===`);
 
+if (portedRouteViolations.length > 0) {
+  console.error('\n❌ CRITICAL: Ported routes returned not-ported marker:');
+  console.table(portedRouteViolations);
+  process.exit(1);
+}
+
 if (totalMismatch > 0) {
   console.error(`\n❌ ERROR: ${totalMismatch} MISMATCH detected! All failures must be purely ROUTE_NOT_PORTED.`);
   process.exit(1);
 } else {
-  console.log(`\n✓ SUCCESS: Zero MISMATCH! All ${totalNotPorted} failing tests are cleanly classified as ROUTE_NOT_PORTED (HTTP 404).\n`);
+  console.log(`\n✓ SUCCESS: Zero MISMATCH! All ${totalNotPorted} failing tests received verified x-route-status: not-ported marker.\n`);
 }

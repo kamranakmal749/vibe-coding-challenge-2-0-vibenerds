@@ -8,7 +8,7 @@
 // 5. Attendance-Match conflict detection & synchronization
 
 import mongoose from 'mongoose';
-import { sportRegex } from './sport';
+import { sportRegex } from './utils/sport';
 import { getWidenedDateWindow } from './ist';
 
 const Session = require('./models/Session');

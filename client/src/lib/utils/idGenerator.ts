@@ -1,5 +1,5 @@
 // client/src/lib/utils/idGenerator.ts
-import { istYear } from './ist';
+import { istYear } from '../ist';
 const Counter = require('../models/Counter');
 
 /**
@@ -22,8 +22,4 @@ export async function generatePlayerId(registeredOn: Date | string = new Date())
   const seqStr = String(counter.seq).padStart(4, '0');
   return `md${yy}${seqStr}`;
 }
-
-module.exports = {
-  generatePlayerId
-};
 

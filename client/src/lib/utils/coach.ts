@@ -1,10 +1,10 @@
 // client/src/lib/utils/coach.ts
+// Resolve which coach owns a player/session record.
 import mongoose from 'mongoose';
 const User = require('../models/User');
 
 export async function resolveCoachId(req: any, explicitCoachId?: any) {
-  const user = req?.user || req;
-  if (user?.role === 'coach') return user.id || user._id;
+  if (req.user.role === 'coach') return req.user.id;
 
   if (explicitCoachId && mongoose.Types.ObjectId.isValid(explicitCoachId)) {
     const explicitCoach = await User.findOne({ _id: explicitCoachId, role: 'coach' }).select('_id');
@@ -16,8 +16,4 @@ export async function resolveCoachId(req: any, explicitCoachId?: any) {
   const firstCoach = await User.findOne({ role: 'coach' }).sort({ createdAt: 1 }).select('_id');
   return firstCoach ? firstCoach._id : null;
 }
-
-module.exports = {
-  resolveCoachId
-};
 

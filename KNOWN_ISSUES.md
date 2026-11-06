@@ -34,3 +34,12 @@ These items represent pre-existing bugs, schema mismatches, and legacy fixtures 
 - **Client Sync Test Contract in `player-removal-unit.test.js`**:
   - Test 7 checks for specific regex strings inside `script.js`. This test is retired by design at cutover once `script.js` is replaced by the Next.js client.
 
+---
+
+### 4. Auth & Token Invalidation
+- **Deleted Coach/Admin Tokens Valid Until Expiry**:
+  - In Express [`src/middleware/auth.js`](file:///c:/Users/pooki/Desktop/hackathon/src/middleware/auth.js#L18), the database user lookup (`User.findById`) and profile revocation check are executed only if `req.user.role === 'player'`.
+  - For coach and admin roles, tokens are validated purely cryptographically against `JWT_SECRET`. If a coach or admin account is deleted or removed from MongoDB, existing JWT tokens issued to that account continue to work on endpoints that do not explicitly perform a fresh `User.findById` query until the 8-hour token TTL expires.
+  - *Resolution*: Ported 1:1 to Next.js during migration to preserve behavior parity; post-cutover remediation can add universal user lookup or token revocation across all roles.
+
+

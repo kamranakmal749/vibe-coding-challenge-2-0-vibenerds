@@ -5,7 +5,3 @@ export function sportRegex(sport?: string): RegExp {
   return new RegExp(`^${escaped}$`, 'i');
 }
 
-module.exports = {
-  sportRegex
-};
-
