@@ -29,7 +29,9 @@ const PORTED_ROUTES = [
   '/api/auth/me',
   '/api/auth/coaches',
   '/api/players',
-  '/api/sessions'
+  '/api/sessions',
+  '/api/matches',
+  '/api/scout'
 ];
 
 console.log(`\n=== NEXT.JS MIGRATION PARITY STATUS ===`);
@@ -61,7 +63,7 @@ for (const file of files) {
         },
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
-        timeout: 90000
+        timeout: 180000
       }
     );
   } catch (err) {

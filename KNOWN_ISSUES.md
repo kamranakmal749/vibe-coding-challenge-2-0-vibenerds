@@ -50,5 +50,14 @@ These items represent pre-existing bugs, schema mismatches, and legacy fixtures 
   - When the Express host runs in UTC rather than IST (UTC+05:30), late-night IST sessions or fixtures falling between 00:00 and 05:30 IST on the 1st of a month are bucketed into the prior UTC calendar day/month.
   - Per instruction G6, calendar and month-boundary behaviors are frozen as-is during Phase 4 migration without refactoring. The stats boundary differential test remains informational under UTC and verifies 100% mathematical identity under `TZ=Asia/Kolkata`. Final resolution is pending the production deployment timezone configuration decision.
 
+---
+
+### 6. Phase 5 Reopen Window Uses Raw `Date.now()`
+- **`editUnlockedUntil` Bypasses `getEffectiveNow`**:
+  - In [`src/routes/matches.js`](file:///c:/Users/pooki/Desktop/hackathon/src/routes/matches.js#L467-L469), lines 467, 651, and 1146 check and set `editUnlockedUntil` using wall-clock `Date.now()`, bypassing `getEffectiveNow(req)`.
+  - In contrast, kickoff and scoring unlock logic checks `effectiveNow`. As a result, mock time supplied via `x-mock-now` does not affect the 5-minute reopen window calculation.
+  - *Resolution*: Ported 1:1 to Next.js in Phase 4C to maintain parity; post-cutover remediation will harmonize all match time comparisons under a single centralized clock service.
+
+
 
 
