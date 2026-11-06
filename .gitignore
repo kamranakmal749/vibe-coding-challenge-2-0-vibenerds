@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.vercel/
+.env
+*.env
+.env.*
+!.env.example
+.tmp_chrome_sync_audit/
+screenshots/
+MAIDANDESK_*_AUDIT.md
+.DS_Store
+*.log

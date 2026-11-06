@@ -1,0 +1,379 @@
+/* ---------- Global Styles ---------- */
+body {
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+}
+
+/* ---------- Page Visibility ---------- */
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.3s ease-out; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Glassmorphism & High-Contrast Borders ---------- */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1.5px solid #cbd5e1;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
+.dark .glass-panel {
+    background: rgba(15, 23, 42, 0.78);
+    border: 1.5px solid #334155;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.glass-sidebar {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1.5px solid #cbd5e1;
+}
+.dark .glass-sidebar {
+    background: rgba(15, 23, 42, 0.88);
+    border-right: 1.5px solid #334155;
+}
+
+.glass-header {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1.5px solid #cbd5e1;
+}
+.dark .glass-header {
+    background: rgba(15, 23, 42, 0.8);
+    border-bottom: 1.5px solid #334155;
+}
+
+/* Clearer Borders on Tables, Calendars, Grids & Cards */
+.calendar-grid {
+    border: 1px solid #cbd5e1;
+}
+.dark .calendar-grid {
+    border: 1px solid #334155;
+}
+
+.calendar-grid > div {
+    border-color: #cbd5e1 !important;
+}
+.dark .calendar-grid > div {
+    border-color: #334155 !important;
+}
+
+/* Crisp borders for inputs & secondary controls */
+input, select {
+    border-color: #cbd5e1 !important;
+}
+.dark input, .dark select {
+    border-color: #334155 !important;
+}
+
+/* ---------- Animated Background Blobs ---------- */
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: -1;
+    opacity: 0.6;
+    animation: float 10s infinite ease-in-out alternate;
+}
+@keyframes float {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, -30px) scale(1.1); }
+}
+
+/* ---------- Timeline ---------- */
+.timeline-item { position: relative; padding-left: 2rem; padding-bottom: 1.5rem; border-left: 2px solid rgba(255, 255, 255, 0.4); }
+.dark .timeline-item { border-left: 2px solid rgba(255, 255, 255, 0.1); }
+.timeline-item:last-child { border-left: 2px solid transparent; padding-bottom: 0; }
+.timeline-dot { position: absolute; left: -6px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); }
+
+/* ---------- Compact Graph Bars ---------- */
+.bar-track {
+    position: relative;
+    width: 100%;
+    max-width: 44px;
+    margin: 0 auto;
+    height: 110px;
+    display: flex;
+    align-items: flex-end;
+    background: rgba(241, 245, 249, 0.7);
+    border-radius: 8px;
+    padding: 3px;
+    border: 1.5px solid #cbd5e1;
+    overflow: hidden;
+}
+.dark .bar-track {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1.5px solid #334155;
+}
+
+.bar-fill {
+    width: 100%;
+    border-radius: 5px;
+    transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+    border: 1px solid rgba(5, 150, 105, 0.4);
+}
+.bar-fill.highlight {
+    background: linear-gradient(180deg, #10b981 0%, #047857 100%);
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+    border: 1px solid rgba(4, 120, 87, 0.6);
+}
+
+/* ---------- Calendar Day Cell ---------- */
+.calendar-day-cell {
+    min-height: 105px;
+    padding: 8px;
+    transition: background-color 0.2s ease;
+    border-color: #cbd5e1 !important;
+}
+.calendar-day-cell:hover {
+    background-color: rgba(255, 255, 255, 0.7);
+}
+.dark .calendar-day-cell {
+    border-color: #334155 !important;
+}
+.dark .calendar-day-cell:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+}
+.calendar-day-cell.other-month {
+    opacity: 0.35;
+    background-color: rgba(241, 245, 249, 0.4);
+}
+.dark .calendar-day-cell.other-month {
+    background-color: rgba(15, 23, 42, 0.3);
+}
+
+/* Universal table and card divider visibility */
+table thead {
+    border-bottom: 1.5px solid #cbd5e1 !important;
+}
+.dark table thead {
+    border-bottom: 1.5px solid #334155 !important;
+}
+table tbody tr {
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+.dark table tbody tr {
+    border-bottom: 1px solid #334155 !important;
+}
+
+/* Glow */
+.logo-glow-dark { filter: drop-shadow(0 0 25px rgba(16, 185, 129, 0.3)); }
+.logo-glow-light { filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.05)); }
+
+/* ---------- Scrollbar Styling ---------- */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.dark ::-webkit-scrollbar-thumb { background: #334155; }
+
+/* ---------- Toasts & Modal Dialogs ---------- */
+#toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+.toast {
+    pointer-events: auto;
+    min-width: 300px;
+    max-width: 420px;
+    padding: 14px 18px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+    animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+@keyframes toastSlideIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.toast.toast-success {
+    background: rgba(16, 185, 129, 0.95);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.toast.toast-error {
+    background: rgba(239, 68, 68, 0.95);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.toast.toast-info {
+    background: rgba(59, 130, 246, 0.95);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.toast.toast-warning {
+    background: rgba(245, 158, 11, 0.95);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Modal styling */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* =========================================================================
+   Mobile Sidebar Drawer & Responsive Enhancements (DEF-RESP-01)
+   ========================================================================= */
+@media (max-width: 767px) {
+    #app-sidebar {
+        position: fixed !important;
+        inset-y: 0 !important;
+        left: 0 !important;
+        height: 100vh !important;
+        transform: translateX(-100%);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+        z-index: 50 !important;
+    }
+    #app-sidebar.mobile-open {
+        transform: translateX(0) !important;
+    }
+}
+
+/* =========================================================================
+   Centralized Theme Variables & Design Tokens
+   ========================================================================= */
+:root {
+    --bg-page: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-surface-elevated: #f1f5f9;
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --border-subtle: #cbd5e1;
+    --border-strong: #94a3b8;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+}
+
+.dark {
+    --bg-page: #090d16;
+    --bg-surface: #0d1421;
+    --bg-surface-elevated: #151d2b;
+    --bg-card: #151d2b;
+    --border-subtle: #1e293b;
+    --border-strong: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+}
+
+/* =========================================================================
+   Academy Desk Theme Dashboard Styling (Light & Dark)
+   ========================================================================= */
+#app-sidebar {
+    background-color: rgba(255, 255, 255, 0.92);
+    border-color: #cbd5e1;
+}
+.dark #app-sidebar {
+    background-color: #0D1421 !important;
+    border-color: rgba(148, 163, 184, 0.1) !important;
+}
+
+header.glass-header {
+    background-color: rgba(255, 255, 255, 0.85);
+    border-color: #cbd5e1;
+}
+.dark header.glass-header {
+    background-color: rgba(13, 20, 33, 0.85) !important;
+    border-color: rgba(148, 163, 184, 0.1) !important;
+}
+
+main {
+    background-color: #f8fafc;
+}
+.dark main {
+    background-color: #090D16;
+}
+
+.desk-card {
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid #cbd5e1;
+    border-radius: 1rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.dark .desk-card {
+    background: #151D2B;
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    box-shadow: none;
+}
+
+.desk-card:hover {
+    border-color: #94a3b8;
+}
+.dark .desk-card:hover {
+    border-color: rgba(148, 163, 184, 0.22);
+}
+
+.desk-card-inner {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+}
+.dark .desk-card-inner {
+    background: #1B2535;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.desk-quick-action-btn {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    transition: all 0.2s ease;
+}
+.dark .desk-quick-action-btn {
+    background: #1B2535;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.desk-quick-action-btn:hover {
+    background: #e2e8f0;
+    border-color: rgba(16, 185, 129, 0.5);
+    transform: translateY(-1px);
+}
+.dark .desk-quick-action-btn:hover {
+    background: #233045;
+    border-color: rgba(16, 185, 129, 0.35);
+}
+
+.desk-stat-wave {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    height: 60%;
+    width: 65%;
+    pointer-events: none;
+    opacity: 0.18;
+    z-index: 0;
+}

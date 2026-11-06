@@ -1,0 +1,30 @@
+{
+  "name": "maidan-desk",
+  "version": "1.0.0",
+  "description": "Maidan Desk – sports academy management platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch --watch-path=src --watch-path=server.js server.js",
+    "seed": "node scripts/seed.js",
+    "test": "node --test test/acceptance.test.js"
+  },
+  "keywords": [
+    "sports",
+    "academy",
+    "attendance"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.11.4"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.16.0"
+  }
+}

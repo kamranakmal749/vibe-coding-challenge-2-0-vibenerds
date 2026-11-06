@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The operating system for your sports academy.">
+    <title>Maidan Desk | Ultimate Platform</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 900: '#064e3b' },
+                        slate: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
+                    },
+                    animation: {
+                        'blob': 'blob 10s infinite',
+                        'blob-slow': 'blob 15s infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Linked Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body
+    class="h-screen w-screen flex bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors relative">
+
+    <!-- BACKGROUND BLOBS (DYNAMICALLY ANIMATED) -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
+        <!-- Blue Blob -->
+        <div
+            class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 dark:opacity-30 dark:mix-blend-screen animate-blob">
+        </div>
+
+        <!-- Red/Rose Blob -->
+        <div class="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-rose-500 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 dark:opacity-30 dark:mix-blend-screen animate-blob-slow"
+            style="animation-delay: 2s;"></div>
+
+        <!-- Emerald Blob -->
+        <div class="absolute top-[40%] left-[30%] w-[300px] h-[300px] bg-emerald-500 rounded-full mix-blend-multiply filter blur-[100px] opacity-30 dark:opacity-20 dark:mix-blend-screen animate-blob"
+            style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- ================= LOGIN / LANDING SCREEN ================= -->
+    <div id="view-login" class="w-full h-full flex flex-col justify-between relative z-10 overflow-y-auto"
+        aria-label="Login Screen">
+        <!-- Top Navigation Bar for Landing Page -->
+        <header
+            class="w-full px-6 py-[14px] flex items-center justify-between border-b border-slate-300/40 dark:border-slate-800/60 backdrop-blur-md">
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"
+                    class="w-10 h-10 flex-shrink-0 transition-transform hover:scale-105 duration-300">
+                    <defs>
+                        <!-- Bright Emerald Gradient kept for both modes -->
+                        <linearGradient id="mGradNav" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#34d399" />
+                            <stop offset="100%" stop-color="#10b981" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- The Monolith 'M' - Scaled to fill the entire 200x200 canvas -->
+                    <path d="M 0 200 L 0 0 L 100 100 L 200 0 L 200 200 L 150 200 L 150 80 L 100 140 L 50 80 L 50 200 Z"
+                        fill="url(#mGradNav)" />
+
+                    <!-- The Data Horizon Line - Slate in light mode, White in dark mode -->
+                    <rect x="0" y="96" width="200" height="8" class="fill-slate-900 dark:fill-white" />
+                </svg>
+                <div>
+                    <span
+                        class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-baseline">
+                        Maidan <span class="text-emerald-500 font-bold ml-1">Desk</span>
+                    </span>
+                    <span
+                        class="text-[10px] font-bold uppercase tracking-wider block text-brand-600 dark:text-brand-400">Dumka
+                        Sports OS</span>
+                </div>
+            </div>
+
+            <!-- Dark / Light Mode Switcher & Quick Links on Landing Page -->
+            <div class="flex items-center gap-3">
+                <button onclick="toggleDarkMode()"
+                    class="p-2.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-white/60 dark:hover:bg-slate-800/60 border border-slate-300 dark:border-slate-700 shadow-sm transition-all"
+                    title="Toggle Theme" aria-label="Toggle Theme">
+                    <!-- Sun icon when in dark mode (click to switch to light) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="w-5 h-5 hidden dark:block text-amber-400">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2"></path>
+                        <path d="M12 20v2"></path>
+                        <path d="m4.93 4.93 1.41 1.41"></path>
+                        <path d="m17.66 17.66 1.41 1.41"></path>
+                        <path d="M2 12h2"></path>
+                        <path d="M20 12h2"></path>
+                        <path d="m6.34 17.66-1.41 1.41"></path>
+                        <path d="m19.07 4.93-1.41 1.41"></path>
+                    </svg>
+                    <!-- Moon icon when in light mode (click to switch to dark) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="w-5 h-5 block dark:hidden text-slate-700">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Landing / Sign-in Grid -->
+        <div
+            class="flex-1 flex flex-col lg:flex-row items-center justify-center px-4 py-[14px] lg:px-12 lg:py-[46px] gap-8 max-w-7xl mx-auto w-full">
+
+            <!-- Left Card: Hero & Feature Highlights -->
+            <div class="w-full lg:w-1/2 flex flex-col justify-center">
+                <div
+                    class="max-w-lg glass-panel p-8 lg:p-10 rounded-3xl shadow-xl border border-slate-300/80 dark:border-slate-800">
+                    <div
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/15 border border-brand-500/30 text-brand-700 dark:text-brand-300 text-xs font-bold mb-6">
+                        <i data-lucide="award" class="w-4 h-4"></i> Built for Dumka Sports Academy
+                    </div>
+                    <h1
+                        class="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white leading-tight mb-4 tracking-tight">
+                        The operating system for your sports academy.
+                    </h1>
+                    <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 mb-8 font-medium leading-relaxed">
+                        Say goodbye to messy paper notebooks. Track daily practice attendance, guard match day score
+                        sheets, and compute talent trial readiness automatically.
+                    </p>
+
+                    <!-- Feature Pillars in Light & Dark mode -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div
+                            class="p-3.5 rounded-2xl bg-white/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-start gap-3 shadow-xs">
+                            <div
+                                class="w-8 h-8 rounded-xl bg-brand-500/15 text-brand-600 flex items-center justify-center flex-shrink-0 font-bold">
+                                <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800 dark:text-slate-200">1. Open & Lock Sessions</p>
+                                <p class="text-slate-500 dark:text-slate-400 mt-0.5">Finalize attendance with locked
+                                    integrity.</p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="p-3.5 rounded-2xl bg-white/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-start gap-3 shadow-xs">
+                            <div
+                                class="w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 font-bold">
+                                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800 dark:text-slate-200">2. Match Day Guard</p>
+                                <p class="text-slate-500 dark:text-slate-400 mt-0.5">Absent players cannot receive
+                                    scores.</p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="p-3.5 rounded-2xl bg-white/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-start gap-3 shadow-xs">
+                            <div
+                                class="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 font-bold">
+                                <i data-lucide="target" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800 dark:text-slate-200">3. Readiness Formula</p>
+                                <p class="text-slate-500 dark:text-slate-400 mt-0.5">&ge;75% att. + &ge;2 matches for
+                                    trials.</p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="p-3.5 rounded-2xl bg-white/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-start gap-3 shadow-xs">
+                            <div
+                                class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center flex-shrink-0 font-bold">
+                                <i data-lucide="users" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800 dark:text-slate-200">4. 4 Dedicated Portals</p>
+                                <p class="text-slate-500 dark:text-slate-400 mt-0.5">Admin, Coach, Scout, and Players.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Card: Sign In Form -->
+            <div class="w-full lg:w-1/2 flex items-center justify-center">
+                <div
+                    class="w-full max-w-md glass-panel p-8 sm:p-10 rounded-3xl shadow-2xl border border-slate-300/80 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white">Sign In</h2>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm font-medium mt-1">Enter your
+                                credentials to access the desk.</p>
+                        </div>
+                        <div
+                            class="w-10 h-10 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-600 dark:text-brand-400">
+                            <i data-lucide="lock" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+
+                    <form onsubmit="handleFormLogin(event)" class="space-y-5">
+                        <!-- USERNAME OR EMAIL FIELD -->
+                        <div>
+                            <label
+                                class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
+                                Username or Email
+                            </label>
+                            <input id="login-email" name="identifier" type="text"
+                                placeholder="Username (e.g. md260001) or Email"
+                                class="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-white/60 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all placeholder-slate-400 text-slate-900 dark:text-white"
+                                required />
+                        </div>
+
+                        <!-- PASSWORD FIELD -->
+                        <div>
+                            <label
+                                class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
+                                Password
+                            </label>
+                            <input id="login-password" type="password" placeholder="••••••••"
+                                class="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-white/60 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all placeholder-slate-400 text-slate-900 dark:text-white"
+                                required />
+                        </div>
+
+                        <div id="login-error"
+                            class="hidden p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-500 font-semibold flex items-center gap-2">
+                        </div>
+
+                        <button type="submit" id="login-submit-btn"
+                            class="w-full bg-slate-900/90 dark:bg-brand-600/90 backdrop-blur-sm text-white font-semibold py-3 rounded-xl shadow-lg hover:bg-slate-800 dark:hover:bg-brand-700 transition-all transform hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
+                            <span>Sign In</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </form>
+
+                    <!-- DEMO ROLES SECTION -->
+                    <div class="mt-10 pt-8 border-t border-slate-200/50 dark:border-slate-700/50">
+                        <p
+                            class="text-xs text-center text-slate-500 dark:text-slate-400 mb-4 uppercase tracking-widest font-bold">
+                            Quick Fill Demo Roles
+                        </p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" onclick="fillDemo('coach@maidandesk.com', 'coach123')"
+                                class="flex justify-between items-center bg-white/40 dark:bg-slate-800/40 hover:bg-white/80 border border-white/50 py-2.5 px-3 rounded-lg text-xs font-semibold shadow-sm transition-colors text-slate-800 dark:text-slate-200">
+                                <span>Coach</span> <span
+                                    class="text-brand-600 dark:text-brand-400 text-[10px]">coach@...</span>
+                            </button>
+                            <button type="button" onclick="fillDemo('scout@maidandesk.com', 'scout123')"
+                                class="flex justify-between items-center bg-white/40 dark:bg-slate-800/40 hover:bg-white/80 border border-white/50 py-2.5 px-3 rounded-lg text-xs font-semibold shadow-sm transition-colors text-slate-800 dark:text-slate-200">
+                                <span>Scout</span> <span
+                                    class="text-brand-600 dark:text-brand-400 text-[10px]">scout@...</span>
+                            </button>
+                            <button type="button" onclick="fillDemo('kamran@player.com', 'player123')"
+                                class="flex justify-between items-center bg-white/40 dark:bg-slate-800/40 hover:bg-white/80 border border-white/50 py-2.5 px-3 rounded-lg text-xs font-semibold shadow-sm transition-colors text-slate-800 dark:text-slate-200">
+                                <span>Kamran (Ready)</span> <span
+                                    class="text-brand-600 dark:text-brand-400 text-[10px]">kamran@...</span>
+                            </button>
+                            <button type="button" onclick="fillDemo('aadil@player.com', 'player123')"
+                                class="flex justify-between items-center bg-white/40 dark:bg-slate-800/40 hover:bg-white/80 border border-white/50 py-2.5 px-3 rounded-lg text-xs font-semibold shadow-sm transition-colors text-slate-800 dark:text-slate-200">
+                                <span>Aadil (Not Ready)</span> <span
+                                    class="text-brand-600 dark:text-brand-400 text-[10px]">aadil@...</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= APP SHELL ================= -->
+    <div id="app-shell" class="hidden w-full h-full flex relative z-10">
+
+        <!-- Mobile Sidebar Backdrop Overlay -->
+        <div id="sidebar-backdrop" onclick="toggleMobileSidebar(false)"
+            class="hidden fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-30 md:hidden transition-opacity"></div>
+
+        <!-- Sidebar -->
+        <aside id="app-sidebar"
+            class="fixed md:static inset-y-0 left-0 z-40 md:z-20 -translate-x-full md:translate-x-0 flex-shrink-0 glass-sidebar flex flex-col transition-transform md:transition-colors duration-250 ease-out select-none md:select-auto shadow-2xl md:shadow-none"
+            style="width: 260px;">
+            <!-- Vertical Drag Handle for Sidebar Resizing -->
+            <div id="sidebar-resizer"
+                class="hidden md:flex absolute top-0 -right-1.5 w-3 h-full cursor-col-resize items-center justify-center group z-30 select-none hover:bg-brand-500/10 active:bg-brand-500/20 transition-colors"
+                title="Drag to resize sidebar (Double-click to reset)">
+                <div
+                    class="w-1 h-8 rounded-full bg-slate-300 dark:bg-slate-700 group-hover:bg-brand-500 group-active:bg-brand-500 transition-colors">
+                </div>
+            </div>
+
+            <div
+                class="h-16 flex-shrink-0 flex items-center justify-between px-5 border-b border-slate-300 dark:border-slate-800">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"
+                        class="w-8 h-8 flex-shrink-0 transition-transform hover:scale-105 duration-300">
+                        <defs>
+                            <!-- Bright Emerald Gradient kept for both modes -->
+                            <linearGradient id="mGradSidebar" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#34d399" />
+                                <stop offset="100%" stop-color="#10b981" />
+                            </linearGradient>
+                        </defs>
+
+                        <!-- The Monolith 'M' - Scaled to fill the entire 200x200 canvas -->
+                        <path
+                            d="M 0 200 L 0 0 L 100 100 L 200 0 L 200 200 L 150 200 L 150 80 L 100 140 L 50 80 L 50 200 Z"
+                            fill="url(#mGradSidebar)" />
+
+                        <!-- The Data Horizon Line - Slate in light mode, White in dark mode -->
+                        <rect x="0" y="96" width="200" height="8" class="fill-slate-900 dark:fill-white" />
+                    </svg>
+                    <span
+                        class="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white flex items-baseline truncate whitespace-nowrap">
+                        Maidan <span class="text-emerald-500 font-bold ml-1">Desk</span>
+                    </span>
+                </div>
+                <!-- Mobile Drawer Close Button -->
+                <button onclick="toggleMobileSidebar(false)"
+                    class="md:hidden p-1.5 text-slate-500 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+                    title="Close Menu" aria-label="Close Navigation Menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <nav id="sidebar-nav" class="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto overflow-x-hidden">
+                <!-- Links injected via JS -->
+            </nav>
+
+            <!-- Bottom Brand Tagline Box matching mockup -->
+            <div class="p-3 flex-shrink-0">
+                <div class="desk-card p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-100/60 dark:bg-[#151D2B] text-center flex flex-col items-center justify-center gap-1.5 shadow-xs">
+                    <div class="w-7 h-7 rounded-xl bg-slate-200 dark:bg-[#1B2535] text-slate-500 dark:text-slate-400 flex items-center justify-center">
+                        <i data-lucide="trophy" class="w-3.5 h-3.5"></i>
+                    </div>
+                    <p class="text-xs font-bold tracking-wide text-slate-700 dark:text-slate-300">
+                        Build. Train. <span class="text-emerald-500">Excel.</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="p-3 flex-shrink-0 border-t border-slate-300 dark:border-slate-800/80">
+                <button onclick="logout()"
+                    class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-red-600 hover:bg-red-500/10 transition-colors overflow-hidden">
+                    <i data-lucide="log-out" class="w-4 h-4 flex-shrink-0"></i>
+                    <span class="truncate whitespace-nowrap text-left">Sign Out</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col min-w-0 h-full">
+            <!-- Header matching mockup with search & user chip -->
+            <header
+                class="h-16 flex-shrink-0 glass-header flex items-center justify-between px-4 sm:px-6 lg:px-8 z-20 transition-colors">
+                <!-- Mobile Hamburger Toggle -->
+                <button id="mobile-sidebar-toggle" onclick="toggleMobileSidebar()"
+                    class="md:hidden p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-white/50 transition-colors"
+                    title="Open Navigation" aria-label="Open Navigation Menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="4" x2="20" y1="12" y2="12"></line>
+                        <line x1="4" x2="20" y1="6" y2="6"></line>
+                        <line x1="4" x2="20" y1="18" y2="18"></line>
+                    </svg>
+                </button>
+
+                <!-- Center/Left Search Bar matching mockup -->
+                <div class="hidden sm:flex items-center flex-1 max-w-lg mx-2 lg:mx-4">
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text"
+                            id="header-global-search"
+                            onkeydown="if(event.key==='Enter'){ searchGlobalAcademy(this.value); }"
+                            placeholder="Search players, sessions..."
+                            class="w-full pl-10 pr-16 py-2.5 bg-slate-100 dark:bg-[#151D2B] border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-emerald-500/50 transition-colors">
+                        <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
+                            <kbd class="px-2 py-0.5 text-xs font-semibold text-slate-400 bg-slate-200 dark:bg-[#1B2535] border border-slate-300 dark:border-slate-700/60 rounded">Ctrl + K</kbd>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 lg:gap-3.5 ml-auto">
+                    <!-- Notification Bell with Red Dot -->
+                    <button onclick="toggleNotifications()"
+                        class="relative p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
+                        title="Notifications" aria-label="Notifications">
+                        <i data-lucide="bell" class="w-4.5 h-4.5"></i>
+                        <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-[#090D16]"></span>
+                    </button>
+
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleDarkMode()"
+                        class="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
+                        title="Toggle Theme" aria-label="Toggle Theme">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="w-4.5 h-4.5 hidden dark:block text-amber-400">
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <path d="M12 2v2"></path>
+                            <path d="M12 20v2"></path>
+                            <path d="m4.93 4.93 1.41 1.41"></path>
+                            <path d="m17.66 17.66 1.41 1.41"></path>
+                            <path d="M2 12h2"></path>
+                            <path d="M20 12h2"></path>
+                            <path d="m6.34 17.66-1.41 1.41"></path>
+                            <path d="m19.07 4.93-1.41 1.41"></path>
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="w-4.5 h-4.5 block dark:hidden text-slate-700">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
+
+                    <div class="w-px h-6 bg-slate-300/60 dark:bg-slate-800 mx-1"></div>
+
+                    <!-- User Profile Chip matching mockup -->
+                    <div class="flex items-center gap-3 pl-1">
+                        <!-- Initials badge or avatar -->
+                        <div id="header-avatar-badge" class="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                            CS
+                        </div>
+                        <div class="text-left hidden sm:block">
+                            <p class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight" id="user-name-display">Coach Sharma</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium leading-tight mt-0.5" id="user-role-display">Coach Account</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+                <div class="max-w-[1600px] w-full mx-auto space-y-6">
+
+                    <!-- ================= ADMIN VIEWS ================= -->
+                    <div id="view-admin-overview" class="page space-y-6">
+                        <div class="mb-6">
+                            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Academy Overview</h2>
+                            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">Real-time academy performance & athlete metrics</p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div class="desk-card p-6 sm:p-7 rounded-2xl flex flex-col justify-between">
+                                <p class="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">Active Players</p>
+                                <p id="admin-stat-players" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">0</p>
+                            </div>
+                            <div class="desk-card p-6 sm:p-7 rounded-2xl flex flex-col justify-between">
+                                <p class="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">Sessions Held</p>
+                                <p id="admin-stat-sessions" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">0</p>
+                            </div>
+                            <div class="desk-card p-6 sm:p-7 rounded-2xl flex flex-col justify-between">
+                                <p class="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">Matches Played</p>
+                                <p id="admin-stat-matches" class="text-3xl sm:text-4xl font-extrabold text-brand-600 dark:text-brand-400 leading-tight">0</p>
+                            </div>
+                            <div class="desk-card p-6 sm:p-7 rounded-2xl flex flex-col justify-between">
+                                <p class="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">Ready for Trial</p>
+                                <p id="admin-stat-ready" class="text-3xl sm:text-4xl font-extrabold text-emerald-500 dark:text-emerald-400 leading-tight">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="view-admin-registration" class="page space-y-6">
+                        <div class="mb-6">
+                            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Player Registration</h2>
+                            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">Register a new academy athlete into the roster</p>
+                        </div>
+                        <div class="desk-card p-7 sm:p-9 rounded-2xl max-w-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                            <form id="player-registration-form" onsubmit="handleRegisterPlayer(event)" novalidate class="space-y-6">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <!-- Full Name -->
+                                    <div class="sm:col-span-2">
+                                        <label for="reg-player-name" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                            Full Name <span class="text-rose-500">*</span>
+                                        </label>
+                                        <input id="reg-player-name" type="text" placeholder="e.g. Rohith Roy" required
+                                            class="w-full bg-white/70 dark:bg-slate-800/70 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm sm:text-base text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 transition-all placeholder:text-slate-400">
+                                        <p id="reg-error-name" class="hidden text-xs font-semibold text-rose-500 mt-1.5 flex items-center gap-1"></p>
+                                    </div>
+
+                                    <!-- Age -->
+                                    <div>
+                                        <label for="reg-player-age" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                            Age (5 – 50) <span class="text-rose-500">*</span>
+                                        </label>
+                                        <input id="reg-player-age" type="number" min="5" max="50" step="1" placeholder="18" required
+                                            class="w-full bg-white/70 dark:bg-slate-800/70 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm sm:text-base text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 transition-all placeholder:text-slate-400">
+                                        <p id="reg-error-age" class="hidden text-xs font-semibold text-rose-500 mt-1.5 flex items-center gap-1"></p>
+                                    </div>
+
+                                    <!-- Sport -->
+                                    <div>
+                                        <label for="reg-player-sport" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                            Sport <span class="text-rose-500">*</span>
+                                        </label>
+                                        <select id="reg-player-sport" required
+                                            class="w-full bg-white/70 dark:bg-slate-800/70 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm sm:text-base text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 transition-all cursor-pointer">
+                                            <option value="">Select Sport...</option>
+                                            <option value="Football">Football</option>
+                                            <option value="Cricket">Cricket</option>
+                                            <option value="Basketball">Basketball</option>
+                                        </select>
+                                        <p id="reg-error-sport" class="hidden text-xs font-semibold text-rose-500 mt-1.5 flex items-center gap-1"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Admin Coach Assignment (Visible only to Admin) -->
+                                <div id="reg-player-coach-wrapper" class="hidden pt-3 border-t border-slate-200/80 dark:border-slate-800">
+                                    <label for="reg-player-coach" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                        Assign to Coach <span class="text-rose-500">*</span>
+                                    </label>
+                                    <select id="reg-player-coach"
+                                        class="w-full bg-white/70 dark:bg-slate-800/70 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm sm:text-base text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 transition-all cursor-pointer">
+                                        <option value="">Loading coaches...</option>
+                                    </select>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5">Admin-registered players must belong to a coach so they appear in that coach's sessions.</p>
+                                    <p id="reg-error-coach" class="hidden text-xs font-semibold text-rose-500 mt-1.5 flex items-center gap-1"></p>
+                                </div>
+
+                                <div id="reg-player-msg" class="hidden text-sm font-semibold p-3.5 rounded-xl"></div>
+
+                                <div class="pt-3">
+                                    <button type="submit" id="reg-player-btn"
+                                        class="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-bold text-sm sm:text-base shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                        <i data-lucide="user-plus" class="w-5 h-5"></i>
+                                        <span>Register Player</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- ================= COACH VIEWS ================= -->
+                    <div id="view-coach-overview" class="page space-y-7">
+                        <!-- Hero Section matching reference mockup -->
+                        <div class="relative overflow-hidden rounded-2xl bg-white/80 dark:bg-[#0D1421] border border-slate-200/80 dark:border-slate-800/80 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
+                            <div class="relative z-10 max-w-xl">
+                                <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+                                    <span id="coach-greeting-text">Good Afternoon</span>, <span id="coach-greeting-role" class="text-emerald-500 dark:text-emerald-400">Coach!</span>
+                                </h1>
+                            </div>
+                            <div class="relative z-10 flex items-center gap-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/90 dark:bg-[#151D2B]/90 border border-slate-300/80 dark:border-slate-700/80 px-4 py-2.5 rounded-xl shadow-xs self-start md:self-auto">
+                                <i data-lucide="calendar" class="w-4 h-4 text-emerald-500"></i>
+                                <span id="coach-hero-date-display">Friday, November 6, 2026</span>
+                            </div>
+
+                            <!-- Sports Silhouette Background Graphic on the right -->
+                            <div class="absolute right-0 top-0 bottom-0 w-80 pointer-events-none opacity-20 dark:opacity-25 overflow-hidden flex items-center justify-end pr-6">
+                                <svg viewBox="0 0 200 200" class="w-64 h-64 text-emerald-400 fill-current">
+                                    <path d="M120 20 C125 20, 130 25, 130 30 C130 35, 125 40, 120 40 C115 40, 110 35, 110 30 C110 25, 115 20, 120 20 Z M115 50 L135 75 L125 110 L105 85 Z M100 85 L85 130 L70 180 L80 185 L95 140 L110 115 L125 150 L140 185 L150 180 L135 140 Z"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- 4 Stat Cards matching reference mockup -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                            <!-- 1. Active Squad Members -->
+                            <div class="desk-card p-6 flex flex-col justify-between cursor-pointer hover:border-emerald-500/50 transition-all transform hover:-translate-y-0.5" onclick="switchPage('coach-players')">
+                                <div class="flex items-center gap-4 z-10">
+                                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border border-emerald-500/25 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="users" class="w-7 h-7"></i>
+                                    </div>
+                                    <div>
+                                        <p id="coach-stat-players" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">0</p>
+                                        <p class="text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Active Squad Members</p>
+                                    </div>
+                                </div>
+                                <svg class="desk-stat-wave text-emerald-500" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M0 35 Q 25 15, 50 25 T 100 5 L 100 40 L 0 40 Z" fill="currentColor" fill-opacity="0.3"></path>
+                                </svg>
+                            </div>
+
+                            <!-- 2. Sessions Conducted -->
+                            <div class="desk-card p-6 flex flex-col justify-between cursor-pointer hover:border-emerald-500/50 transition-all transform hover:-translate-y-0.5" onclick="switchPage('coach-sessions')">
+                                <div class="flex items-center gap-4 z-10">
+                                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border border-emerald-500/25 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="calendar" class="w-7 h-7"></i>
+                                    </div>
+                                    <div>
+                                        <p id="coach-stat-sessions" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">0</p>
+                                        <p class="text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Sessions Conducted</p>
+                                    </div>
+                                </div>
+                                <svg class="desk-stat-wave text-emerald-500" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M0 30 Q 30 5, 60 20 T 100 10 L 100 40 L 0 40 Z" fill="currentColor" fill-opacity="0.3"></path>
+                                </svg>
+                            </div>
+
+                            <!-- 3. Total Recorded Matches -->
+                            <div class="desk-card p-6 flex flex-col justify-between cursor-pointer hover:border-emerald-500/50 transition-all transform hover:-translate-y-0.5" onclick="switchPage('coach-matches')">
+                                <div class="flex items-center gap-4 z-10">
+                                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border border-emerald-500/25 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="trophy" class="w-7 h-7"></i>
+                                    </div>
+                                    <div>
+                                        <p id="coach-stat-matches" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">0</p>
+                                        <p class="text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Total Recorded Matches</p>
+                                    </div>
+                                </div>
+                                <svg class="desk-stat-wave text-emerald-500" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M0 25 Q 20 35, 50 15 T 100 5 L 100 40 L 0 40 Z" fill="currentColor" fill-opacity="0.3"></path>
+                                </svg>
+                            </div>
+
+                            <!-- 4. Players Shortlisted -->
+                            <div class="desk-card p-6 flex flex-col justify-between cursor-pointer hover:border-emerald-500/50 transition-all transform hover:-translate-y-0.5" onclick="switchPage('scout')">
+                                <div class="flex items-center gap-4 z-10">
+                                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border border-emerald-500/25 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="play" class="w-7 h-7 fill-current"></i>
+                                    </div>
+                                    <div>
+                                        <p id="coach-stat-ready" class="text-3xl sm:text-4xl font-extrabold text-emerald-500 dark:text-emerald-400 leading-tight">0</p>
+                                        <p class="text-sm font-semibold text-slate-600 dark:text-slate-400 mt-1">Players Shortlisted</p>
+                                    </div>
+                                </div>
+                                <svg class="desk-stat-wave text-emerald-500" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M0 35 Q 35 10, 70 20 T 100 5 L 100 40 L 0 40 Z" fill="currentColor" fill-opacity="0.3"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Action Required Card (Adaptive Content Height) -->
+                        <div class="desk-card p-6 sm:p-7">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2.5 font-bold text-base text-slate-900 dark:text-white">
+                                    <i data-lucide="zap" class="w-5 h-5 text-amber-500 dark:text-amber-400 fill-amber-500 dark:fill-amber-400"></i>
+                                    <span>Action Required</span>
+                                </div>
+                                <button onclick="switchPage('coach-sessions')" class="text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-emerald-500 dark:hover:text-emerald-400 flex items-center gap-1.5 transition-colors cursor-pointer">
+                                    <span id="dashboard-action-count-text">0 items</span> <span>&rarr;</span>
+                                </button>
+                            </div>
+                            <div id="dashboard-action-required-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <!-- Dynamic Action Items Injected by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Today's Training (Left) & Upcoming Matches (Right) -->
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            <!-- Left: Today's Training (7 cols) -->
+                            <div class="lg:col-span-7 desk-card p-6 sm:p-7 flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-5">
+                                    <div class="flex items-center gap-2.5 font-bold text-base text-slate-900 dark:text-white">
+                                        <i data-lucide="calendar" class="w-5 h-5 text-emerald-500 dark:text-emerald-400"></i>
+                                        <span>Today's Training</span>
+                                    </div>
+                                    <button onclick="switchPage('coach-sessions')" class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1.5 cursor-pointer">
+                                        View all sessions &rarr;
+                                    </button>
+                                </div>
+
+                                <div id="coach-today-training-container">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <div>
+                                            <h3 id="today-training-title" class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">Football Training</h3>
+                                            <div class="flex items-center flex-wrap gap-4 text-sm text-slate-600 dark:text-slate-400 mt-2">
+                                                <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4 text-slate-500"></i> <span id="today-training-time">09:00 AM - 10:30 AM</span></span>
+                                                <span class="flex items-center gap-1.5"><i data-lucide="users" class="w-4 h-4 text-slate-500"></i> <span id="today-training-enrolled">11 enrolled</span></span>
+                                                <span class="flex items-center gap-1.5"><i data-lucide="calendar" class="w-4 h-4 text-slate-500"></i> <span id="today-training-date">Nov 6, 2026</span></span>
+                                            </div>
+                                        </div>
+                                        <span id="today-training-badge" class="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+                                            COMPLETED
+                                        </span>
+                                    </div>
+
+                                    <div class="mt-7">
+                                        <div class="flex items-center justify-between mb-2.5">
+                                            <div class="flex items-baseline gap-2">
+                                                <span id="today-training-rate" class="text-2xl font-extrabold text-emerald-500 dark:text-emerald-400">100%</span>
+                                                <span class="text-sm font-semibold text-slate-600 dark:text-slate-400">attendance</span>
+                                            </div>
+                                            <span id="today-training-counts" class="text-sm font-semibold text-slate-600 dark:text-slate-400">11 Present &bull; 0 Absent</span>
+                                        </div>
+                                        <!-- Attendance Green Progress Bar -->
+                                        <div class="w-full bg-slate-200/90 dark:bg-[#1B2535] rounded-full h-3 overflow-hidden">
+                                            <div id="today-training-progress-bar" class="bg-emerald-500 h-3 rounded-full transition-all duration-500" style="width: 100%;"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-6 flex justify-end">
+                                        <button id="today-training-view-btn" onclick="openTodayRegisterModal()" class="text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1.5 cursor-pointer">
+                                            View Register &rarr;
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Upcoming Matches (5 cols) -->
+                            <div class="lg:col-span-5 desk-card p-6 sm:p-7 flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-5">
+                                    <div class="flex items-center gap-2.5 font-bold text-base text-slate-900 dark:text-white">
+                                        <i data-lucide="trophy" class="w-5 h-5 text-emerald-500 dark:text-emerald-400"></i>
+                                        <span>Upcoming Matches</span>
+                                    </div>
+                                    <button onclick="switchPage('coach-matches')" class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1.5 cursor-pointer">
+                                        View all &rarr;
+                                    </button>
+                                </div>
+
+                                <div id="dashboard-upcoming-matches-list" class="space-y-3.5 flex-1 flex flex-col justify-center">
+                                    <!-- Matches injected dynamically by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Attendance Insights (Left) & Recent Activity (Right) -->
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            <!-- Left: Attendance Insights (7 cols) -->
+                            <div class="lg:col-span-7 desk-card p-6 sm:p-7 flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-2.5 font-bold text-base text-slate-900 dark:text-white">
+                                        <i data-lucide="bar-chart-2" class="w-5 h-5 text-emerald-500 dark:text-emerald-400"></i>
+                                        <span>Attendance Insights</span>
+                                    </div>
+                                    <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100/80 dark:bg-[#1B2535] px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center gap-1.5">
+                                        <span>This week</span> <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-500"></i>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-baseline justify-between mb-5">
+                                    <div class="flex items-baseline gap-2.5">
+                                        <span id="dashboard-insights-rate" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">86%</span>
+                                        <span class="text-sm text-slate-600 dark:text-slate-400 font-semibold">weekly average</span>
+                                    </div>
+                                    <span id="dashboard-insights-trend" class="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                        &uarr; Active Season
+                                    </span>
+                                </div>
+
+                                <!-- 7-Day Emerald Bar Chart matching mockup -->
+                                <div class="pt-2">
+                                    <div id="dashboard-attendance-bars" class="flex items-end justify-between gap-3 h-32 px-3">
+                                        <!-- Bars generated dynamically by JS with emerald heights -->
+                                    </div>
+                                    <div class="flex justify-between text-xs font-bold text-slate-500 dark:text-slate-400 mt-3 px-3">
+                                        <span>Mon</span>
+                                        <span>Tue</span>
+                                        <span>Wed</span>
+                                        <span>Thu</span>
+                                        <span>Fri</span>
+                                        <span>Sat</span>
+                                        <span>Sun</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Recent Activity (5 cols) -->
+                            <div class="lg:col-span-5 desk-card p-6 sm:p-7 flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-5">
+                                    <div class="flex items-center gap-2.5 font-bold text-base text-slate-900 dark:text-white">
+                                        <i data-lucide="zap" class="w-5 h-5 text-emerald-500 dark:text-emerald-400"></i>
+                                        <span>Recent Activity</span>
+                                    </div>
+                                    <button onclick="switchPage('coach-players')" class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1.5 cursor-pointer">
+                                        View all &rarr;
+                                    </button>
+                                </div>
+
+                                <div id="dashboard-recent-activity-list" class="space-y-4 flex-1 flex flex-col justify-center">
+                                    <!-- Dynamic feed items injected by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="view-coach-players" class="page space-y-6">
+                        <div class="flex justify-between items-end mb-6">
+                            <div>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Players Directory</h2>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">Manage academy athletes and track readiness</p>
+                            </div>
+                            <button onclick="switchPage('admin-registration')"
+                                class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-2 cursor-pointer">
+                                <i data-lucide="plus" class="w-4.5 h-4.5"></i> <span>Add Player</span>
+                            </button>
+                        </div>
+
+                        <div
+                            class="desk-card rounded-2xl overflow-hidden shadow-xs border border-slate-200 dark:border-slate-800">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr
+                                            class="bg-slate-100/90 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 uppercase tracking-wider font-bold text-xs sm:text-sm border-b border-slate-300 dark:border-slate-700 select-none">
+                                            <th
+                                                class="py-4 px-4 w-16 text-center border-r border-slate-200 dark:border-slate-700/80">
+                                                S.No.</th>
+                                            <th
+                                                class="py-4 px-6 min-w-[220px] border-r border-slate-200 dark:border-slate-700/80">
+                                                Name</th>
+                                            <th
+                                                class="py-4 px-5 min-w-[130px] border-r border-slate-200 dark:border-slate-700/80">
+                                                Sport</th>
+                                            <th
+                                                class="py-4 px-5 min-w-[150px] border-r border-slate-200 dark:border-slate-700/80">
+                                                Date of Registration</th>
+                                            <th
+                                                class="py-4 px-6 min-w-[200px] border-r border-slate-200 dark:border-slate-700/80">
+                                                Attendance (%)</th>
+                                            <th
+                                                class="py-4 px-6 min-w-[170px] border-r border-slate-200 dark:border-slate-700/80">
+                                                Matches Played</th>
+                                            <th class="py-4 px-4 w-24 text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="coach-players-table-body"
+                                        class="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                                        <tr>
+                                            <td colspan="7" class="py-8 text-center text-slate-400">Loading players from
+                                                database...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="coach-players-container" class="hidden"></div>
+                    </div>
+
+
+
+                    <!-- ================= 1. MAIN ATTENDANCE SESSIONS PAGE (SESSION-WISE TABLE) ================= -->
+                    <div id="view-coach-sessions" class="page space-y-6">
+                        <!-- Top Header Row -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <div>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Attendance Sessions</h2>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">Review and manage academy training rosters</p>
+                            </div>
+
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <!-- Open New Session Button (Preserved) -->
+                                <button onclick="openCreateSessionModal()"
+                                    class="px-5 py-2.5 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white transition-colors shadow-xs flex items-center gap-2 cursor-pointer">
+                                    <i data-lucide="plus" class="w-4.5 h-4.5"></i>
+                                    <span>Open New Session</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Stats Ribbon: Session-wise summary -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                            <div class="desk-card p-5 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+                                <span
+                                    class="text-sm font-semibold text-slate-600 dark:text-slate-400 block mb-1">Total
+                                    Sessions</span>
+                                <span id="session-stat-total"
+                                    class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white block">0</span>
+                            </div>
+                            <div class="desk-card p-5 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+                                <span
+                                    class="text-sm font-semibold text-brand-600 dark:text-brand-400 block mb-1">Avg.
+                                    Session Attendance</span>
+                                <span id="session-stat-avg"
+                                    class="text-3xl sm:text-4xl font-extrabold text-brand-600 dark:text-brand-400 block">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- Toolbar: Search Bar + Sport Filter -->
+                        <div
+                            class="desk-card p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 mb-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
+                            <div class="flex flex-1 items-center gap-3 flex-wrap sm:flex-nowrap">
+                                <div class="relative flex-1 min-w-[200px] max-w-md">
+                                    <i data-lucide="search"
+                                        class="w-4.5 h-4.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                                    <input id="session-search-input" type="text"
+                                        placeholder="Search by date or sport..." oninput="filterSessionsTable()"
+                                        class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl bg-white/80 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/50">
+                                </div>
+                                <select id="session-sport-filter" onchange="filterSessionsTable()"
+                                    class="px-4 py-2.5 text-sm rounded-xl bg-white/80 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 cursor-pointer">
+                                    <option value="ALL">All Sports</option>
+                                    <option value="Football">Football</option>
+                                    <option value="Cricket">Cricket</option>
+                                </select>
+                            </div>
+
+                            <div
+                                class="flex items-center justify-between sm:justify-end gap-3 text-sm font-semibold text-slate-600 dark:text-slate-400">
+                                <span id="session-records-count">Showing 0 sessions</span>
+                                <button onclick="loadSessions()" title="Refresh Table"
+                                    class="p-2 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer">
+                                    <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 1. MAIN TABLE: SESSION-WISE ERP TABLE -->
+                        <div
+                            class="desk-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <!-- Light grey table header with clear column separations -->
+                                    <thead>
+                                        <tr
+                                            class="bg-slate-100/90 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 uppercase tracking-wider font-bold text-xs sm:text-sm border-b border-slate-300 dark:border-slate-700 select-none">
+                                            <th
+                                                class="py-4 px-4 w-16 text-center border-r border-slate-200 dark:border-slate-700/80">
+                                                S.No.</th>
+                                            <th
+                                                class="py-4 px-6 min-w-[180px] border-r border-slate-200 dark:border-slate-700/80">
+                                                Date</th>
+                                            <th
+                                                class="py-4 px-5 min-w-[140px] border-r border-slate-200 dark:border-slate-700/80">
+                                                Sport Name</th>
+                                            <th
+                                                class="py-4 px-6 min-w-[260px] border-r border-slate-200 dark:border-slate-700/80">
+                                                Attendance (%)</th>
+                                            <th class="py-4 px-5 min-w-[190px] text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <!-- Thin horizontal row borders, compact clean rows -->
+                                    <tbody id="session-table-body"
+                                        class="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                                        <tr>
+                                            <td colspan="5" class="py-8 text-center text-slate-400">Loading sessions
+                                                from database...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= 2. SHOW DETAILS PAGE: DEDICATED PLAYER-WISE VIEW ================= -->
+                    <div id="view-coach-session-details" class="page space-y-6">
+                        <!-- Navigation Bar -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <div class="flex items-center gap-3.5">
+                                <button onclick="switchPage('coach-sessions')"
+                                    class="px-4 py-2.5 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors flex items-center gap-2 text-sm font-bold cursor-pointer">
+                                    <i data-lucide="arrow-left" class="w-4 h-4"></i> <span>Back to Sessions</span>
+                                </button>
+                                <div>
+                                    <h2 id="details-session-title"
+                                        class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white leading-tight">
+                                        Football &bull; Session Details</h2>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <button id="details-toggle-lock-btn"
+                                    onclick="toggleSessionLock(activeDetailsSession?._id)"
+                                    class="px-4 py-2.5 rounded-xl text-sm font-bold transition-all shadow-xs flex items-center gap-2 border cursor-pointer">
+                                    <i data-lucide="lock" class="w-4 h-4"></i>
+                                    <span>Lock Session</span>
+                                </button>
+                                <button id="details-edit-att-btn"
+                                    onclick="handleEditAttendanceClick()"
+                                    class="px-5 py-2.5 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white transition-colors shadow-xs flex items-center gap-2 cursor-pointer">
+                                    <i data-lucide="clipboard-check" class="w-4.5 h-4.5"></i>
+                                    <span>Take Attendance</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Session Overview Ribbon -->
+                        <div
+                            class="desk-card p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="w-12 h-12 rounded-2xl bg-brand-500/15 text-brand-600 border border-brand-500/25 flex items-center justify-center font-bold shrink-0">
+                                    <i data-lucide="calendar" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2.5 flex-wrap">
+                                        <span id="details-sport-badge"
+                                            class="px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-brand-500/15 text-brand-600 border border-brand-500/25">Football</span>
+                                        <span id="details-date-badge"
+                                            class="text-sm font-bold text-slate-900 dark:text-slate-100">Date</span>
+                                        <span id="details-locked-badge"
+                                            class="hidden px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"></span>
+                                        <span id="details-saved-badge"
+                                            class="hidden px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                                            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Saved
+                                        </span>
+                                    </div>
+                                    <span id="details-roster-note" class="hidden text-xs text-slate-500 dark:text-slate-400 mt-1 block font-medium"></span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                                <div
+                                    class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-sm">
+                                    <span class="text-slate-500 dark:text-slate-400 block text-xs font-semibold uppercase tracking-wider">Session
+                                        Turnout</span>
+                                    <span id="details-session-turnout"
+                                        class="font-extrabold text-base text-slate-900 dark:text-white mt-0.5 block">0 Present</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Player Table Toolbar -->
+                        <div
+                            class="desk-card p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 mb-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
+                            <div class="relative flex-1 max-w-md">
+                                <i data-lucide="search"
+                                    class="w-4.5 h-4.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                                <input id="details-player-search" type="text"
+                                    placeholder="Filter athletes in this session..."
+                                    oninput="filterSessionPlayersTable()"
+                                    class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl bg-white/80 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/50">
+                            </div>
+                            <span id="details-player-count" class="text-sm font-semibold text-slate-600 dark:text-slate-400">Showing 0
+                                players</span>
+                        </div>
+
+                        <!-- Conflict Alert Banner (Phase 4) -->
+                        <div id="details-conflict-alert"
+                            class="hidden mb-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-sm flex items-center gap-3">
+                            <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0"></i>
+                            <span id="details-conflict-message" class="font-medium">One or more athletes marked absent
+                                have recorded matches on this date requiring review.</span>
+                        </div>
+
+                        <!-- EXACT PLAYER-WISE TABLE (Section 2 - Date Specific Attendance Register) -->
+                        <div
+                            class="desk-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <!-- Light grey table header with clear column separations -->
+                                    <thead>
+                                        <tr
+                                            class="bg-slate-100/90 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 uppercase tracking-wider font-bold text-xs sm:text-sm border-b border-slate-300 dark:border-slate-700 select-none">
+                                            <th
+                                                class="py-4 px-4 w-16 text-center border-r border-slate-200 dark:border-slate-700/80">
+                                                S.No.</th>
+                                            <th
+                                                class="py-4 px-6 min-w-[220px] border-r border-slate-200 dark:border-slate-700/80">
+                                                Player Name</th>
+                                            <th
+                                                class="py-4 px-5 min-w-[140px] border-r border-slate-200 dark:border-slate-700/80">
+                                                Sport Name</th>
+                                            <th
+                                                class="py-4 px-6 min-w-[160px] text-center border-r border-slate-200 dark:border-slate-700/80">
+                                                Trial Eligibility</th>
+                                            <th class="py-4 px-6 min-w-[180px] text-center">Attendance Status</th>
+                                        </tr>
+                                    </thead>
+                                    <!-- Thin horizontal row borders, compact clean rows -->
+                                    <tbody id="details-player-table-body"
+                                        class="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                                        <tr>
+                                            <td colspan="5" class="py-8 text-center text-slate-400">Loading session
+                                                athletes...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= INTERACTIVE SESSION ATTENDANCE ROSTER VIEW ================= -->
+                    <div id="view-coach-session-roster" class="page space-y-6">
+                        <!-- Navigation & Header Card -->
+                        <div class="flex items-center gap-3.5 mb-6">
+                            <button onclick="backFromRosterView()"
+                                class="px-4 py-2.5 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors flex items-center gap-2 text-sm font-bold cursor-pointer">
+                                <i data-lucide="arrow-left" class="w-4 h-4"></i> <span>Back to Sessions</span>
+                            </button>
+                        </div>
+
+                        <!-- Header Card with Dynamic Counters -->
+                        <div
+                            class="desk-card p-6 sm:p-7 rounded-2xl shadow-sm mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 border-l-4 border-brand-500">
+                            <div>
+                                <div class="flex items-center gap-2.5 mb-1.5">
+                                    <span id="roster-sport-badge"
+                                        class="text-xs font-bold uppercase tracking-wider text-brand-600 bg-brand-500/15 px-3 py-1 rounded-md border border-brand-500/25">Football</span>
+                                    <span id="roster-mode-badge"
+                                        class="hidden px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">Edit Mode</span>
+                                </div>
+                                <h2 id="roster-date-title"
+                                    class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Session Date</h2>
+                            </div>
+
+                            <!-- Live Dynamic Counters -->
+                            <div class="flex items-center gap-3.5">
+                                <div
+                                    class="flex items-center gap-3 px-5 py-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300">
+                                    <i data-lucide="check-circle" class="w-6 h-6 text-emerald-500"></i>
+                                    <div>
+                                        <span
+                                            class="text-xs font-bold uppercase tracking-wider block text-emerald-600 dark:text-emerald-400">Present</span>
+                                        <span id="roster-present-counter"
+                                            class="text-2xl sm:text-3xl font-extrabold leading-none">0</span>
+                                    </div>
+                                </div>
+                                <div
+                                    class="flex items-center gap-3 px-5 py-3 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-800 dark:text-rose-300">
+                                    <i data-lucide="x-circle" class="w-6 h-6 text-rose-500"></i>
+                                    <div>
+                                        <span
+                                            class="text-xs font-bold uppercase tracking-wider block text-rose-600 dark:text-rose-400">Absent</span>
+                                        <span id="roster-absent-counter"
+                                            class="text-2xl sm:text-3xl font-extrabold leading-none">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Core Player List Table -->
+                        <div class="desk-card rounded-2xl overflow-hidden shadow-sm mb-6">
+                            <div
+                                class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                                <h3 class="font-bold text-base text-slate-800 dark:text-slate-200">Registered Roster</h3>
+                                <div class="flex items-center gap-2.5">
+                                    <button onclick="setAllAttendance('present')"
+                                        class="px-4 py-2 rounded-xl text-sm font-bold bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors cursor-pointer">
+                                        Mark All Present
+                                    </button>
+                                    <button onclick="setAllAttendance('absent')"
+                                        class="px-4 py-2 rounded-xl text-sm font-bold bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 border border-rose-500/20 transition-colors cursor-pointer">
+                                        Mark All Absent
+                                    </button>
+                                </div>
+                            </div>
+
+                            <ul id="roster-player-list" class="divide-y divide-slate-200 dark:divide-slate-800">
+                                <!-- Populated dynamically with toggle rows -->
+                            </ul>
+                        </div>
+
+                        <!-- Save Attendance Action Bar -->
+                        <div
+                            class="desk-card p-5 sm:p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <p id="roster-footer-help-text" class="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                                Once saved, attendance is permanently finalized and the session will be locked automatically. Players marked absent cannot play in matches.
+                            </p>
+                            <div id="roster-action-buttons" class="flex items-center gap-3 w-full sm:w-auto">
+                                <button id="roster-save-btn" onclick="executeSaveAttendance()"
+                                    class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm sm:text-base shadow-md transition-all flex items-center justify-center gap-2.5 cursor-pointer">
+                                    <i data-lucide="check" class="w-5 h-5"></i> <span>Save Attendance</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- ================= MATCHES & CALENDAR DASHBOARD (PHASE 7-10) ================= -->
+                <div id="view-coach-matches" class="page">
+                    <!-- Top Header & Action -->
+                    <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Matches & Calendar</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Schedule and track matches</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openAddMatchModal()"
+                                class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer">
+                                <i data-lucide="plus" class="w-4 h-4"></i> Add New Match
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3 Summary Metric Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+                        <div class="desk-card p-6 sm:p-7 rounded-2xl flex flex-col justify-between">
+                            <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+                                <span class="text-sm font-semibold">Total Matches</span>
+                                <i data-lucide="trophy" class="w-5 h-5 text-brand-500"></i>
+                            </div>
+                            <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight"
+                                id="stat-total-matches">0</div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-medium">All academy fixtures</p>
+                        </div>
+                        <div class="desk-card p-6 sm:p-7 rounded-2xl flex flex-col justify-between">
+                            <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+                                <span class="text-sm font-semibold">Upcoming</span>
+                                <i data-lucide="calendar-clock" class="w-5 h-5 text-amber-500"></i>
+                            </div>
+                            <div class="text-3xl sm:text-4xl font-extrabold text-amber-600 dark:text-amber-400 leading-tight"
+                                id="stat-upcoming-matches">0</div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-medium">Scheduled to play</p>
+                        </div>
+                        <div class="desk-card p-6 sm:p-7 rounded-2xl flex flex-col justify-between">
+                            <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+                                <span class="text-sm font-semibold">Completed</span>
+                                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
+                            </div>
+                            <div class="text-3xl sm:text-4xl font-extrabold text-emerald-600 dark:text-emerald-400 leading-tight"
+                                id="stat-completed-matches">0</div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-medium">Scored & finalized</p>
+                        </div>
+                    </div>
+
+                    <!-- 3 Navigation Tabs -->
+                    <div class="flex items-center gap-2 border-b border-slate-200/80 dark:border-slate-800 mb-6 overflow-x-auto pb-1">
+                        <button id="match-tab-btn-calendar" onclick="switchMatchTab('calendar')"
+                            class="match-tab-btn active px-5 py-3 text-sm font-bold border-b-2 border-brand-500 text-brand-600 dark:text-brand-400 flex items-center gap-2.5 cursor-pointer transition-colors whitespace-nowrap">
+                            <i data-lucide="calendar" class="w-4.5 h-4.5"></i> <span>Match Calendar</span>
+                        </button>
+                        <button id="match-tab-btn-upcoming" onclick="switchMatchTab('upcoming')"
+                            class="match-tab-btn px-5 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors whitespace-nowrap">
+                            <i data-lucide="calendar-clock" class="w-4.5 h-4.5"></i> <span>Upcoming Matches</span>
+                        </button>
+                        <button id="match-tab-btn-completed" onclick="switchMatchTab('completed')"
+                            class="match-tab-btn px-5 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors whitespace-nowrap">
+                            <i data-lucide="check-circle-2" class="w-4.5 h-4.5"></i> <span>Completed Matches</span>
+                        </button>
+                    </div>
+
+                    <!-- TAB 1: Match Calendar Section -->
+                    <div id="match-tab-content-calendar" class="match-tab-content space-y-6">
+                        <!-- Calendar Navigation Header -->
+                        <div class="desk-card p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <button onclick="changeCalendarMonth(-1)"
+                                    class="p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                                    title="Previous Month">
+                                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                                </button>
+                                <h3 id="calendar-month-heading"
+                                    class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white min-w-[180px] text-center">
+                                    November 2026</h3>
+                                <button onclick="changeCalendarMonth(1)"
+                                    class="p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                                    title="Next Month">
+                                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                                </button>
+                                <button onclick="goToCurrentCalendarMonth()"
+                                    class="px-4 py-2 rounded-xl text-sm font-bold border border-brand-500/30 text-brand-600 dark:text-brand-400 hover:bg-brand-500/10 transition-colors cursor-pointer">
+                                    Today
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-4 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                                    <span>Upcoming Fixtures</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calendar Grid Container -->
+                        <div class="desk-card p-5 sm:p-7 rounded-2xl overflow-hidden">
+                            <!-- Day Names Row -->
+                            <div class="grid grid-cols-7 gap-2 mb-3 text-center text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">
+                                <div>Sun</div>
+                                <div>Mon</div>
+                                <div>Tue</div>
+                                <div>Wed</div>
+                                <div>Thu</div>
+                                <div>Fri</div>
+                                <div>Sat</div>
+                            </div>
+                            <!-- Day Cells Grid -->
+                            <div id="calendar-grid" class="grid grid-cols-7 gap-2">
+                                <!-- Injected dynamically via renderCalendarGrid() -->
+                            </div>
+                        </div>
+
+                        <!-- Selected Day Matches Drawer / Panel -->
+                        <div id="calendar-day-panel" class="desk-card p-6 sm:p-7 rounded-2xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2.5">
+                                    <i data-lucide="calendar-days" class="w-5 h-5 text-brand-500"></i>
+                                    <h4 id="calendar-day-panel-title"
+                                        class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Fixtures for Selected Day</h4>
+                                </div>
+                                <span id="calendar-day-panel-count"
+                                    class="text-xs sm:text-sm font-bold px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20">0 matches</span>
+                            </div>
+                            <div id="calendar-day-matches-list" class="space-y-3">
+                                <p class="text-sm text-slate-500 dark:text-slate-400 py-4 text-center">Click any date on the calendar above to view its fixtures.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: Upcoming Matches Section -->
+                    <div id="match-tab-content-upcoming" class="match-tab-content hidden space-y-4">
+                        <div class="desk-card rounded-2xl overflow-hidden shadow-xs">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm whitespace-nowrap">
+                                    <thead class="bg-slate-100/70 dark:bg-slate-800/70 border-b border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider text-xs sm:text-sm">
+                                        <tr>
+                                            <th class="py-4 px-5 sm:px-6 border-r border-slate-200/80 dark:border-slate-800/80">Match Title</th>
+                                            <th class="py-4 px-5 sm:px-6 border-r border-slate-200/80 dark:border-slate-800/80">Sport</th>
+                                            <th class="py-4 px-5 sm:px-6 border-r border-slate-200/80 dark:border-slate-800/80">Date & Time</th>
+                                            <th class="py-4 px-5 sm:px-6 border-r border-slate-200/80 dark:border-slate-800/80">Opponent</th>
+                                            <th class="py-4 px-5 sm:px-6 border-r border-slate-200/80 dark:border-slate-800/80">Venue</th>
+                                            <th class="py-4 px-5 sm:px-6 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="upcoming-matches-table-body" class="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                                        <!-- Dynamically injected -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: Completed Matches Section -->
+                    <div id="match-tab-content-completed" class="match-tab-content hidden space-y-4">
+                        <div class="desk-card rounded-2xl overflow-hidden shadow-xs">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm whitespace-nowrap">
+                                    <thead class="bg-slate-100/70 dark:bg-slate-800/70 border-b border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider text-xs sm:text-sm">
+                                        <tr>
+                                            <th class="py-4 px-5 sm:px-6 border-r border-slate-200/80 dark:border-slate-800/80">Match Name</th>
+                                            <th class="py-4 px-5 sm:px-6 border-r border-slate-200/80 dark:border-slate-800/80">Sport</th>
+                                            <th class="py-4 px-5 sm:px-6 border-r border-slate-200/80 dark:border-slate-800/80">Date & Time</th>
+                                            <th class="py-4 px-5 sm:px-6 border-r border-slate-200/80 dark:border-slate-800/80 text-center">Participation</th>
+                                            <th class="py-4 px-5 sm:px-6 text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="completed-matches-table-body" class="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                                        <!-- Dynamically injected -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    </div>
+
+                    <!-- ================= SCOUT VIEW ================= -->
+                    <div id="view-scout" class="page space-y-6">
+                        <div class="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                            <div>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Advanced Scouting</h2>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">Trial-ready academy athletes evaluated for professional selection</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button type="button" id="scout-export-pdf-btn" onclick="exportScoutReportPDF()"
+                                    class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-brand-600 dark:hover:bg-brand-700 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2.5 cursor-pointer">
+                                    <i data-lucide="file-down" class="w-4.5 h-4.5 text-emerald-400"></i>
+                                    <span>Export PDF</span>
+                                </button>
+                                <span
+                                    class="px-4 py-2 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold text-xs sm:text-sm border border-emerald-500/30 flex items-center gap-2">
+                                    <i data-lucide="check-circle" class="w-4.5 h-4.5"></i> <span>Ready Threshold: &ge;75% Att. & &ge;2 Matches</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="desk-card rounded-2xl overflow-hidden shadow-xs">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm whitespace-nowrap">
+                                    <thead class="bg-slate-100/70 dark:bg-slate-800/70 border-b border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider text-xs sm:text-sm">
+                                        <tr>
+                                            <th class="py-4 px-6 border-r border-slate-200/80 dark:border-slate-800/80 font-bold">Player</th>
+                                            <th class="py-4 px-6 border-r border-slate-200/80 dark:border-slate-800/80 font-bold">Sport & Age</th>
+                                            <th class="py-4 px-6 border-r border-slate-200/80 dark:border-slate-800/80 font-bold">Attendance Rate</th>
+                                            <th class="py-4 px-6 border-r border-slate-200/80 dark:border-slate-800/80 font-bold">Matches Played</th>
+                                            <th class="py-4 px-6 text-right font-bold">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="scout-players-tbody" class="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                                        <!-- Populated dynamically via loadScoutPlayers() -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= PLAYER PORTAL ================= -->
+                    <div id="view-player-overview" class="page space-y-6">
+                        <!-- Top Athlete Header Banner -->
+                        <div class="desk-card p-6 sm:p-8 rounded-2xl mb-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
+                            <div class="flex items-center gap-5">
+                                <div class="relative w-18 h-18 shrink-0 group cursor-pointer" onclick="document.getElementById('player-avatar-upload').click()">
+                                    <img id="player-profile-card-avatar" src="https://i.pravatar.cc/150?img=3"
+                                        class="w-18 h-18 rounded-2xl border-2 border-brand-500/40 shadow-sm object-cover transition-opacity group-hover:opacity-75"
+                                        alt="Athlete Avatar">
+                                    <div class="absolute inset-0 bg-slate-900/60 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-200">
+                                        <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <input type="file" id="player-avatar-upload" class="hidden" accept="image/*" onchange="handleAvatarUpload(event)">
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-3 flex-wrap">
+                                        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                                            Welcome back, <span id="player-profile-name">Player</span>
+                                        </h2>
+                                        <span id="player-username-badge"
+                                            class="px-3 py-1 rounded-lg text-sm font-mono font-bold bg-brand-500/15 text-brand-700 dark:text-brand-300 border border-brand-500/30"></span>
+                                    </div>
+                                    <p id="player-profile-card-sub" class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">Athlete training, performance and trial readiness portal</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span id="player-profile-card-status"
+                                    class="bg-brand-500/15 text-brand-700 dark:text-brand-300 px-4 py-2 rounded-xl text-sm font-bold border border-brand-500/25 inline-flex items-center gap-2">
+                                    <i data-lucide="shield-check" class="w-4.5 h-4.5 text-brand-500"></i> Active Athlete
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 5 Unified Metric KPI Cards -->
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+                            <!-- Attendance Rate -->
+                            <div class="desk-card p-6 rounded-2xl flex flex-col justify-between">
+                                <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+                                    <span class="text-sm font-semibold">Attendance</span>
+                                    <i data-lucide="check-check" class="w-5 h-5 text-brand-500"></i>
+                                </div>
+                                <div class="mt-1">
+                                    <span id="player-stat-attendance" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">0%</span>
+                                </div>
+                                <p id="player-stat-attendance-desc" class="text-xs text-brand-600 dark:text-brand-400 font-semibold mt-1.5">Based on training sessions</p>
+                            </div>
+
+                            <!-- Sessions Attended -->
+                            <div class="desk-card p-6 rounded-2xl flex flex-col justify-between">
+                                <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+                                    <span class="text-sm font-semibold">Sessions</span>
+                                    <i data-lucide="calendar" class="w-5 h-5 text-emerald-500"></i>
+                                </div>
+                                <div class="mt-1">
+                                    <span id="player-stat-sessions" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">0</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1.5">Present count</p>
+                            </div>
+
+                            <!-- Matches Played -->
+                            <div class="desk-card p-6 rounded-2xl flex flex-col justify-between">
+                                <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+                                    <span class="text-sm font-semibold">Matches</span>
+                                    <i data-lucide="trophy" class="w-5 h-5 text-amber-500"></i>
+                                </div>
+                                <div class="mt-1">
+                                    <span id="player-stat-matches" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">0</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1.5">Total recorded appearances</p>
+                            </div>
+
+                            <!-- Overall Rating -->
+                            <div class="desk-card p-6 rounded-2xl flex flex-col justify-between">
+                                <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+                                    <span class="text-sm font-semibold">Overall Rating</span>
+                                    <i data-lucide="star" class="w-5 h-5 text-sky-500"></i>
+                                </div>
+                                <div class="mt-1">
+                                    <span id="player-stat-rating" class="text-3xl sm:text-4xl font-extrabold text-slate-400 dark:text-slate-500 leading-tight">—</span>
+                                </div>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1.5 italic">Pending evaluation</p>
+                            </div>
+
+                            <!-- Trial Eligibility -->
+                            <div class="desk-card p-6 rounded-2xl flex flex-col justify-between col-span-2 md:col-span-1 border-l-4 border-brand-500">
+                                <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+                                    <span class="text-sm font-semibold">Trial Status</span>
+                                    <i data-lucide="award" class="w-5 h-5 text-brand-500 dark:text-brand-400"></i>
+                                </div>
+                                <div class="mt-1">
+                                    <span id="player-stat-ready" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white leading-tight">In Training</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-medium">&ge;75% att. + &ge;2 matches</p>
+                            </div>
+                        </div>
+
+                        <!-- Balanced 2-Column Responsive Sections -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                            <!-- Left Column: Next Training Session & My Journey -->
+                            <div class="space-y-6">
+                                <div class="desk-card rounded-2xl p-6 sm:p-7 shadow-xs">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2.5">
+                                            <i data-lucide="calendar" class="w-5 h-5 text-brand-500"></i> Next Training Session
+                                        </h3>
+                                        <span class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Academy Schedule</span>
+                                    </div>
+                                    <div class="p-8 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700/60 text-center flex flex-col items-center justify-center">
+                                        <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-3">
+                                            <i data-lucide="calendar-clock" class="w-6 h-6 stroke-[1.5]"></i>
+                                        </div>
+                                        <p class="text-base font-bold text-slate-800 dark:text-slate-200">No upcoming session scheduled</p>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Your coach will post the next practice timetable soon.</p>
+                                    </div>
+                                </div>
+
+                                <div class="desk-card rounded-2xl p-6 sm:p-7 shadow-xs">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2.5">
+                                            <i data-lucide="git-commit" class="w-5 h-5 text-brand-500"></i> My Journey
+                                        </h3>
+                                        <span class="text-xs font-bold px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Progression</span>
+                                    </div>
+                                    <div class="pt-2">
+                                        <div class="timeline-item">
+                                            <div class="timeline-dot"></div>
+                                            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Step 1</p>
+                                            <p class="text-base font-bold text-slate-800 dark:text-slate-200 mt-0.5">Joined Academy & Enrolled in Roster</p>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="timeline-dot"></div>
+                                            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Step 2</p>
+                                            <p class="text-base font-bold text-slate-800 dark:text-slate-200 mt-0.5">Training Attendance & Development</p>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="timeline-dot bg-brand-500 shadow-[0_0_0_4px_rgba(16,185,129,0.2)]"></div>
+                                            <p class="text-xs font-bold text-brand-500 uppercase tracking-wider">Current Milestone</p>
+                                            <p id="player-journey-status" class="text-base font-bold text-slate-900 dark:text-white mt-0.5">In Training</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Recent Feedback & Academy Quick Card -->
+                            <div class="space-y-6">
+                                <div class="desk-card rounded-2xl p-6 sm:p-7 shadow-xs">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2.5">
+                                            <i data-lucide="message-square" class="w-5 h-5 text-brand-500"></i> Coach Feedback & Remarks
+                                        </h3>
+                                        <span class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">Evaluation</span>
+                                    </div>
+                                    <div class="p-8 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700/60 text-center flex flex-col items-center justify-center">
+                                        <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-3">
+                                            <i data-lucide="message-square-off" class="w-6 h-6 stroke-[1.5]"></i>
+                                        </div>
+                                        <p class="text-base font-bold text-slate-800 dark:text-slate-200">No coach feedback yet</p>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Feedback entered during match debriefs and training will appear here.</p>
+                                    </div>
+                                </div>
+
+                                <div class="desk-card rounded-2xl p-6 sm:p-7 shadow-xs">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2.5">
+                                            <i data-lucide="sparkles" class="w-5 h-5 text-brand-500"></i> Trial Readiness Criteria
+                                        </h3>
+                                        <button onclick="switchPage('player-attendance')" class="text-sm font-bold text-brand-600 dark:text-brand-400 hover:underline">
+                                            View Attendance Log &rarr;
+                                        </button>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4 text-xs">
+                                        <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-1.5">
+                                            <span class="text-slate-400 font-bold uppercase text-[10px] tracking-wider block">Attendance Rule</span>
+                                            <p class="font-extrabold text-slate-800 dark:text-slate-200 text-base">&ge; 75% Sessions</p>
+                                            <span class="text-xs text-slate-500 block">Required for scout shortlisting</span>
+                                        </div>
+                                        <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-1.5">
+                                            <span class="text-slate-400 font-bold uppercase text-[10px] tracking-wider block">Match Rule</span>
+                                            <p class="font-extrabold text-slate-800 dark:text-slate-200 text-base">&ge; 2 Matches</p>
+                                            <span class="text-xs text-slate-500 block">Completed fixture appearances</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="view-player-attendance" class="page space-y-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
+                            <div>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">My Attendance</h2>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">Session attendance history and academy eligibility record</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="player-streak-badge"
+                                    class="text-sm font-semibold px-4 py-2 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 flex items-center gap-2">
+                                    <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i>
+                                    <span>Official Record: <strong class="font-bold" id="player-streak-text">Verified by Coach</strong></span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Top Summary Cards -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+                            <div class="desk-card p-6 sm:p-7 rounded-2xl flex flex-col justify-between">
+                                <p class="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">Overall Attendance</p>
+                                <div class="flex items-baseline gap-2">
+                                    <span id="player-att-page-rate"
+                                        class="text-3xl sm:text-4xl font-extrabold text-brand-600 dark:text-brand-400 leading-tight">0%</span>
+                                    <span class="text-xs text-slate-500 font-semibold">of training sessions</span>
+                                </div>
+                            </div>
+                            <div class="desk-card p-6 sm:p-7 rounded-2xl flex flex-col justify-between">
+                                <p class="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">Sessions Attended</p>
+                                <div class="flex items-baseline gap-2">
+                                    <span id="player-att-page-present" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">0</span>
+                                    <span id="player-att-page-total" class="text-xs text-slate-500 font-medium">/ 0 total sessions</span>
+                                </div>
+                            </div>
+                            <div class="desk-card p-6 sm:p-7 rounded-2xl flex flex-col justify-between">
+                                <p class="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">Trial Eligibility</p>
+                                <div class="flex items-baseline gap-2">
+                                    <span id="player-att-page-ready" class="text-2xl sm:text-3xl font-extrabold text-slate-400 dark:text-slate-500 leading-tight">Not Ready</span>
+                                    <span class="text-xs text-slate-500 font-medium">(&ge;75% & &ge;2 matches)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Side-by-Side Live Container (Monthly Graph + Session Log) -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                            <!-- Monthly Attendance Graph (Compact & Dynamic) -->
+                            <div class="desk-card p-6 sm:p-7 rounded-2xl shadow-xs">
+                                <div class="flex justify-between items-center mb-4">
+                                    <div>
+                                        <h3 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">Attendance Breakdown</h3>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Practice attendance vs academy benchmark</p>
+                                    </div>
+                                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20">Target: 75%+</span>
+                                </div>
+
+                                <!-- Dynamic Visual Progress Bar -->
+                                <div class="space-y-5 pt-3 pb-2">
+                                    <div>
+                                        <div class="flex justify-between text-sm font-bold mb-2">
+                                            <span>Current Rate</span>
+                                            <span id="player-progress-pct" class="text-brand-600 font-extrabold text-base">0%</span>
+                                        </div>
+                                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-5 rounded-full overflow-hidden border border-slate-300 dark:border-slate-700 p-0.5">
+                                            <div id="player-progress-bar"
+                                                class="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-emerald-500 to-teal-400"
+                                                style="width: 0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4 pt-2 text-xs">
+                                        <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-1">
+                                            <p class="text-slate-400 font-bold uppercase text-[10px] tracking-wider">Attendance Criteria (&ge;75%)</p>
+                                            <p id="player-criteria-att" class="text-base font-extrabold mt-1 text-slate-800 dark:text-slate-200">Pending</p>
+                                        </div>
+                                        <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-1">
+                                            <p class="text-slate-400 font-bold uppercase text-[10px] tracking-wider">Match Criteria (&ge;2 Matches)</p>
+                                            <p id="player-criteria-matches" class="text-base font-extrabold mt-1 text-slate-800 dark:text-slate-200">Pending</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recent Session History Table (Live MongoDB Data) -->
+                            <div class="desk-card rounded-2xl overflow-hidden shadow-xs">
+                                <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                                    <h3 class="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">My Session History</h3>
+                                    <span class="text-xs text-slate-500 font-medium">Live attendance records</span>
+                                </div>
+                                <div class="overflow-x-auto max-h-80">
+                                    <table class="w-full text-left text-sm whitespace-nowrap">
+                                        <thead class="bg-slate-100/70 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider text-xs sticky top-0 border-b border-slate-200/80 dark:border-slate-800">
+                                            <tr>
+                                                <th class="py-3.5 px-5 font-bold">Date</th>
+                                                <th class="py-3.5 px-5 font-bold">Sport</th>
+                                                <th class="py-3.5 px-5 font-bold text-right">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="player-attendance-history-tbody" class="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                                            <!-- Dynamically populated from live sessions -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="view-player-matches" class="page space-y-6">
+                        <div class="mb-6">
+                            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">My Matches</h2>
+                            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">Recorded match scores and official tournament performances</p>
+                        </div>
+                        <div class="desk-card rounded-2xl overflow-hidden shadow-xs">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm whitespace-nowrap">
+                                    <thead class="bg-slate-100/70 dark:bg-slate-800/70 border-b border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider text-xs sm:text-sm">
+                                        <tr>
+                                            <th class="py-4 px-6 border-r border-slate-200/80 dark:border-slate-800/80 font-bold">Date</th>
+                                            <th class="py-4 px-6 border-r border-slate-200/80 dark:border-slate-800/80 font-bold">Sport & Opponent</th>
+                                            <th class="py-4 px-6 text-right font-bold">Your Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="player-matches-tbody" class="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                                        <!-- Populated dynamically via loadPlayerMatches() -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="view-player-profile" class="page space-y-6">
+                        <div class="mb-6">
+                            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">My Profile</h2>
+                            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">Academy athlete identity, affiliation and scouting readiness</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                            <!-- Left Column: Identity & Photo Card -->
+                            <div class="desk-card p-7 sm:p-8 rounded-2xl text-center space-y-5 shadow-xs">
+                                <div class="relative w-32 h-32 mx-auto group cursor-pointer" onclick="document.getElementById('player-avatar-upload').click()">
+                                    <img id="player-profile-detail-avatar" src="https://i.pravatar.cc/150?img=3"
+                                        class="w-32 h-32 rounded-2xl border-4 border-white dark:border-slate-800 shadow-md object-cover transition-opacity group-hover:opacity-75"
+                                        alt="Player Profile Avatar">
+                                    <div class="absolute inset-0 bg-slate-900/60 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-200">
+                                        <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 id="player-profile-detail-name" class="text-2xl font-extrabold text-slate-900 dark:text-white">Player Name</h3>
+                                    <p id="player-profile-detail-sub" class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Sport • Age • Position</p>
+                                </div>
+
+                                <div class="pt-2 flex justify-center">
+                                    <span id="player-profile-detail-badge"
+                                        class="px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 inline-flex items-center gap-2">
+                                        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i> Active Athlete
+                                    </span>
+                                </div>
+
+                                <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-600 dark:text-slate-400 space-y-2 text-left">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-medium">Portal Access:</span>
+                                        <span class="font-bold text-emerald-600 dark:text-emerald-400">Verified</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-medium">Profile Status:</span>
+                                        <span class="font-semibold text-slate-700 dark:text-slate-200">Complete</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Academy Records & Details Grid -->
+                            <div class="lg:col-span-2 desk-card p-7 sm:p-8 rounded-2xl space-y-6 shadow-xs">
+                                <div>
+                                    <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2.5">
+                                        <i data-lucide="award" class="w-5 h-5 text-brand-500"></i> Academy Affiliation & Roster Data
+                                    </h3>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Official sports records maintained by academy coaching staff</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div class="p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+                                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Player ID / Username</label>
+                                        <p id="player-profile-detail-username" class="font-mono font-bold text-brand-600 dark:text-brand-400 text-base mt-1.5">Not Assigned</p>
+                                    </div>
+                                    <div class="p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+                                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Academy Roster / Squad</label>
+                                        <p id="player-profile-detail-batch" class="font-bold text-slate-800 dark:text-slate-200 text-base mt-1.5">Official Roster</p>
+                                    </div>
+                                    <div class="p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+                                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Assigned Coach</label>
+                                        <p id="player-profile-detail-coach" class="font-bold text-slate-800 dark:text-slate-200 text-base mt-1.5">Head Coach</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-200/80 dark:border-slate-800/80">
+                                    <div class="p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-2">
+                                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Trial Readiness Evaluation</label>
+                                        <p id="player-profile-detail-ready" class="font-extrabold text-base text-emerald-500">Pending Evaluation</p>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">Requires &ge; 75% attendance rate and &ge; 2 recorded match appearances</p>
+                                    </div>
+                                    <div class="p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-2">
+                                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Matches Recorded</label>
+                                        <p id="player-profile-detail-matches" class="font-extrabold text-base text-slate-800 dark:text-slate-200">0 matches</p>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">Official fixtures scored and verified on tournament scorecards</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- PDF Generation Libraries -->
+    <script src="vendor/jspdf.umd.min.js"></script>
+    <script src="vendor/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Application Script -->
+    <script src="script.js?v=20261106-01"></script>
+
+    <!-- Global Glassmorphic Modal & Toast Container -->
+    <div id="toast-container"></div>
+
+    <div id="app-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeModal()">
+        <div class="glass-panel p-6 sm:p-8 rounded-3xl max-w-xl w-full shadow-2xl relative"
+            onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-200 dark:border-slate-800">
+                <h3 id="modal-title" class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">Dialog</h3>
+                <button onclick="closeModal()"
+                    class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1.5 rounded-lg cursor-pointer transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="modal-body" class="space-y-4">
+                <!-- Content injected dynamically -->
+            </div>
+            <div id="modal-footer"
+                class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3 flex-wrap">
+                <!-- Actions injected dynamically -->
+            </div>
+        </div>
+    </div>
+    <!-- Dedicated One-Time Player Account Credentials Modal (Coach View) -->
+    <div id="player-credentials-modal" class="modal-overlay hidden" onclick="if(event.target === this) closePlayerCredentialsModal()">
+        <div class="glass-panel p-6 sm:p-8 rounded-3xl max-w-lg w-full shadow-2xl relative" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Player Account Created</h3>
+                </div>
+                <button onclick="closePlayerCredentialsModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-200 text-xs flex items-start gap-2.5">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+                    <p class="leading-relaxed">
+                        <strong>One-time credential notice:</strong> This temporary password will only be shown once and cannot be retrieved later. The player is required to change it on their first login.
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-2 border-b border-slate-200/60 dark:border-slate-800/60">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Athlete Name</span>
+                            <div id="cred-player-name" class="font-bold text-sm text-slate-900 dark:text-white">—</div>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Player ID</span>
+                            <div id="cred-player-id" class="font-bold text-sm text-indigo-600 dark:text-indigo-400 font-mono">—</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Generated Username</span>
+                        <div class="flex items-center gap-2">
+                            <input id="cred-username-input" type="text" readonly class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-brand-600 dark:text-brand-400 select-all outline-none" />
+                            <button type="button" onclick="copyCredentialField('cred-username-input', 'Username')" class="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shrink-0 flex items-center gap-1 transition-colors">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="cred-password-section">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Temporary Password</span>
+                        <div class="flex items-center gap-2">
+                            <div class="relative w-full">
+                                <input id="cred-password-input" type="password" readonly class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white select-all outline-none pr-9" />
+                                <button type="button" onclick="togglePasswordVisibility('cred-password-input', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5">
+                                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                            <button type="button" onclick="copyCredentialField('cred-password-input', 'Password')" class="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shrink-0 flex items-center gap-1 transition-colors">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center gap-2">
+                <button type="button" onclick="copyAllCredentials()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 hover:bg-brand-100 border border-brand-200 dark:border-brand-800/60 transition-colors flex items-center gap-1.5">
+                    <i data-lucide="clipboard-copy" class="w-3.5 h-3.5"></i> Copy All Details
+                </button>
+                <button type="button" onclick="closePlayerCredentialsModal()" class="px-5 py-2 rounded-xl text-xs font-bold bg-slate-900 dark:bg-brand-600 hover:opacity-90 text-white shadow-sm transition-opacity">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dedicated Mandatory Password Change Modal (Player First Login) -->
+    <div id="mandatory-password-modal" class="modal-overlay hidden">
+        <div class="glass-panel p-6 sm:p-8 rounded-3xl max-w-md w-full shadow-2xl relative" onclick="event.stopPropagation()">
+            <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+                <div class="w-9 h-9 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 shrink-0">
+                    <i data-lucide="key-round" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Set Your Permanent Password</h3>
+                    <p class="text-[11px] text-slate-400">First-time login requirement</p>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
+                You are currently logged in with a temporary password. For the security of your athlete profile, please choose a new permanent password (at least 6 characters) before continuing.
+            </p>
+
+            <form id="mandatory-password-form" onsubmit="handleMandatoryPasswordChange(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">New Password</label>
+                    <div class="relative">
+                        <input id="new-permanent-password" type="password" required minlength="6" placeholder="At least 6 characters" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 pr-9" />
+                        <button type="button" onclick="togglePasswordVisibility('new-permanent-password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5">
+                            <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Confirm Password</label>
+                    <div class="relative">
+                        <input id="confirm-permanent-password" type="password" required minlength="6" placeholder="Repeat new password" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 pr-9" />
+                        <button type="button" onclick="togglePasswordVisibility('confirm-permanent-password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5">
+                            <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="mandatory-password-error" class="hidden text-xs text-rose-500 font-semibold p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20"></div>
+
+                <div class="pt-2">
+                    <button id="mandatory-password-submit-btn" type="submit" class="w-full py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i data-lucide="lock" class="w-3.5 h-3.5"></i> Set Password & Continue
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
