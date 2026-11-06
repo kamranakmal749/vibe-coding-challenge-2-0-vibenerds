@@ -55,20 +55,15 @@ export async function PATCH(
     }
 
     const updatedParticipations: any[] = [];
-    for (const item of scores) {
-      const pid = (item.playerId || item.player?._id || item.player)?.toString();
-      const numScore = Number(item.score);
+    for (const entry of scores) {
+      const { playerId, score } = entry;
+      if (!playerId) continue;
 
-      if (!pid) {
-        return NextResponse.json(
-          { error: 'Each score entry must contain a valid playerId' },
-          { status: 400 }
-        );
-      }
+      const numScore = Number(score);
       if (isNaN(numScore) || numScore < 0 || numScore > 20) {
         return NextResponse.json(
           {
-            error: `Invalid score ${item.score} for player ${pid}. Scores must be between 0 and 20.`,
+            error: `Invalid score ${score} for player ${playerId}. Scores must be between 0 and 20.`,
           },
           { status: 400 }
         );
@@ -76,13 +71,13 @@ export async function PATCH(
 
       const participation = await MatchParticipation.findOne({
         match: match._id,
-        player: pid,
+        player: playerId,
       });
 
       if (!participation) {
         return NextResponse.json(
           {
-            error: `No participation record found for player ${pid} in this match`,
+            error: `No participation record found for player ${playerId} in this match`,
           },
           { status: 404 }
         );
@@ -90,7 +85,7 @@ export async function PATCH(
       if (participation.played !== true) {
         return NextResponse.json(
           {
-            error: `Player ${pid} is not recorded as "played". Only played players can have scores edited.`,
+            error: `Player ${playerId} is not recorded as "played". Only played players can have scores edited.`,
           },
           { status: 409 }
         );
@@ -101,7 +96,7 @@ export async function PATCH(
       updatedParticipations.push(participation);
 
       const entryIdx = (match.entries || []).findIndex(
-        (e: any) => (e.player?._id || e.player).toString() === pid
+        (e: any) => (e.player?._id || e.player).toString() === playerId
       );
       if (entryIdx >= 0 && match.entries[entryIdx].result === 'played') {
         match.entries[entryIdx].score = numScore;

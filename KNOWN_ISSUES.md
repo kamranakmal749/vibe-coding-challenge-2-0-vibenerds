@@ -60,13 +60,30 @@ These items represent pre-existing bugs, schema mismatches, and legacy fixtures 
 
 ---
 
-### 7. Polling Sends No `entityId` (`/api/sync/version`)
-- **Account Deleted Logout Toast Will Not Fire**:
-  - In `script.js` lines 510–517, the real-time logout toast for a deleted player account checks `if (entity === 'player' && action === 'deleted' && myPlayerId && String(myPlayerId) === String(entityId))`.
-  - The legacy SSE stream (`/api/sync/stream`) pushed granular event payloads containing `entityId`, but `/api/sync/stream` is intentionally omitted in Next.js for serverless compatibility.
-  - The heartbeat version polling (`/api/sync/version`) returns `{ version, clientsCount }` without `entityId`, dispatching a generic update event `{ entity: 'all', action: 'updated' }`.
-  - Consequently, while client views and aggregate data refresh correctly upon version increments, the specific "Your player profile has been permanently removed by an administrator" toast notification and immediate forced `logout()` will not fire via polling; the deleted player account is instead rejected on their next authenticated API call with 401/404.
-  - *Post-cutover remediation*: Harmonize account revocation checks into the polling loop or client session watcher.
+### 8. Deliberate Deviations: Upfront ObjectId Validation & Route Guards
+- **Upfront 400 Bad Request for Malformed ObjectIds**:
+  - In Next.js route handlers across matches endpoints:
+    - `GET /api/matches/:id`
+    - `PATCH /api/matches/:id`
+    - `DELETE /api/matches/:id`
+    - `PATCH /api/matches/:id/cancel`
+    - `PATCH /api/matches/:id/complete`
+    - `PATCH /api/matches/:id/reopen-for-edit`
+    - `PATCH /api/matches/:id/edit-scores`
+    - `GET /api/matches/:id/eligible-players`
+    - `PUT /api/matches/:id/selected-players`
+    - `GET /api/matches/:id/participation`
+    - `PATCH /api/matches/:id/participation/:playerId`
+    - `PUT /api/matches/:id/entries`
+    - `POST /api/matches/:id/save-all`
+  - Next.js explicitly checks `!mongoose.Types.ObjectId.isValid(id)` and returns `400 { error: 'Invalid match ID format' }` (or `400 { error: 'Invalid ID format' }` for invalid player IDs).
+  - In Express, passing an invalid ObjectId string (such as `123` or `invalid-id`) directly into `Match.findById(id)` throws a Mongoose `CastError`, which unhandled falls into the route's `catch (err)` block returning either `500 { error: err.message }` or an unhandled exception. Next.js handles this safely at the HTTP boundary with standard 400 Client Error.
+- **Coach Ownership Guard on `PUT /api/matches/:id/selected-players`**:
+  - Next.js adds `if (auth.user.role === 'coach' && match.coach.toString() !== coachId) return 403 { error: 'Forbidden' }`. Express previously omitted this ownership guard, allowing a coach to alter player selections on other coaches' matches.
+- **Team Size Validation on `POST /api/matches/:id/save-all` (Line ~125 Reconciled)**:
+  - Both Express (lines 695 and 701 of `src/routes/matches.js`) and Next.js (lines 115 and 124 of `client/src/app/api/matches/[id]/save-all/route.ts`) check minimum team size.
+  - When `selectedPlayerIds: []` is submitted with `complete: true`, line 695 (`uniquePlayerIds.length > 0`) is skipped, but line 701 (`complete && uniquePlayerIds.length < minTeamSize`) triggers in both Express and Next.js, returning HTTP 400 `${match.sport} requires at least ${minTeamSize} selected players to complete the match, but only 0 were selected.`.
+  - There is zero divergence: no valid or invalid input exists that Express accepts which Next.js rejects.
 
 
 

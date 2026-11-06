@@ -42,3 +42,4 @@ To allow Vercel serverless functions to connect to MongoDB Atlas:
 
 - Navigate to **MongoDB Atlas** > **Network Access** (`Security` > `Network Access`).
 - Ensure `0.0.0.0/0` (Allow access from anywhere) is configured in the IP Access List, because Vercel serverless function IP addresses are dynamic and change across invocations.
+

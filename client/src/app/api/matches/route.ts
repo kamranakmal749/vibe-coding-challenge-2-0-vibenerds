@@ -159,17 +159,30 @@ export async function GET(req: Request) {
         .populate('selectedPlayers', 'name age sport')
         .populate('sessionId', 'date sport saved');
 
-      const matchesWithSchedule = allMatches.map((m: any) => ({
-        ...m.toObject(),
-        _id: (m._id || m.id).toString(),
-        id: (m._id || m.id).toString(),
-        ...enrichMatchScheduleFields(m, req),
-      }));
+      const matches = allMatches.filter((m: any) => {
+        // If matched via modern participation
+        if (participationMatchIds.some((id: any) => id.toString() === m._id.toString())) {
+          return true;
+        }
+        // Fallback to legacy entries / scores
+        if (m.entries && m.entries.length > 0) {
+          const entry = m.entries.find(
+            (e: any) => (e.player?._id || e.player).toString() === playerId.toString()
+          );
+          return entry && entry.result === 'played';
+        }
+        return (
+          m.scores &&
+          m.scores.some(
+            (s: any) => (s.player?._id || s.player).toString() === playerId.toString()
+          )
+        );
+      });
 
-      return NextResponse.json(matchesWithSchedule);
+      return NextResponse.json(matches);
     }
 
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json([]);
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -235,10 +248,11 @@ export async function POST(req: Request) {
       const presentPlayers = (session.attendance || []).filter(
         (a: any) => a.player && a.status === 'present'
       );
-      if (presentPlayers.length < minTeamSize) {
+      const totalEligible = presentPlayers.length;
+      if (totalEligible < minTeamSize) {
         return NextResponse.json(
           {
-            error: `${trimmedSport} requires at least ${minTeamSize} eligible players, but only ${presentPlayers.length} are available.`,
+            error: `${trimmedSport} requires at least ${minTeamSize} eligible players, but only ${totalEligible} are available.`,
           },
           { status: 400 }
         );

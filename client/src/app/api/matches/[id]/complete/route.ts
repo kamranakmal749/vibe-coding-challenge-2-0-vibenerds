@@ -68,6 +68,13 @@ export async function PATCH(
       );
     }
 
+    if (!match.selectedPlayers || match.selectedPlayers.length === 0) {
+      return NextResponse.json(
+        { error: 'Cannot complete a match with no selected players' },
+        { status: 422 }
+      );
+    }
+
     const selectedIds = (match.selectedPlayers || []).map((pid: any) =>
       (pid._id || pid).toString()
     );
@@ -120,10 +127,10 @@ export async function PATCH(
     await bumpSync('match:completed');
 
     return NextResponse.json({
-      message: 'Match marked as completed successfully',
+      message: 'Match marked as completed',
       match,
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
