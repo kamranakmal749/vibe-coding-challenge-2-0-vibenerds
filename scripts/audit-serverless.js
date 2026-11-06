@@ -160,3 +160,4 @@ if (suspiciousLogs.length === 0) {
   console.table(suspiciousLogs);
 }
 console.log('\n===============================================================');
+
