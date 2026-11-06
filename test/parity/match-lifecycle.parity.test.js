@@ -8,6 +8,7 @@ const {
   stopTestServer,
   authHeader,
   getPastDateStr,
+  getFutureDateStr,
   createCoachFixture,
   createPlayerTeamFixture
 } = require('./parity-helpers');
@@ -214,5 +215,119 @@ test('PARITY - Match: Save squad, record scores via /save-all and complete match
   });
   assert.equal(compRes.status, 200);
   const completed = await compRes.json();
+  assert.equal(completed.match.status, 'completed');
+});
+
+test('PARITY - Match: Scoring lock enforced for match scheduled tomorrow (403), allowed for kickoff 2 days ago', async () => {
+  const { coach, token } = await createCoachFixture('match_scoring_lock');
+  const players = await createPlayerTeamFixture(coach._id, 'Football', 12);
+  const tomorrowDate = getFutureDateStr(1);
+
+  // 1. Create a match scheduled for tomorrow at 17:00
+  const futMatchRes = await fetch(`${baseUrl}/api/matches`, {
+    method: 'POST',
+    headers: authHeader(token),
+    body: JSON.stringify({
+      title: 'Future Trophy Match',
+      sport: 'Football',
+      date: tomorrowDate,
+      time: '17:00',
+      opponent: 'Future FC',
+      venue: 'National Arena'
+    })
+  });
+  assert.equal(futMatchRes.status, 201);
+  const futMatch = await futMatchRes.json();
+
+  // Attempting to complete the match before unlock time must return 403
+  const futCompRes = await fetch(`${baseUrl}/api/matches/${futMatch._id}/complete`, {
+    method: 'PATCH',
+    headers: authHeader(token),
+    body: JSON.stringify({
+      scoreTeam: 2,
+      scoreOpponent: 1
+    })
+  });
+  assert.equal(futCompRes.status, 403);
+  const futCompJson = await futCompRes.json();
+  assert.equal(futCompJson.locked, true);
+  assert.ok(futCompJson.error.includes('Cannot complete match before scoring unlock time'));
+
+  // Attempting to save participation/scores before unlock time must return 403
+  const squad = players.slice(0, 11);
+  const futSaveRes = await fetch(`${baseUrl}/api/matches/${futMatch._id}/save-all`, {
+    method: 'POST',
+    headers: authHeader(token),
+    body: JSON.stringify({
+      selectedPlayerIds: squad.map(p => p._id.toString()),
+      participations: squad.map(p => ({
+        playerId: p._id.toString(),
+        played: true,
+        score: 1
+      }))
+    })
+  });
+  assert.equal(futSaveRes.status, 403);
+  const futSaveJson = await futSaveRes.json();
+  assert.equal(futSaveJson.locked, true);
+  assert.ok(futSaveJson.error.includes('Scoring is locked until'));
+  assert.ok(futSaveJson.error.includes('60 minutes after match kickoff'));
+
+  // 2. Match whose kickoff was 2 days ago: scoring and completion are allowed
+  const pastDate = getPastDateStr(2);
+  const sessRes = await fetch(`${baseUrl}/api/sessions`, {
+    method: 'POST',
+    headers: authHeader(token),
+    body: JSON.stringify({ date: pastDate, sport: 'Football' })
+  });
+  assert.equal(sessRes.status, 201);
+  const session = await sessRes.json();
+  await fetch(`${baseUrl}/api/sessions/${session._id}/save`, {
+    method: 'PATCH',
+    headers: authHeader(token),
+    body: JSON.stringify({ attendance: players.map(p => ({ player: p._id.toString(), status: 'present' })) })
+  });
+
+  const pastMatchRes = await fetch(`${baseUrl}/api/matches`, {
+    method: 'POST',
+    headers: authHeader(token),
+    body: JSON.stringify({
+      title: 'Past Trophy Match',
+      sport: 'Football',
+      date: pastDate,
+      time: '16:00',
+      opponent: 'Past Rivals',
+      venue: 'City Stadium'
+    })
+  });
+  assert.equal(pastMatchRes.status, 201);
+  const pastMatch = await pastMatchRes.json();
+
+  // Save all (participation + scores) allowed (200)
+  const pastSaveRes = await fetch(`${baseUrl}/api/matches/${pastMatch._id}/save-all`, {
+    method: 'POST',
+    headers: authHeader(token),
+    body: JSON.stringify({
+      selectedPlayerIds: squad.map(p => p._id.toString()),
+      participations: squad.map(p => ({
+        playerId: p._id.toString(),
+        played: true,
+        score: 2
+      }))
+    })
+  });
+  assert.equal(pastSaveRes.status, 200);
+
+  // Complete allowed (200)
+  const pastCompRes = await fetch(`${baseUrl}/api/matches/${pastMatch._id}/complete`, {
+    method: 'PATCH',
+    headers: authHeader(token),
+    body: JSON.stringify({
+      scoreTeam: 2,
+      scoreOpponent: 1
+    })
+  });
+  assert.equal(pastCompRes.status, 200);
+  const completed = await pastCompRes.json();
   assert.equal(completed.match.status, 'completed');
 });

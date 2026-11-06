@@ -55,7 +55,7 @@ export function istDateTime(dateStr: string, timeStr: string = '00:00:00'): Date
 
 /**
  * Widened session date query window.
- * Keeps Express's widened min/max search window while guaranteeing IST boundary coverage.
+ * Strictly uses explicit IST (+05:30) and UTC boundaries without relying on host-local time.
  */
 export function getWidenedDateWindow(dateInput: Date | string | number): { minDate: Date; maxDate: Date } {
   const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
@@ -67,15 +67,30 @@ export function getWidenedDateWindow(dateInput: Date | string | number): { minDa
   const utcStart = new Date(d).setUTCHours(0, 0, 0, 0);
   const utcEnd = new Date(d).setUTCHours(23, 59, 59, 999);
 
-  const localStart = new Date(d).setHours(0, 0, 0, 0);
-  const localEnd = new Date(d).setHours(23, 59, 59, 999);
+  return {
+    minDate: new Date(Math.min(istStart, utcStart)),
+    maxDate: new Date(Math.max(istEnd, utcEnd)),
+  };
+}
 
-  const minTime = Math.min(istStart, utcStart, localStart);
-  const maxTime = Math.max(istEnd, utcEnd, localEnd);
+/**
+ * Returns month start and end timestamps in IST for a 'YYYY-MM' input,
+ * widened to include UTC day boundaries for stored document matching.
+ */
+export function getIstMonthRange(monthStr: string): { startDate: Date; endDate: Date } {
+  const [year, m] = monthStr.split('-').map(Number);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const daysInMonth = new Date(Date.UTC(year, m, 0)).getUTCDate();
+
+  const istStart = istDateTime(`${year}-${pad(m)}-01`, '00:00:00').getTime();
+  const istEnd = istDateTime(`${year}-${pad(m)}-${pad(daysInMonth)}`, '23:59:59.999').getTime();
+
+  const utcStart = new Date(Date.UTC(year, m - 1, 1, 0, 0, 0)).getTime();
+  const utcEnd = new Date(Date.UTC(year, m, 0, 23, 59, 59, 999)).getTime();
 
   return {
-    minDate: new Date(minTime),
-    maxDate: new Date(maxTime),
+    startDate: new Date(Math.min(istStart, utcStart)),
+    endDate: new Date(Math.max(istEnd, utcEnd)),
   };
 }
 

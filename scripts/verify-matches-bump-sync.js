@@ -1,11 +1,32 @@
 // scripts/verify-matches-bump-sync.js
+// Automated source parser comparing broadcastServerSync in Express vs bumpSync in Next.js
 const fs = require('fs');
 const path = require('path');
 
 const expressMatchesFile = path.resolve(__dirname, '../src/routes/matches.js');
 const expressContent = fs.readFileSync(expressMatchesFile, 'utf8');
 
-const nextRoutes = [
+// Parse all route handlers and their broadcastServerSync calls from Express source
+function parseExpressSyncCalls(content) {
+  const routes = [];
+  const routeRegex = /router\.(post|patch|put|delete)\(['"`]([^'"`]+)['"`],[\s\S]*?(?=(?:router\.(?:post|patch|put|delete|get)|module\.exports|$))/g;
+  let match;
+  while ((match = routeRegex.exec(content)) !== null) {
+    const method = match[1].toUpperCase();
+    const routePath = match[2];
+    const handlerBody = match[0];
+    const syncMatch = handlerBody.match(/broadcastServerSync\(\s*\{[\s\S]*?\}\s*\)/);
+    routes.push({
+      method,
+      route: `/api/matches${routePath === '/' ? '' : routePath}`,
+      syncCall: syncMatch ? syncMatch[0].replace(/\s+/g, ' ').trim() : 'None (omitted in Express)'
+    });
+  }
+  return routes;
+}
+
+// Map of Express routes to Next.js route file paths
+const nextRouteMap = [
   { method: 'POST', route: '/api/matches', file: 'client/src/app/api/matches/route.ts' },
   { method: 'PATCH', route: '/api/matches/:id', file: 'client/src/app/api/matches/[id]/route.ts' },
   { method: 'DELETE', route: '/api/matches/:id', file: 'client/src/app/api/matches/[id]/route.ts' },
@@ -19,57 +40,40 @@ const nextRoutes = [
   { method: 'PUT', route: '/api/matches/:id/entries', file: 'client/src/app/api/matches/[id]/entries/route.ts' }
 ];
 
-console.log('=== MATCH MUTATIONS: EXPRESS broadcastServerSync vs NEXT.JS bumpSync ===\n');
+const expressRoutes = parseExpressSyncCalls(expressContent);
 
-for (const nr of nextRoutes) {
+const table = [];
+for (const nr of nextRouteMap) {
+  // Find matching Express route dynamically parsed from src/routes/matches.js
+  const exp = expressRoutes.find(r => r.method === nr.method && r.route === nr.route);
+  const expressSync = exp ? exp.syncCall : 'Not found';
+
+  // Parse Next.js source dynamically from disk
   const nextFilePath = path.resolve(__dirname, '..', nr.file);
-  const nextContent = fs.existsSync(nextFilePath) ? fs.readFileSync(nextFilePath, 'utf8') : '';
-
-  // Find Next.js bumpSync call
-  let nextSyncCall = 'None (omitted for parity)';
-  const nextMatch = nextContent.match(/await\s+bumpSync\([^)]+\)/);
-  if (nextMatch) {
-    nextSyncCall = nextMatch[0];
-  }
-
-  // Find Express broadcastServerSync call around the route handler
-  let expressSyncCall = 'None (omitted in Express)';
-  // Exact line extraction from Express matches.js
-  if (nr.route === '/api/matches' && nr.method === 'POST') {
-    expressSyncCall = "broadcastServerSync({ entity: 'match', action: 'created', entityId: match._id.toString() });";
-  } else if (nr.route === '/api/matches/:id' && nr.method === 'PATCH') {
-    expressSyncCall = "broadcastServerSync({ entity: 'match', action: 'updated', entityId: match._id.toString() });";
-  } else if (nr.route === '/api/matches/:id' && nr.method === 'DELETE') {
-    expressSyncCall = "broadcastServerSync({ entity: 'match', action: 'deleted', entityId: req.params.id });";
-  } else if (nr.route === '/api/matches/:id/cancel') {
-    expressSyncCall = "broadcastServerSync({ entity: 'match', action: 'cancelled', entityId: match._id.toString() });";
-  } else if (nr.route === '/api/matches/:id/selected-players') {
-    expressSyncCall = "broadcastServerSync({ entity: 'match', action: 'updated', entityId: match._id.toString() });";
-  } else if (nr.route === '/api/matches/:id/participation/:playerId') {
-    expressSyncCall = "broadcastServerSync({ entity: 'match', action: 'updated', entityId: match._id.toString() });";
-  } else if (nr.route === '/api/matches/:id/save-all') {
-    expressSyncCall = "broadcastServerSync({ entity: 'match', action: complete ? 'completed' : 'updated', entityId: match._id.toString() });";
-  } else if (nr.route === '/api/matches/:id/complete') {
-    expressSyncCall = "broadcastServerSync({ entity: 'match', action: 'completed', entityId: match._id.toString() });";
-  } else if (nr.route === '/api/matches/:id/reopen-for-edit') {
-    expressSyncCall = "broadcastServerSync({ entity: 'match', action: 'updated', entityId: match._id.toString() });";
-  } else if (nr.route === '/api/matches/:id/edit-scores') {
-    expressSyncCall = "broadcastServerSync({ entity: 'match', action: 'updated', entityId: match._id.toString() });";
-  } else if (nr.route === '/api/matches/:id/entries') {
-    expressSyncCall = 'None (omitted in Express)';
-  }
-
-  // Handle DELETE /api/matches/:id specifically in Next.js file
-  if (nr.method === 'DELETE' && nr.route === '/api/matches/:id') {
-    const deleteBlock = nextContent.match(/export async function DELETE[\s\S]*?\n\}/);
-    if (deleteBlock) {
-      const match = deleteBlock[0].match(/await\s+bumpSync\([^)]+\)/);
-      if (match) nextSyncCall = match[0];
+  let nextSync = 'None (omitted for parity)';
+  if (fs.existsSync(nextFilePath)) {
+    const nextContent = fs.readFileSync(nextFilePath, 'utf8');
+    // Extract method handler block
+    const methodRegex = new RegExp(`export\\s+async\\s+function\\s+${nr.method}\\b[\\s\\S]*?(?=(?:export\\s+async\\s+function|$))`);
+    const handlerMatch = nextContent.match(methodRegex);
+    const bodyToSearch = handlerMatch ? handlerMatch[0] : nextContent;
+    const nextMatch = bodyToSearch.match(/await\s+bumpSync\([^)]+\)/);
+    if (nextMatch) {
+      nextSync = nextMatch[0].replace(/\s+/g, ' ').trim();
     }
   }
 
-  console.log(`Route:   ${nr.method} ${nr.route}`);
-  console.log(`Express: ${expressSyncCall}`);
-  console.log(`Next.js: ${nextSyncCall}`);
-  console.log('-'.repeat(80));
+  table.push({
+    method: nr.method,
+    route: nr.route,
+    expressBroadcastServerSync: expressSync,
+    nextBumpSync: nextSync
+  });
 }
+
+console.log('=== MATCH MUTATIONS: EXPRESS broadcastServerSync vs NEXT.JS bumpSync ===\n');
+console.table(table);
+
+console.log('\nNaming reconciliation:');
+console.log('- Express uses `broadcastServerSync(event)` which emits to SSE and in-memory version counter.');
+console.log('- Next.js uses `bumpSync(event)` which atomically updates MongoDB SyncState doc ("global") via findOneAndUpdate({_id: "global"}, {$inc: {version: 1}}).');

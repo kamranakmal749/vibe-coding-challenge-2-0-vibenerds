@@ -1135,9 +1135,9 @@ Express runs on PORT 3000. Next.js dev runs on port 3001. `client/next.config.js
 Keep the current lock/unlock controls, `toggle-lock` usage, labels, and nav items exactly as they behave today. Known drift (Section 13) is intentionally NOT fixed during migration.
 
 ### 16.5 Migration Phases and Cutover Gates
-The authoritative cutover gate is governed exclusively by the modern **21 Parity Tests** (`test/parity/*.parity.test.js` and `client/test/*.parity.test.ts`), **NOT** the legacy test suite:
+The authoritative cutover gate is governed exclusively by the modern **22 Parity Tests** (`test/parity/*.parity.test.js` and `client/test/*.parity.test.ts`), **NOT** the legacy test suite:
 1. `git diff --stat -- src scripts test server.js package.json` shows no modifications to frozen Express backend files.
-2. **21 Parity Tests Cutover Gate**: 100% PASS against the Next.js server on Port 3000 (`scripts/run-parity-suite.js`), executing identically under both `TZ=UTC` and `TZ=Asia/Kolkata`.
+2. **22 Parity Tests Cutover Gate**: 100% PASS against the Next.js server on Port 3000 (`scripts/run-parity-suite.js` / `scripts/migration-status.js`), executing identically under both `TZ=UTC` and `TZ=Asia/Kolkata`.
 3. `npm --prefix client run build` succeeds with zero TypeScript or build errors.
 4. The phase's parity checklist (Section 16.6) is verified against the seeded data.
 5. **Legacy Test Baseline (112 tests: 45 PASS, 67 FAIL)**:

@@ -2,6 +2,8 @@
 // Match schedule, kickoff, unlock, and time status calculation utilities.
 // Ported from src/routes/matches.js with strict behavioral parity.
 
+import { istDateString, istDateTime } from './ist';
+
 export const STANDARD_TEAM_SIZES: Record<string, number> = {
   cricket: 11,
   football: 11,
@@ -42,34 +44,22 @@ export function parseTimeString(timeStr?: string): { hours: number; minutes: num
 }
 
 /**
- * Calculates scheduled kickoff datetime in host-local time (identical to Express).
+ * Calculates scheduled kickoff datetime strictly in Indian Standard Time (IST, UTC+05:30).
+ * Matches the behavior of Express running in Asia/Kolkata without depending on host-local timezone.
  */
 export function getMatchScheduledDateTime(match: any): Date {
   if (!match || !match.date) return new Date();
-  let year: number;
-  let month: number;
-  let day: number;
+  let dateStr: string;
 
   if (typeof match.date === 'string' && /^\d{4}-\d{2}-\d{2}/.test(match.date)) {
-    const [y, m, d] = match.date.slice(0, 10).split('-').map(Number);
-    year = y;
-    month = m - 1;
-    day = d;
+    dateStr = match.date.slice(0, 10);
   } else {
-    const d = new Date(match.date);
-    if (!isNaN(d.getUTCFullYear())) {
-      year = d.getUTCFullYear();
-      month = d.getUTCMonth();
-      day = d.getUTCDate();
-    } else {
-      year = d.getFullYear();
-      month = d.getMonth();
-      day = d.getDate();
-    }
+    dateStr = istDateString(match.date);
   }
 
   const { hours, minutes } = parseTimeString(match.time);
-  return new Date(year, month, day, hours, minutes, 0, 0);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return istDateTime(dateStr, `${pad(hours)}:${pad(minutes)}:00`);
 }
 
 /**

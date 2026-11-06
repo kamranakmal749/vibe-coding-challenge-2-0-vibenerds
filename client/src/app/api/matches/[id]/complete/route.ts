@@ -56,10 +56,11 @@ export async function PATCH(
       const unlockStr = unlockTime.toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: 'Asia/Kolkata',
       });
       return NextResponse.json(
         {
-          error: `Scoring is locked until ${unlockStr} (60 minutes after match kickoff)`,
+          error: `Cannot complete match before scoring unlock time (${unlockStr})`,
           unlockTime: unlockTime.toISOString(),
           locked: true,
         },

@@ -150,6 +150,7 @@ export async function POST(
       const unlockStr = unlockTime.toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: 'Asia/Kolkata',
       });
       return NextResponse.json(
         {
@@ -222,6 +223,7 @@ export async function POST(
         const unlockStr = unlockTime.toLocaleTimeString([], {
           hour: '2-digit',
           minute: '2-digit',
+          timeZone: 'Asia/Kolkata',
         });
         return NextResponse.json(
           {

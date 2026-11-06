@@ -86,6 +86,15 @@ function getPastDateStr(daysAgo = 0) {
   return `${year}-${month}-${day}`;
 }
 
+function getFutureDateStr(daysAhead = 1) {
+  const d = new Date();
+  d.setDate(d.getDate() + daysAhead);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 async function createCoachFixture(prefix = 'c') {
   const ts = Date.now() + Math.floor(Math.random() * 10000);
   const user = await User.create({
@@ -146,6 +155,7 @@ module.exports = {
   stopTestServer,
   authHeader,
   getPastDateStr,
+  getFutureDateStr,
   createCoachFixture,
   createAdminFixture,
   createScoutFixture,

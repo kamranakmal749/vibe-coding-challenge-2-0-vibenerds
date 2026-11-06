@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import { authenticateRequest } from '@/lib/auth';
 import { resolveCoachId } from '@/lib/utils/coach';
+import { getIstMonthRange } from '@/lib/ist';
 
 const Match = require('@/lib/models/Match');
 
@@ -26,9 +27,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const [year, m] = month.split('-').map(Number);
-    const startDate = new Date(Date.UTC(year, m - 1, 1, 0, 0, 0));
-    const endDate = new Date(Date.UTC(year, m, 0, 23, 59, 59, 999));
+    const { startDate, endDate } = getIstMonthRange(month);
 
     const filter: any = {
       date: { $gte: startDate, $lte: endDate },
