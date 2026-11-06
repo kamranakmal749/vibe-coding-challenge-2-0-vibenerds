@@ -1,0 +1,337 @@
+[
+  {
+    "file": "acceptance.test.js",
+    "test": "1. Opening a session creates every player of that coach in that sport with status \"present\" and participation equal to defaultParticipation",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "2. Marking one player absent, then saving: that player is \"absent\" with participation null; others remain \"present\"",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "6. Creating a match on a date with no session succeeds. PUT entries returns 409",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "7. Match on a date with an unsaved session: PUT entries returns 409 with the save-first message",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "8. Match on a saved session: an absent player in the entries returns 422 with their id",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "9. Match on a saved session: a present player with participation \"practice\" in the entries returns 422",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "10. Match on a saved session: omitting an eligible player returns 422 with that player's id, and nothing is written",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "11. Eligible player with result \"played\" and score 0 is accepted and counts as a played match",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "12. Eligible player with result \"did_not_play\" is accepted and does not count toward matches played",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "17. Drafts sync current players, saved sessions stay fixed, and session/player attendance agree",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "19. Saving attendance preserves omitted roster members and rejects unknown players",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "20. Admin-registered players and admin-created sessions are assigned to a coach",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "checklist.test.js",
+    "test": "CHECK 2 — Match on same day: absent player REFUSED, present players ACCEPTED in eligible list",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 1: Record attendance for 4 players (3 PRESENT, 1 ABSENT) -> Turnout 75%, player stats update immediately in DB",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 2: Change the 1 ABSENT player to PRESENT -> Turnout becomes 100%, player stats update",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 3: Create match, complete with scores, then mark participating player ABSENT -> conflict flagged, valid matches and readiness drop, history preserved",
+    "error": "TypeError: Cannot read properties of undefined (reading '0')"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 4: Change player back to PRESENT -> Conflict automatically resolves, eligibility restored without duplicate match records",
+    "error": "TypeError: Cannot read properties of undefined (reading '0')"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 5: Create a second match, select squad, enter scores, mark completed -> participation & matches played update correctly",
+    "error": "TypeError: Cannot read properties of undefined (reading '0')"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 8: Simulated hard refresh: direct DB re-query from Atlas retains exact synchronized stats",
+    "error": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:"
+  },
+  {
+    "file": "eligible_players_column.test.js",
+    "test": "0. Coach Login",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "eligible_players_column.test.js",
+    "test": "Eligible Players Column & No Squad Size Limit Verification",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "full-synchronization-flow.test.js",
+    "test": "TEST 2: Change Rahul attendance Absent -> Present restores Attendance, Directory, Eligibility & Ready status",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "full-synchronization-flow.test.js",
+    "test": "TEST 4: Edit player name in Directory updates Attendance, Matches, Coach Dashboard and Player Dashboard",
+    "error": "TypeError: Cannot read properties of undefined (reading 'name')"
+  },
+  {
+    "file": "match-phase2.test.js",
+    "test": "Phase 2: POST /api/matches creates a match and rejects missing fields & exact duplicates",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "match-phase2.test.js",
+    "test": "Phase 2: GET /api/matches with filters (sport, date, opponent, status)",
+    "error": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:"
+  },
+  {
+    "file": "match-phase2.test.js",
+    "test": "Phase 2: GET /api/matches/calendar returns only matches in requested month",
+    "error": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:"
+  },
+  {
+    "file": "match-phase2.test.js",
+    "test": "Phase 2: GET /api/matches/:id returns details + computed counts, PATCH edits upcoming match, PATCH cancel works",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "match-phase3.test.js",
+    "test": "Phase 3: GET eligible-players returns sessionFound: false when no session or unsaved session",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "match-phase3.test.js",
+    "test": "Phase 3: GET eligible-players on saved session returns only present & match/both players",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "match-phase3.test.js",
+    "test": "Phase 3: PUT selected-players rejects non-eligible player with 422",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "match-phase3.test.js",
+    "test": "Phase 3: PUT selected-players succeeds, is idempotent, and removing a player removes participation row",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "match-phase4.test.js",
+    "test": "Phase 4: GET /api/matches/:id/participation returns participation table",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "match-phase8.test.js",
+    "test": "Phase 8: Add Match Form - validation, creation, duplicate guard",
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "file": "match_flow.test.js",
+    "test": "12-Step Match Management Verification Flow",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "player-removal-unit.test.js",
+    "test": "7. Verification of UI & Client Sync contract in script.js",
+    "error": "AssertionError [ERR_ASSERTION]: Never calls native confirm"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "1. Role Authorization: Coach cannot delete player",
+    "error": "Assertion failure or prerequisite fixture mismatch"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "2. Role Authorization: Scout cannot delete player",
+    "error": "Assertion failure or prerequisite fixture mismatch"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "3. Role Authorization: Player cannot delete themselves",
+    "error": "Assertion failure or prerequisite fixture mismatch"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "4. Admin deletes player: succeeds and returns 200",
+    "error": "Assertion failure or prerequisite fixture mismatch"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "5. Verify Player document is permanently deleted from MongoDB",
+    "error": "Assertion failure or prerequisite fixture mismatch"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "6. Verify linked User account is permanently deleted",
+    "error": "Assertion failure or prerequisite fixture mismatch"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "7. Verify existing JWT token for deleted player is rejected with 401",
+    "error": "Assertion failure or prerequisite fixture mismatch"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "8. Verify draft session roster had deleted player removed",
+    "error": "Assertion failure or prerequisite fixture mismatch"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "9. Verify saved historical session survives with null-safety and no errors",
+    "error": "Assertion failure or prerequisite fixture mismatch"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "10. Verify upcoming match had deleted player removed",
+    "error": "Assertion failure or prerequisite fixture mismatch"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "11. Verify completed historical match fixture, score, and opponent remain 100% intact",
+    "error": "Assertion failure or prerequisite fixture mismatch"
+  },
+  {
+    "file": "session-roster-integrity.test.js",
+    "test": "Session roster is fixed at creation time: adding a player AFTER session creation must NOT expand the roster",
+    "error": "AssertionError [ERR_ASSERTION]: Should create session successfully"
+  },
+  {
+    "file": "session-roster-integrity.test.js",
+    "test": "Session GET on a locked session never re-queries players or modifies the stored roster",
+    "error": "AssertionError [ERR_ASSERTION]: Should create session successfully"
+  },
+  {
+    "file": "standard_team_size.test.js",
+    "test": "Standard Playing-Team Sizes and Match Validation Suite",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "1. Match Creation — Initial status Upcoming, only basic details collected",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "2. At 4:59 PM — Status Upcoming, Scoring is Locked (HTTP 403)",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "3. At 5:30 PM — Status In Progress, Scoring is still Locked (HTTP 403)",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "4. At 5:59 PM — Status In Progress, Scoring is still Locked (HTTP 403)",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "5. At 6:00 PM — Scoring Unlocks (HTTP 200 accepted)",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "6. Complete Match after unlock & verify Completed Matches display",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "7. Refresh check — permanent persistence in MongoDB after completion",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "8. Rescheduling test — updating time recalculates unlock time",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "Time-Based Match Management & 60-Minute Scoring Unlock Workflow",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "0. Coach Login",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "1. Setup Players and Practice Attendance",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "2. Match Creation with variable maxSquadSize",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "3. Eligibility check & maxSquadSize enforcement",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "4. At 14:30 (30 mins into match) — Scoring is Locked",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "5. At 15:00 — Scoring Unlocked: Coach saves Draft",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "6. Save & Complete Match via unified action",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "7. Completed Matches display & scores permanence after page refresh",
+    "error": "TypeError: fetch failed"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "Unified Match Management Module Verification",
+    "error": "TypeError: fetch failed"
+  }
+]

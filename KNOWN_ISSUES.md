@@ -42,4 +42,13 @@ These items represent pre-existing bugs, schema mismatches, and legacy fixtures 
   - For coach and admin roles, tokens are validated purely cryptographically against `JWT_SECRET`. If a coach or admin account is deleted or removed from MongoDB, existing JWT tokens issued to that account continue to work on endpoints that do not explicitly perform a fresh `User.findById` query until the 8-hour token TTL expires.
   - *Resolution*: Ported 1:1 to Next.js during migration to preserve behavior parity; post-cutover remediation can add universal user lookup or token revocation across all roles.
 
+---
+
+### 5. Timezone & Calendar Month Boundaries
+- **Express uses host-local time; IST fix pending deployment-TZ decision**:
+  - In Express, date boundary queries in `matches.js` (`GET /api/matches/calendar`, `findAnySession`, and `syncSessionMatchConflicts`) construct Date ranges using host-local methods (e.g., `setHours(0,0,0,0)` and `new Date(year, month - 1, 1)`).
+  - When the Express host runs in UTC rather than IST (UTC+05:30), late-night IST sessions or fixtures falling between 00:00 and 05:30 IST on the 1st of a month are bucketed into the prior UTC calendar day/month.
+  - Per instruction G6, calendar and month-boundary behaviors are frozen as-is during Phase 4 migration without refactoring. The stats boundary differential test remains informational under UTC and verifies 100% mathematical identity under `TZ=Asia/Kolkata`. Final resolution is pending the production deployment timezone configuration decision.
+
+
 

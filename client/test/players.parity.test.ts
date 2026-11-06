@@ -302,3 +302,72 @@ test('PLAYERS - DELETE cascade (Admin only permanent deletion)', async () => {
   await Session.findByIdAndDelete(draftSession._id);
   await User.deleteMany({ _id: { $in: [coach._id, admin._id] } });
 });
+
+test('PLAYERS - Non-transactional fallback cascade deletion path', async () => {
+  const coach = await User.create({
+    name: 'Fallback Cascade Coach',
+    username: `coach_fallback_${Date.now()}`,
+    email: `coach_fallback_${Date.now()}@test.com`,
+    password: 'password123',
+    role: 'coach'
+  });
+
+  const admin = await User.create({
+    name: 'Fallback Admin',
+    username: `admin_fallback_${Date.now()}`,
+    email: `admin_fallback_${Date.now()}@test.com`,
+    password: 'password123',
+    role: 'admin'
+  });
+  const adminToken = jwt.sign({ id: admin._id, role: 'admin' }, JWT_SECRET);
+
+  const player = await Player.create({
+    name: 'Fallback Target',
+    sport: 'Football',
+    age: 19,
+    coach: coach._id
+  });
+
+  const playerUser = await User.create({
+    name: player.name,
+    username: player.username || `player_${player._id}`,
+    email: `fallback_${player._id}@test.com`,
+    password: 'password123',
+    role: 'player',
+    playerId: player._id
+  });
+
+  const draftSession = await Session.create({
+    coach: coach._id,
+    sport: 'Football',
+    date: new Date('2026-11-01T00:00:00.000Z'),
+    saved: false,
+    locked: false,
+    attendance: [{ player: player._id, status: 'present' }],
+    initialRosterPlayerIds: [player._id]
+  });
+
+  // Admin deletes player with header triggering non-transactional fallback
+  const adminDelRes = await fetch(`${baseUrl}/api/players/${player._id}`, {
+    method: 'DELETE',
+    headers: {
+      ...authHeader(adminToken),
+      'x-test-force-no-tx': 'true'
+    }
+  });
+  assert.equal(adminDelRes.status, 200);
+
+  // Verify Player and User are deleted
+  const checkPlayer = await Player.findById(player._id);
+  assert.equal(checkPlayer, null);
+  const checkUser = await User.findById(playerUser._id);
+  assert.equal(checkUser, null);
+
+  // Verify draft session roster updated
+  const checkSession = await Session.findById(draftSession._id);
+  assert.ok(!checkSession.attendance.some((a: any) => a.player?.toString() === player._id.toString()));
+
+  // Cleanup
+  await Session.findByIdAndDelete(draftSession._id);
+  await User.deleteMany({ _id: { $in: [coach._id, admin._id] } });
+});

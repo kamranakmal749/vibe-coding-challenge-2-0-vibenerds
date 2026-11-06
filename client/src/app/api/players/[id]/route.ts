@@ -188,11 +188,17 @@ export async function DELETE(
 
     // Transaction attempt if replica set supports it
     let mongoSession: any = null;
-    try {
-      mongoSession = await mongoose.startSession();
-      mongoSession.startTransaction();
-    } catch {
-      mongoSession = null;
+    const forceFallback = req.headers.get('x-test-force-no-tx') === 'true';
+    if (!forceFallback) {
+      try {
+        mongoSession = await mongoose.startSession();
+        mongoSession.startTransaction();
+      } catch {
+        mongoSession = null;
+        console.warn('[WARN] MongoDB replica set transaction not available; falling back to non-transactional player deletion cascade');
+      }
+    } else {
+      console.warn('[WARN] MongoDB replica set transaction not available (simulated); falling back to non-transactional player deletion cascade');
     }
 
     try {

@@ -28,7 +28,8 @@ const PORTED_ROUTES = [
   '/api/auth/change-password',
   '/api/auth/me',
   '/api/auth/coaches',
-  '/api/players'
+  '/api/players',
+  '/api/sessions'
 ];
 
 console.log(`\n=== NEXT.JS MIGRATION PARITY STATUS ===`);
