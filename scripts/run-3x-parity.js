@@ -30,3 +30,4 @@ for (let run = 1; run <= 3; run++) {
 
 console.log('\n=== 3X CONSECUTIVE RUN RESULTS ===');
 console.table(results);
+

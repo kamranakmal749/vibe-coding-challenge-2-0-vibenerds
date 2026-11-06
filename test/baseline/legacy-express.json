@@ -1,0 +1,557 @@
+[
+  {
+    "file": "acceptance.test.js",
+    "test": "1. Opening a session creates every player of that coach in that sport with status \"present\" and participation equal to defaultParticipation",
+    "status": "FAIL"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "2. Marking one player absent, then saving: that player is \"absent\" with participation null; others remain \"present\"",
+    "status": "FAIL"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "3. After saving, PATCH /bulk and PATCH /mark return 409 and the database is unchanged",
+    "status": "PASS"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "4. Two simultaneous save requests on one session: exactly one succeeds, the other returns 409",
+    "status": "PASS"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "5. Opening a duplicate (coach, date, sport) returns 409",
+    "status": "PASS"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "6. Creating a match on a date with no session succeeds. PUT entries returns 409",
+    "status": "FAIL"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "7. Match on a date with an unsaved session: PUT entries returns 409 with the save-first message",
+    "status": "FAIL"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "8. Match on a saved session: an absent player in the entries returns 422 with their id",
+    "status": "FAIL"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "9. Match on a saved session: a present player with participation \"practice\" in the entries returns 422",
+    "status": "FAIL"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "10. Match on a saved session: omitting an eligible player returns 422 with that player's id, and nothing is written",
+    "status": "FAIL"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "11. Eligible player with result \"played\" and score 0 is accepted and counts as a played match",
+    "status": "FAIL"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "12. Eligible player with result \"did_not_play\" is accepted and does not count toward matches played",
+    "status": "FAIL"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "13. 75% attendance and 2 matches: READY. 74% and 2 matches: NOT READY. 75% and 1 match: NOT READY",
+    "status": "PASS"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "14. Scout GET /api/scout/ready returns only READY players. Player GET /api/players/me returns only their own record",
+    "status": "PASS"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "15. Player creation with a future registeredOn returns 400. Invalid defaultParticipation returns 400",
+    "status": "PASS"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "16. Migration run twice produces the same database state as running it once",
+    "status": "PASS"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "17. Drafts sync current players, saved sessions stay fixed, and session/player attendance agree",
+    "status": "FAIL"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "18. Official attendance ignores drafts and sessions where the player is not on the roster",
+    "status": "PASS"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "19. Saving attendance preserves omitted roster members and rejects unknown players",
+    "status": "FAIL"
+  },
+  {
+    "file": "acceptance.test.js",
+    "test": "20. Admin-registered players and admin-created sessions are assigned to a coach",
+    "status": "FAIL"
+  },
+  {
+    "file": "checklist.test.js",
+    "test": "CHECK 1 — Attendance register: 2 present + 1 absent, each shows correct status on their row",
+    "status": "PASS"
+  },
+  {
+    "file": "checklist.test.js",
+    "test": "CHECK 2 — Match on same day: absent player REFUSED, present players ACCEPTED in eligible list",
+    "status": "FAIL"
+  },
+  {
+    "file": "checklist.test.js",
+    "test": "CHECK 3a — Player with <75% attendance is NOT READY (even with 2 matches)",
+    "status": "PASS"
+  },
+  {
+    "file": "checklist.test.js",
+    "test": "CHECK 3b — Player at exactly 75% attendance with 2 matches IS READY",
+    "status": "PASS"
+  },
+  {
+    "file": "checklist.test.js",
+    "test": "CHECK 4a — Scout radar shows ONLY Ready players; not-ready players are hidden",
+    "status": "PASS"
+  },
+  {
+    "file": "checklist.test.js",
+    "test": "CHECK 4b — Player login sees only their own dashboard row (not other players data)",
+    "status": "PASS"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 1: Record attendance for 4 players (3 PRESENT, 1 ABSENT) -> Turnout 75%, player stats update immediately in DB",
+    "status": "FAIL"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 2: Change the 1 ABSENT player to PRESENT -> Turnout becomes 100%, player stats update",
+    "status": "FAIL"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 3: Create match, complete with scores, then mark participating player ABSENT -> conflict flagged, valid matches and readiness drop, history preserved",
+    "status": "FAIL"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 4: Change player back to PRESENT -> Conflict automatically resolves, eligibility restored without duplicate match records",
+    "status": "FAIL"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 5: Create a second match, select squad, enter scores, mark completed -> participation & matches played update correctly",
+    "status": "FAIL"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 6: Check trial readiness for boundary conditions: (74% + 2 = NOT READY, 75% + 1 = NOT READY, 75% + 2 = READY)",
+    "status": "PASS"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 7: Coach, Player, Scout dashboards show consistent data and respect role authorization",
+    "status": "PASS"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 8: Simulated hard refresh: direct DB re-query from Atlas retains exact synchronized stats",
+    "status": "FAIL"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 9: Rapid duplicate attendance submission: rejected by duplicate check or validator",
+    "status": "PASS"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "test": "TEST 10: Attempt to edit a locked session: blocked with 409 Conflict",
+    "status": "PASS"
+  },
+  {
+    "file": "eligible_players_column.test.js",
+    "test": "0. Coach Login",
+    "status": "FAIL"
+  },
+  {
+    "file": "eligible_players_column.test.js",
+    "test": "Eligible Players Column & No Squad Size Limit Verification",
+    "status": "FAIL"
+  },
+  {
+    "file": "full-synchronization-flow.test.js",
+    "test": "TEST 1: Change Rahul attendance Present -> Absent updates Attendance, Directory, Match eligibility & Ready status",
+    "status": "PASS"
+  },
+  {
+    "file": "full-synchronization-flow.test.js",
+    "test": "TEST 2: Change Rahul attendance Absent -> Present restores Attendance, Directory, Eligibility & Ready status",
+    "status": "FAIL"
+  },
+  {
+    "file": "full-synchronization-flow.test.js",
+    "test": "TEST 3: Change match participation Yes -> No drops matches played & recalculates Ready status everywhere",
+    "status": "PASS"
+  },
+  {
+    "file": "full-synchronization-flow.test.js",
+    "test": "TEST 4: Edit player name in Directory updates Attendance, Matches, Coach Dashboard and Player Dashboard",
+    "status": "FAIL"
+  },
+  {
+    "file": "full-synchronization-flow.test.js",
+    "test": "TEST 5: Refresh website and log in again retains all persisted changes",
+    "status": "PASS"
+  },
+  {
+    "file": "full-synchronization-flow.test.js",
+    "test": "TEST 6: Two independent sessions: change in Session 1 propagates to Session 2",
+    "status": "PASS"
+  },
+  {
+    "file": "match-phase1.test.js",
+    "test": "Phase 1: Create a match and two participations; verify duplicate (match, player) throws duplicate-key error",
+    "status": "PASS"
+  },
+  {
+    "file": "match-phase2.test.js",
+    "test": "Phase 2: POST /api/matches creates a match and rejects missing fields & exact duplicates",
+    "status": "FAIL"
+  },
+  {
+    "file": "match-phase2.test.js",
+    "test": "Phase 2: GET /api/matches with filters (sport, date, opponent, status)",
+    "status": "FAIL"
+  },
+  {
+    "file": "match-phase2.test.js",
+    "test": "Phase 2: GET /api/matches/calendar returns only matches in requested month",
+    "status": "FAIL"
+  },
+  {
+    "file": "match-phase2.test.js",
+    "test": "Phase 2: GET /api/matches/:id returns details + computed counts, PATCH edits upcoming match, PATCH cancel works",
+    "status": "FAIL"
+  },
+  {
+    "file": "match-phase3.test.js",
+    "test": "Phase 3: GET eligible-players returns sessionFound: false when no session or unsaved session",
+    "status": "FAIL"
+  },
+  {
+    "file": "match-phase3.test.js",
+    "test": "Phase 3: GET eligible-players on saved session returns only present & match/both players",
+    "status": "FAIL"
+  },
+  {
+    "file": "match-phase3.test.js",
+    "test": "Phase 3: PUT selected-players rejects non-eligible player with 422",
+    "status": "FAIL"
+  },
+  {
+    "file": "match-phase3.test.js",
+    "test": "Phase 3: PUT selected-players succeeds, is idempotent, and removing a player removes participation row",
+    "status": "FAIL"
+  },
+  {
+    "file": "match-phase4.test.js",
+    "test": "Phase 4: GET /api/matches/:id/participation returns participation table",
+    "status": "FAIL"
+  },
+  {
+    "file": "match-phase4.test.js",
+    "test": "Phase 4: PATCH /api/matches/:id/participation/:playerId enforces played:false forces score:null, and played:true requires score for numeric sport",
+    "status": "PASS"
+  },
+  {
+    "file": "match-phase4.test.js",
+    "test": "Phase 4: PATCH /api/matches/:id/complete validates all selected players have played status, then marks completed",
+    "status": "PASS"
+  },
+  {
+    "file": "match-phase5.test.js",
+    "test": "Phase 5: Reopening completed match unlocks participation edits, while unrelated completed match stays locked",
+    "status": "PASS"
+  },
+  {
+    "file": "match-phase5.test.js",
+    "test": "Phase 5: GET /api/matches/history returns only completed matches with totalPlayed count and filters",
+    "status": "PASS"
+  },
+  {
+    "file": "match-phase5.test.js",
+    "test": "Phase 5: Player stats (totalMatchesPlayed, totalMatchesSelected, totalMatchesNotPlayed, individual history) exclude upcoming and cancelled matches",
+    "status": "PASS"
+  },
+  {
+    "file": "match-phase6.test.js",
+    "test": "Phase 6: Player with 75% attendance and 2 completed played matches is Ready; upcoming or not-played matches do not count",
+    "status": "PASS"
+  },
+  {
+    "file": "match-phase8.test.js",
+    "test": "Phase 8: Add Match Form - validation, creation, duplicate guard",
+    "status": "FAIL"
+  },
+  {
+    "file": "match-phase8.test.js",
+    "test": "Phase 8: Match Details - GET /api/matches/:id returns complete schema & computed counts",
+    "status": "PASS"
+  },
+  {
+    "file": "match-phase8.test.js",
+    "test": "Phase 8: Edit Match - PATCH /api/matches/:id edits upcoming match, rejects non-upcoming",
+    "status": "PASS"
+  },
+  {
+    "file": "match-phase8.test.js",
+    "test": "Phase 8: Cancel Match - PATCH /api/matches/:id/cancel cancels upcoming, rejects non-upcoming",
+    "status": "PASS"
+  },
+  {
+    "file": "match-phase8.test.js",
+    "test": "Phase 8: Comprehensive 403 cross-coach guards on all match endpoints",
+    "status": "PASS"
+  },
+  {
+    "file": "match_flow.test.js",
+    "test": "12-Step Match Management Verification Flow",
+    "status": "FAIL"
+  },
+  {
+    "file": "player-identity.test.js",
+    "test": "1. Concurrent player ID generation has zero collisions",
+    "status": "PASS"
+  },
+  {
+    "file": "player-identity.test.js",
+    "test": "2. Cross-year sequence resets correctly per year",
+    "status": "PASS"
+  },
+  {
+    "file": "player-identity.test.js",
+    "test": "3. Login works via username (md-code) and via email, and fails cleanly on wrong password",
+    "status": "PASS"
+  },
+  {
+    "file": "player-identity.test.js",
+    "test": "4. Player account creation rejects non-existent player",
+    "status": "PASS"
+  },
+  {
+    "file": "player-removal-unit.test.js",
+    "test": "1. Auth Middleware: allow(\"admin\") strictly blocks non-admin roles",
+    "status": "PASS"
+  },
+  {
+    "file": "player-removal-unit.test.js",
+    "test": "2. Auth Middleware: Rejects missing or invalid JWT tokens",
+    "status": "PASS"
+  },
+  {
+    "file": "player-removal-unit.test.js",
+    "test": "3. Auth Middleware: Revokes access when Player user document was deleted",
+    "status": "PASS"
+  },
+  {
+    "file": "player-removal-unit.test.js",
+    "test": "4. Auth Middleware: Revokes access when Player profile document was deleted",
+    "status": "PASS"
+  },
+  {
+    "file": "player-removal-unit.test.js",
+    "test": "5. Auth Middleware: Allows active Admin, Coach, or existing Player",
+    "status": "PASS"
+  },
+  {
+    "file": "player-removal-unit.test.js",
+    "test": "6. Match Participation: Null-safely handles deleted players in participation mapping",
+    "status": "PASS"
+  },
+  {
+    "file": "player-removal-unit.test.js",
+    "test": "7. Verification of UI & Client Sync contract in script.js",
+    "status": "FAIL"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "1. Role Authorization: Coach cannot delete player",
+    "status": "FAIL"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "2. Role Authorization: Scout cannot delete player",
+    "status": "FAIL"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "3. Role Authorization: Player cannot delete themselves",
+    "status": "FAIL"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "4. Admin deletes player: succeeds and returns 200",
+    "status": "FAIL"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "5. Verify Player document is permanently deleted from MongoDB",
+    "status": "FAIL"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "6. Verify linked User account is permanently deleted",
+    "status": "FAIL"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "7. Verify existing JWT token for deleted player is rejected with 401",
+    "status": "FAIL"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "8. Verify draft session roster had deleted player removed",
+    "status": "FAIL"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "9. Verify saved historical session survives with null-safety and no errors",
+    "status": "FAIL"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "10. Verify upcoming match had deleted player removed",
+    "status": "FAIL"
+  },
+  {
+    "file": "player-removal.test.js",
+    "test": "11. Verify completed historical match fixture, score, and opponent remain 100% intact",
+    "status": "FAIL"
+  },
+  {
+    "file": "session-roster-integrity.test.js",
+    "test": "Session roster is fixed at creation time: adding a player AFTER session creation must NOT expand the roster",
+    "status": "FAIL"
+  },
+  {
+    "file": "session-roster-integrity.test.js",
+    "test": "Session GET on a locked session never re-queries players or modifies the stored roster",
+    "status": "FAIL"
+  },
+  {
+    "file": "standard_team_size.test.js",
+    "test": "Standard Playing-Team Sizes and Match Validation Suite",
+    "status": "FAIL"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "1. Match Creation — Initial status Upcoming, only basic details collected",
+    "status": "FAIL"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "1b. Squad Selection — Add player to squad before match time",
+    "status": "PASS"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "2. At 4:59 PM — Status Upcoming, Scoring is Locked (HTTP 403)",
+    "status": "FAIL"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "3. At 5:30 PM — Status In Progress, Scoring is still Locked (HTTP 403)",
+    "status": "FAIL"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "4. At 5:59 PM — Status In Progress, Scoring is still Locked (HTTP 403)",
+    "status": "FAIL"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "5. At 6:00 PM — Scoring Unlocks (HTTP 200 accepted)",
+    "status": "FAIL"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "6. Complete Match after unlock & verify Completed Matches display",
+    "status": "FAIL"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "7. Refresh check — permanent persistence in MongoDB after completion",
+    "status": "FAIL"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "8. Rescheduling test — updating time recalculates unlock time",
+    "status": "FAIL"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "test": "Time-Based Match Management & 60-Minute Scoring Unlock Workflow",
+    "status": "FAIL"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "0. Coach Login",
+    "status": "FAIL"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "1. Setup Players and Practice Attendance",
+    "status": "FAIL"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "2. Match Creation with variable maxSquadSize",
+    "status": "FAIL"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "3. Eligibility check & maxSquadSize enforcement",
+    "status": "FAIL"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "4. At 14:30 (30 mins into match) — Scoring is Locked",
+    "status": "FAIL"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "5. At 15:00 — Scoring Unlocked: Coach saves Draft",
+    "status": "FAIL"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "6. Save & Complete Match via unified action",
+    "status": "FAIL"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "7. Completed Matches display & scores permanence after page refresh",
+    "status": "FAIL"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "8. Cleanup test entities",
+    "status": "PASS"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "test": "Unified Match Management Module Verification",
+    "status": "FAIL"
+  }
+]

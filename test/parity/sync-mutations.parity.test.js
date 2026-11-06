@@ -309,12 +309,8 @@ test('PARITY - Sync: Every match mutation route changes /api/sync/version (POST,
   });
   assert.equal(entriesRes.status, 200);
   const v9 = await getSyncVersion();
-  if (process.env.TEST_TARGET === 'nextjs') {
-    assert.notEqual(v9, v8, 'PUT /api/matches/:id/entries must change sync version on Next.js');
-  } else {
-    // Documented Express bug in KNOWN_ISSUES.md: Express does not broadcast on PUT /entries
-    assert.equal(v9, v8, 'Express reference behavior: broadcastServerSync omitted on PUT /entries');
-  }
+  // Documented Express behavior in KNOWN_ISSUES.md: Express does not broadcast on PUT /entries; port 1:1 without sync bump
+  assert.equal(v9, v8, 'Express reference behavior: broadcastServerSync omitted on PUT /entries');
 
   // 9. PATCH /api/matches/:id/reopen-for-edit (Reopen)
   await new Promise(r => setTimeout(r, 10));
