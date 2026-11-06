@@ -1148,3 +1148,37 @@ Phases run in order. After each phase, ALL of these must pass before the next ph
 - A match cannot be scored without a saved session that day (409 toast); absent or practice-only players are rejected (422).
 - Player portal (`md260001/player123`) shows only own data and only matches where the player played.
 - Numbers on the Next.js pages match the legacy app for the same account.
+
+### 16.7 Running Next.js on Port 3000 Against `academy_parity`
+To build, run, and verify the standalone Next.js server against the dedicated parity database:
+
+1. **Build the Next.js App**:
+   ```bash
+   npm --prefix client run build
+   ```
+
+2. **Start Next.js Standalone Server on Port 3000 against `academy_parity`**:
+   - **PowerShell**:
+     ```powershell
+     $env:MONGODB_URI = (Get-Content .env | Select-String "MONGODB_URI").ToString().Split('=', 2)[1].Trim().Replace('/academy_dev', '/academy_parity')
+     $env:PORT = "3000"
+     npm --prefix client run start
+     ```
+   - **Bash**:
+     ```bash
+     export MONGODB_URI=$(grep MONGODB_URI .env | cut -d '=' -f2 | sed 's/\/academy_dev/\/academy_parity/')
+     export PORT=3000
+     npm --prefix client run start
+     ```
+   - **Automated Verification Script**:
+     ```bash
+     # Runs build check, launches Next.js on port 3000 with TZ=UTC or TZ=Asia/Kolkata, asserts /api/health and /api/sync/version, and terminates cleanly
+     node scripts/test-next-parity.js
+     ```
+
+3. **Execute Parity Test Suite Against Running Next.js Server**:
+   ```powershell
+   $env:BASE_URL = "http://localhost:3000"
+   node scripts/run-parity-suite.js
+   ```
+
