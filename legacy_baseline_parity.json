@@ -1,0 +1,162 @@
+[
+  {
+    "file": "acceptance.test.js",
+    "pass": 0,
+    "fail": 1,
+    "total": 1,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "checklist.test.js",
+    "pass": 5,
+    "fail": 1,
+    "total": 6,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "data-synchronization.test.js",
+    "pass": 4,
+    "fail": 6,
+    "total": 10,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "eligible_players_column.test.js",
+    "pass": 0,
+    "fail": 2,
+    "total": 2,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "full-synchronization-flow.test.js",
+    "pass": 0,
+    "fail": 1,
+    "total": 1,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "match-phase1.test.js",
+    "pass": 1,
+    "fail": 0,
+    "total": 1,
+    "status": "PASS",
+    "note": ""
+  },
+  {
+    "file": "match-phase2.test.js",
+    "pass": 0,
+    "fail": 4,
+    "total": 4,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "match-phase3.test.js",
+    "pass": 0,
+    "fail": 4,
+    "total": 4,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "match-phase4.test.js",
+    "pass": 2,
+    "fail": 1,
+    "total": 3,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "match-phase5.test.js",
+    "pass": 3,
+    "fail": 0,
+    "total": 3,
+    "status": "PASS",
+    "note": ""
+  },
+  {
+    "file": "match-phase6.test.js",
+    "pass": 1,
+    "fail": 0,
+    "total": 1,
+    "status": "PASS",
+    "note": ""
+  },
+  {
+    "file": "match-phase8.test.js",
+    "pass": 4,
+    "fail": 1,
+    "total": 5,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "match_flow.test.js",
+    "pass": 0,
+    "fail": 1,
+    "total": 1,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "player-identity.test.js",
+    "pass": 5,
+    "fail": 0,
+    "total": 5,
+    "status": "PASS",
+    "note": ""
+  },
+  {
+    "file": "player-removal-unit.test.js",
+    "pass": 6,
+    "fail": 1,
+    "total": 7,
+    "status": "FAIL",
+    "note": "Legacy DOM test: checks script.js"
+  },
+  {
+    "file": "player-removal.test.js",
+    "pass": 0,
+    "fail": 11,
+    "total": 11,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "session-roster-integrity.test.js",
+    "pass": 0,
+    "fail": 2,
+    "total": 2,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "standard_team_size.test.js",
+    "pass": 0,
+    "fail": 1,
+    "total": 1,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "time_based_match.test.js",
+    "pass": 1,
+    "fail": 9,
+    "total": 10,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  },
+  {
+    "file": "unified_match_module.test.js",
+    "pass": 1,
+    "fail": 9,
+    "total": 10,
+    "status": "FAIL",
+    "note": "Assertion failure"
+  }
+]

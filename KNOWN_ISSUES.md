@@ -9,6 +9,8 @@ These items represent pre-existing bugs, schema mismatches, and legacy fixtures 
   - In [`src/routes/players.js`](file:///c:/Users/pooki/Desktop/hackathon/src/routes/players.js#L380-L382), administrative player deletion performs a `console.log("[AUDIT] Admin ...")` statement rather than creating and persisting an `AuditLog` document (`AuditLog.create(...)`). As a result, the `auditlogs` collection in MongoDB remains empty.
 - **`audit.js` Route Unmounted**:
   - [`src/routes/audit.js`](file:///c:/Users/pooki/Desktop/hackathon/src/routes/audit.js) defines admin endpoints `GET /api/audit-logs` and `GET /api/audit-logs/:id`, but it is never mounted in [`src/app.js`](file:///c:/Users/pooki/Desktop/hackathon/src/app.js). It is currently dead code in the Express backend.
+- **Omission of `broadcastServerSync` in `PUT /api/matches/:id/entries`**:
+  - In [`src/routes/matches.js`](file:///c:/Users/pooki/Desktop/hackathon/src/routes/matches.js#L1122), the deprecated `PUT /api/matches/:id/entries` endpoint saves entries and returns HTTP 200, but omits `broadcastServerSync(...)`. Consequently, it does not change `/api/sync/version` on Express. (All other 20 mutation routes in sessions, matches, and players call `broadcastServerSync`).
 
 ---
 
@@ -31,3 +33,4 @@ These items represent pre-existing bugs, schema mismatches, and legacy fixtures 
   - `acceptance.test.js` tests 6–12 target the deprecated Phase 2 `PUT /entries` endpoint, which was replaced in Phase 7/8 by the unified `/save-all` and `/complete` workflow.
 - **Client Sync Test Contract in `player-removal-unit.test.js`**:
   - Test 7 checks for specific regex strings inside `script.js`. This test is retired by design at cutover once `script.js` is replaced by the Next.js client.
+
