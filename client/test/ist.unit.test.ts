@@ -67,3 +67,4 @@ test('ist.ts: widened date window covers IST day completely', () => {
   assert.ok(minDate.getTime() <= istStart, 'minDate must cover IST day start');
   assert.ok(maxDate.getTime() >= istEnd, 'maxDate must cover IST day end');
 });
+

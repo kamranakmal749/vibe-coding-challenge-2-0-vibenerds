@@ -38,3 +38,4 @@ if (differences.length === 0) {
   console.error(`Found ${differences.length} differences (flaky tests):`, differences);
   process.exit(1);
 }
+

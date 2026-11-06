@@ -1190,7 +1190,7 @@ When running Next.js locally or deploying to Vercel/serverless, configuration is
 | `MONGODB_URI` | Yes | MongoDB connection string. Server refuses connection unless targeting `academy_dev` (development) or `academy_parity` (testing), unless `ALLOW_PROD_DB=true`. | `mongodb+srv://<user>:<password>@<cluster>/academy_dev?retryWrites=true&w=majority` |
 | `JWT_SECRET` | Yes | Secret key used to sign and verify JWT authorization tokens. **Must be identical to Express backend** to maintain session parity and validate existing tokens. | `<same_as_express_root_env>` |
 | `PORT` | No | HTTP listening port for standalone server (defaults to `3000`). | `3000` |
-| `TZ` | No | Server process timezone. The Next.js backend uses explicit IST helpers in `lib/ist.ts` ensuring deterministic date and lock behavior regardless of whether `TZ=UTC` (serverless default) or `TZ=Asia/Kolkata`. | `Asia/Kolkata` or `UTC` |
+| `TZ` | No | **Tests only; production must not depend on it.** The Next.js backend uses explicit IST helpers in `client/src/lib/ist.ts` ensuring deterministic date, calendar windows, and lock calculations using an explicit UTC+05:30 offset regardless of whether `TZ=UTC` (standard serverless default) or `TZ=Asia/Kolkata`. | `Asia/Kolkata` or `UTC` (tests only) |
 | `ALLOW_PROD_DB` | No | Emergency escape hatch for production deployments. Set to `'true'` only when `NODE_ENV === 'production'` to connect to non-dev databases. | `'false'` (default) |
 
 
