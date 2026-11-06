@@ -44,11 +44,24 @@ These items represent pre-existing bugs, schema mismatches, and legacy fixtures 
 
 ---
 
-### 5. Timezone & Calendar Month Boundaries
-- **Express uses host-local time; IST fix pending deployment-TZ decision**:
-  - In Express, date boundary queries in `matches.js` (`GET /api/matches/calendar`, `findAnySession`, and `syncSessionMatchConflicts`) construct Date ranges using host-local methods (e.g., `setHours(0,0,0,0)` and `new Date(year, month - 1, 1)`).
-  - When the Express host runs in UTC rather than IST (UTC+05:30), late-night IST sessions or fixtures falling between 00:00 and 05:30 IST on the 1st of a month are bucketed into the prior UTC calendar day/month.
-  - Per instruction G6, calendar and month-boundary behaviors are frozen as-is during Phase 4 migration without refactoring. The stats boundary differential test remains informational under UTC and verifies 100% mathematical identity under `TZ=Asia/Kolkata`. Final resolution is pending the production deployment timezone configuration decision.
+### 5. Timezone & Calendar Month Boundaries (Decision A: OPEN)
+- **Host-Local Time Dependency vs Explicit IST Representation (OPEN)**:
+  - In Express, date boundary queries and match schedule enrichments in `matches.js` (`GET /api/matches/calendar`, `findAnySession`, `getMatchScheduledDateTime`, `getMatchUnlockDateTime`, and `syncSessionMatchConflicts`) construct Date ranges using host-local methods (e.g., `setHours(0,0,0,0)` and `new Date(year, month, day, hours, minutes)`).
+  - When the host runs in UTC rather than IST (UTC+05:30), a match scheduled for `17:00` yields kickoff instant `17:00:00.000Z` under `TZ=UTC` versus `11:30:00.000Z` under `TZ=Asia/Kolkata` (a difference of exactly 5 hours 30 minutes). Unlock time (kickoff + 60m) similarly shifts from `18:00:00.000Z` to `12:30:00.000Z`.
+  - **Decision A is restored as OPEN** (do not assume host-local as final design).
+  - **Affected Routes**:
+    1. `GET /api/matches`
+    2. `POST /api/matches`
+    3. `GET /api/matches/:id`
+    4. `PATCH /api/matches/:id`
+    5. `PATCH /api/matches/:id/cancel`
+    6. `GET /api/matches/history`
+    7. `GET /api/matches/calendar`
+    8. `GET /api/matches/check-eligibility`
+    9. `PATCH /api/matches/:id/participation/:playerId` (enforces 60-min unlock)
+    10. `POST /api/matches/:id/save-all` (enforces 60-min unlock)
+    11. `PATCH /api/matches/:id/complete` (enforces 60-min unlock)
+  - Final resolution will be decided when container/production deployment timezone policy (UTC container vs explicit IST parsing) is finalized.
 
 ---
 

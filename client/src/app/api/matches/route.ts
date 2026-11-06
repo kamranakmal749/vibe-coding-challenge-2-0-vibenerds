@@ -238,7 +238,7 @@ export async function POST(req: Request) {
       if (presentPlayers.length < minTeamSize) {
         return NextResponse.json(
           {
-            error: `${trimmedSport} requires at least ${minTeamSize} eligible players, but only ${presentPlayers.length} are present in practice attendance.`,
+            error: `${trimmedSport} requires at least ${minTeamSize} eligible players, but only ${presentPlayers.length} are available.`,
           },
           { status: 400 }
         );

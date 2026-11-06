@@ -100,7 +100,8 @@ export async function PATCH(
       return NextResponse.json(
         {
           error:
-            'All selected players must have Played or Did Not Play status recorded before completing the match',
+            'All selected players must have a Played/Not Played status before completing the match',
+          missingStatusPlayerIds: missingParticipation,
           missingPlayerIds: missingParticipation,
         },
         { status: 422 }

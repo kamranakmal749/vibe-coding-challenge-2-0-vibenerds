@@ -68,7 +68,7 @@ export async function PATCH(
       if (isNaN(numScore) || numScore < 0 || numScore > 20) {
         return NextResponse.json(
           {
-            error: `Score for player ${pid} must be a number between 0 and 20`,
+            error: `Invalid score ${item.score} for player ${pid}. Scores must be between 0 and 20.`,
           },
           { status: 400 }
         );
@@ -82,15 +82,15 @@ export async function PATCH(
       if (!participation) {
         return NextResponse.json(
           {
-            error: `Participation record not found for player ${pid} in this match`,
+            error: `No participation record found for player ${pid} in this match`,
           },
           { status: 404 }
         );
       }
-      if (!participation.played) {
+      if (participation.played !== true) {
         return NextResponse.json(
           {
-            error: `Cannot edit score for player ${pid} because they did not play in this match`,
+            error: `Player ${pid} is not recorded as "played". Only played players can have scores edited.`,
           },
           { status: 409 }
         );
