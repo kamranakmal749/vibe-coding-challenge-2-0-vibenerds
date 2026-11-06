@@ -80,3 +80,64 @@ test('MATCHES - Decision D: Static segments (check-eligibility, history, calenda
   assert.ok(Array.isArray(calData), 'calendar must return an array of matches');
 });
 
+test('P1 REGRESSION - POST /api/matches with UI payload succeeds with 201', async () => {
+  const mongoose = require('mongoose');
+  const uri = (process.env.MONGODB_URI || '').replace('/academy_dev', '/academy_parity');
+  if (mongoose.connection.readyState === 0) {
+    await mongoose.connect(uri);
+  }
+  const User = require('../src/lib/models/User');
+  const Player = require('../src/lib/models/Player');
+
+  // Find or create a coach with >= 11 players
+  let coach = await User.findOne({ role: 'coach', username: { $regex: /^coach_match_/ } });
+  if (!coach) {
+    coach = await User.findOne({ role: 'coach' });
+  }
+
+  // Ensure coach has 12 players for Football
+  const count = await Player.countDocuments({ coach: coach._id, sport: { $regex: /^football$/i } });
+  if (count < 11) {
+    const toCreate = 11 - count;
+    for (let i = 0; i < toCreate; i++) {
+      await Player.create({
+        name: `RosterAthlete_${Date.now()}_${i}`,
+        age: 18,
+        sport: 'Football',
+        coach: coach._id,
+        defaultParticipation: 'both',
+      });
+    }
+  }
+
+  const token = jwt.sign(
+    { id: coach._id.toString(), role: 'coach', name: coach.name || 'Coach' },
+    JWT_SECRET
+  );
+
+  const uiBody = {
+    title: `Championship Final ${Date.now()}`,
+    sport: 'Football',
+    date: '2026-11-28',
+    time: '17:00',
+    opponent: `Titans FC ${Date.now()}`,
+    venue: 'Main Stadium',
+    description: 'Scheduled via Maidan Desk UI',
+    selectedPlayerIds: null,
+  };
+
+  const res = await fetch(`${baseUrl}/api/matches`, {
+    method: 'POST',
+    headers: authHeader(token),
+    body: JSON.stringify(uiBody),
+  });
+
+  assert.equal(res.status, 201);
+  const data = await res.json();
+  assert.equal(data.title, uiBody.title);
+  assert.equal(data.sport, 'Football');
+  assert.equal(data.status, 'upcoming');
+  assert.ok(data._id, 'Created match must have _id');
+  await mongoose.disconnect();
+});
+

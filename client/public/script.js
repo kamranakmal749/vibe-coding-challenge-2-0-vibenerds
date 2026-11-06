@@ -1,7 +1,21 @@
 // script.js - Full live integration with Maidan Desk REST API
 
+// IST Date helper with zero host-local dependency
+function getTodayIstString(date = new Date()) {
+    const d = date instanceof Date ? date : new Date(date);
+    if (isNaN(d.getTime())) return '';
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(d);
+}
+
+if (typeof window !== 'undefined') {
+    window.getTodayIstString = getTodayIstString;
+}
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { getTodayIstString };
+}
+
 let currentUser = null;
-let authToken = localStorage.getItem('token') || null;
+let authToken = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
 
 // Helpers for API requests
 async function api(path, options = {}) {
@@ -13,7 +27,12 @@ async function api(path, options = {}) {
         options.headers['Content-Type'] = 'application/json';
         options.body = JSON.stringify(options.body);
     }
-    const res = await fetch(path, options);
+    let res;
+    try {
+        res = await fetch(path, options);
+    } catch (err) {
+        throw new Error('Cannot reach the server. Check your connection and try again.');
+    }
     const data = await res.json().catch(() => null);
     if (!res.ok) {
         if (res.status === 401) {
@@ -22,7 +41,7 @@ async function api(path, options = {}) {
             } else if (authToken) {
                 showToast('Session expired. Please sign in again.', 'info');
             }
-            logout();
+            setTimeout(() => { logout(); }, 300);
         }
         if (res.status === 403 && data && data.mustChangePassword) {
             openMandatoryPasswordChangeModal();
@@ -367,14 +386,12 @@ function logout() {
     stopGreetingTimer();
     authToken = null;
     currentUser = null;
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    try {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+    } catch (_) {}
 
-    document.getElementById('app-shell').classList.add('hidden');
-    document.getElementById('view-login').classList.remove('hidden');
-    document.getElementById('sidebar-nav').innerHTML = '';
-    document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-    showToast('Signed out successfully.', 'info');
+    window.location.href = '/';
 }
 
 // ── REAL-TIME CROSS-TAB DATA SYNCHRONIZATION ──────────────────────────────
@@ -2784,9 +2801,9 @@ function renderSessionDetailsView(session) {
     // Conflict check for linked matches
     const conflictAlert = document.getElementById('details-conflict-alert');
     if (conflictAlert) {
-        const sessionDateStr = new Date(session.date).toISOString().split('T')[0];
+        const sessionDateStr = getTodayIstString(session.date);
         const hasLinkedConflict = (cachedMatchList || []).some(m => {
-            const mDateStr = new Date(m.date).toISOString().split('T')[0];
+            const mDateStr = getTodayIstString(m.date);
             return mDateStr === sessionDateStr && m.sport === session.sport && m.hasConflict;
         });
         if (hasLinkedConflict) {
@@ -3960,10 +3977,10 @@ function getMatchEligiblePlayersCount(m) {
     }
     if (Array.isArray(cachedSessions) && cachedSessions.length > 0) {
         const mDate = new Date(m.date);
-        const mDateStr = mDate.toISOString().slice(0, 10);
+        const mDateStr = getTodayIstString(mDate);
         const session = cachedSessions.find(s => {
             if (s.sport !== m.sport) return false;
-            const sDateStr = new Date(s.date).toISOString().slice(0, 10);
+            const sDateStr = getTodayIstString(s.date);
             return sDateStr === mDateStr && (s.saved || s.locked);
         });
         if (session && Array.isArray(session.attendance)) {
@@ -4568,7 +4585,7 @@ async function exportScoutReportPDF() {
         });
 
         // 3. Save / Download PDF
-        const safeDateStr = new Date().toISOString().slice(0, 10);
+        const safeDateStr = getTodayIstString();
         doc.save(`Maidan_Desk_Ready_Players_Report_${safeDateStr}.pdf`);
         showToast('Ready Players Report exported successfully.', 'success');
     } catch (err) {
@@ -5031,7 +5048,7 @@ function toggleAllModalSquadCheckboxes(selectAll) {
 }
 
 function openAddMatchModal(prefillDate = null) {
-    const defaultDate = prefillDate || (selectedCalendarDateStr || new Date().toISOString().split('T')[0]);
+    const defaultDate = prefillDate || (selectedCalendarDateStr || getTodayIstString());
     activeMatchCreationEligibility = null;
 
     const html = `
@@ -5885,7 +5902,7 @@ async function openEditMatchModal(matchId) {
         }
         if (!match) return;
 
-        const matchDateIso = new Date(match.date).toISOString().split('T')[0];
+        const matchDateIso = getTodayIstString(match.date);
 
         const html = `
             <div class="space-y-4">
@@ -6855,5 +6872,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch {
             logout();
         }
+    } else {
+        window.location.href = '/';
     }
 });

@@ -12,7 +12,7 @@ const nextConfig = {
     return {
       beforeFiles: [
         {
-          source: '/',
+          source: '/app',
           destination: '/index.html',
         },
       ],

@@ -68,3 +68,21 @@ test('ist.ts: widened date window covers IST day completely', () => {
   assert.ok(maxDate.getTime() >= istEnd, 'maxDate must cover IST day end');
 });
 
+test('P2: helper returns 2026-11-07 at instant 2026-11-06T21:56:00Z (03:26 AM IST on Nov 7)', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const scriptContent = fs.readFileSync(path.resolve(__dirname, '../public/script.js'), 'utf8');
+
+  const match = scriptContent.match(/function getTodayIstString[\s\S]*?\r?\n\}/);
+  assert.ok(match, 'getTodayIstString must be defined in client/public/script.js');
+
+  const getTodayIstString = new Function(`${match[0]}; return getTodayIstString;`)();
+  const instant = new Date('2026-11-06T21:56:00Z');
+
+  // Assert client/public/script.js helper returns 2026-11-07
+  assert.equal(getTodayIstString(instant), '2026-11-07');
+
+  // Assert backend ist.ts helper returns 2026-11-07
+  assert.equal(istDateString(instant), '2026-11-07');
+});
+

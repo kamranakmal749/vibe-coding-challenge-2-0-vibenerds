@@ -1,14 +1,17 @@
 # Maidan Desk — Next.js Migration
 
-The API is fully migrated to Next.js route handlers on MongoDB; the UI is the original vanilla app served from Next.js, with React pages to come.
+The API is fully migrated to Next.js route handlers on MongoDB. The entry portal at `/` is a native React login page, while the battle-tested workspace SPA is served at `/app`.
 
 ---
 
 ## Architecture Overview
 
-- **Backend**: 100% of the REST API (34 endpoints across authentication, players, attendance sessions, matches, scouting, and synchronization) has been ported from legacy Express to Next.js App Router route handlers (`client/src/app/api/**/route.ts`).
-- **Frontend Live Bridge**: The original battle-tested single-page application (`index.html`, `script.js`, `style.css`, and vendor libraries) is served directly out of `client/public/` via Next.js `beforeFiles` URL rewrite (`/ -> /index.html`).
-- **Clock & Timezone**: Time calculations for match kickoff, scoring lock windows, and attendance calendars operate on Indian Standard Time (IST, UTC+05:30) via explicit helpers, ensuring deterministic behavior regardless of host timezone (Vercel serverless runs in UTC).
+- **Backend**: 100% of the REST API (35 endpoints across authentication, players, attendance sessions, matches, scouting, and synchronization) has been ported from legacy Express to Next.js App Router route handlers (`client/src/app/api/**/route.ts`).
+- **Entry Page (`/`)**: A dedicated React client component (`client/src/app/page.tsx`) styled with dark glassmorphism and emerald accents. Features username/password inputs, 1-click quick-fill demo roles (Admin, Coach, Scout, Player `md260001`), authentication error banners, and automatic redirect to `/app` for existing sessions via `useEffect` (preventing SSR hydration mismatch).
+- **SPA Workspace (`/app`)**: The legacy single-page application (`index.html`, `script.js`, `style.css`, and vendor libraries) is mapped to `/app` via Next.js `beforeFiles` rewrite (`{ source: '/app', destination: '/index.html' }`).
+- **Clock & Timezone (IST)**: All date defaults (fixture date picker, session date defaults, report exports), match kickoff/unlock timing, scoring lock windows, and attendance calendar queries operate strictly on Indian Standard Time (`Asia/Kolkata`, UTC+05:30) via explicit helpers (`getTodayIstString`, `istDateString`, `istDateTime`). This eliminates timezone drift between UTC hosting (e.g. Vercel) and client browser clocks.
+- **Error Handling**: The client fetch wrapper (`api()`) intercepts low-level network failures and presents a user-friendly message (`"Cannot reach the server. Check your connection and try again."`) instead of leaking raw browser `"Failed to fetch"` exceptions. All server-side domain errors (400, 403, 409, 422) remain untouched.
+- **Session Lifecycle & Logout**: User sign-out and HTTP 401 handling clear `token` and `user` from `localStorage` and redirect to `/`, while preserving session-expired notification toasts.
 - **Synchronization**: SSE stream has been replaced by 4-second polling against `/api/sync/version` backed by atomic document increments in the `syncstates` collection in MongoDB.
 
 ---
@@ -48,7 +51,7 @@ The API is fully migrated to Next.js route handlers on MongoDB; the UI is the or
 
 ## Demo Credentials
 
-You can sign in with any of the following pre-seeded test accounts:
+You can sign in with any of the following pre-seeded test accounts (also accessible via 1-click quick-fill buttons on `/`):
 
 | Role | Username | Password | Default Landing View |
 |---|---|---|---|
