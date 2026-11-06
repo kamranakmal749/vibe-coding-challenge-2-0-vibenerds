@@ -7,7 +7,7 @@ const assert = require('node:assert/strict');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = process.env.BASE_URL ? process.env.BASE_URL.replace(/\/$/, '') : 'http://localhost:3000';
 let coachToken = null;
 let coachId = null;
 

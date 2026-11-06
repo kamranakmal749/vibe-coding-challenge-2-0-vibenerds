@@ -2,7 +2,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const baseUrl = 'http://localhost:3000';
+const baseUrl = process.env.BASE_URL ? process.env.BASE_URL.replace(/\/$/, '') : 'http://localhost:3000';
 
 async function authHeader(token) {
   return {

@@ -49,8 +49,12 @@ test.before(async () => {
   if (mongoose.connection.readyState !== 1) {
     await mongoose.connect(process.env.MONGODB_URI);
   }
-  server = app.listen(0);
-  baseUrl = `http://localhost:${server.address().port}`;
+  if (process.env.BASE_URL) {
+    baseUrl = process.env.BASE_URL.replace(/\/$/, '');
+  } else {
+    server = app.listen(0);
+    baseUrl = `http://localhost:${server.address().port}`;
+  }
 
   // Cleanup
   await User.deleteMany({ email: { $regex: EMAIL_SUFFIX + '$' } });

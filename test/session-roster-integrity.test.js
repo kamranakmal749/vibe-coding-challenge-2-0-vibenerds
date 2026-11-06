@@ -31,9 +31,13 @@ function authHeader(token) {
 
 test.before(async () => {
   await mongoose.connect(process.env.MONGODB_URI);
-  server = app.listen(0);
-  const port = server.address().port;
-  baseUrl = `http://localhost:${port}`;
+  if (process.env.BASE_URL) {
+    baseUrl = process.env.BASE_URL.replace(/\/$/, '');
+  } else {
+    server = app.listen(0);
+    const port = server.address().port;
+    baseUrl = `http://localhost:${port}`;
+  }
 
   // Isolated coach with a unique sport name so nothing bleeds in from seeded data
   coachUser = await User.create({

@@ -6,7 +6,7 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = process.env.BASE_URL ? process.env.BASE_URL.replace(/\/$/, '') : 'http://localhost:3000';
 const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key_here';
 
 async function req(url, options = {}) {

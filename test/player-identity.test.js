@@ -18,8 +18,12 @@ let baseUrl;
 
 test.before(async () => {
   await mongoose.connect(process.env.MONGODB_URI);
-  server = app.listen(0);
-  baseUrl = `http://localhost:${server.address().port}`;
+  if (process.env.BASE_URL) {
+    baseUrl = process.env.BASE_URL.replace(/\/$/, '');
+  } else {
+    server = app.listen(0);
+    baseUrl = `http://localhost:${server.address().port}`;
+  }
 
   // Clean test namespace counters
   await Counter.deleteMany({ key: { $in: ['player_28', 'player_24', 'player_29'] } });
