@@ -44,24 +44,11 @@ These items represent pre-existing bugs, schema mismatches, and legacy fixtures 
 
 ---
 
-### 5. Timezone & Calendar Month Boundaries (Decision A: OPEN)
-- **Host-Local Time Dependency vs Explicit IST Representation (OPEN)**:
-  - In Express, date boundary queries and match schedule enrichments in `matches.js` (`GET /api/matches/calendar`, `findAnySession`, `getMatchScheduledDateTime`, `getMatchUnlockDateTime`, and `syncSessionMatchConflicts`) construct Date ranges using host-local methods (e.g., `setHours(0,0,0,0)` and `new Date(year, month, day, hours, minutes)`).
-  - When the host runs in UTC rather than IST (UTC+05:30), a match scheduled for `17:00` yields kickoff instant `17:00:00.000Z` under `TZ=UTC` versus `11:30:00.000Z` under `TZ=Asia/Kolkata` (a difference of exactly 5 hours 30 minutes). Unlock time (kickoff + 60m) similarly shifts from `18:00:00.000Z` to `12:30:00.000Z`.
-  - **Decision A is restored as OPEN** (do not assume host-local as final design).
-  - **Affected Routes**:
-    1. `GET /api/matches`
-    2. `POST /api/matches`
-    3. `GET /api/matches/:id`
-    4. `PATCH /api/matches/:id`
-    5. `PATCH /api/matches/:id/cancel`
-    6. `GET /api/matches/history`
-    7. `GET /api/matches/calendar`
-    8. `GET /api/matches/check-eligibility`
-    9. `PATCH /api/matches/:id/participation/:playerId` (enforces 60-min unlock)
-    10. `POST /api/matches/:id/save-all` (enforces 60-min unlock)
-    11. `PATCH /api/matches/:id/complete` (enforces 60-min unlock)
-  - Final resolution will be decided when container/production deployment timezone policy (UTC container vs explicit IST parsing) is finalized.
+### 5. Timezone & Calendar Month Boundaries (Decision A: CLOSED)
+- **Host-Local Time Dependency vs Explicit IST Representation (RESOLVED)**:
+  - In Express, date boundary queries and match schedule enrichments in `matches.js` constructed Date ranges using host-local methods, relying on the host laptop running in `Asia/Kolkata` (UTC+05:30).
+  - Next.js runs on UTC hosts (Vercel/serverless).
+  - **Decision A is CLOSED**: Next.js implements explicit Indian Standard Time helpers in `client/src/lib/ist.ts` (`istDateTime`, `istDateString`, `getWidenedDateWindow`, `getIstMonthRange`) that parse date components with explicit `+05:30` offsets, eliminating all host-local `new Date(y, m, d, h, min)` and `.setHours()` calls across kickoff, unlock, calendar month boundaries, and status progression. Kickoff and unlock instants match Express under `Asia/Kolkata` identically.
 
 ---
 
@@ -70,6 +57,17 @@ These items represent pre-existing bugs, schema mismatches, and legacy fixtures 
   - In [`src/routes/matches.js`](file:///c:/Users/pooki/Desktop/hackathon/src/routes/matches.js#L467-L469), lines 467, 651, and 1146 check and set `editUnlockedUntil` using wall-clock `Date.now()`, bypassing `getEffectiveNow(req)`.
   - In contrast, kickoff and scoring unlock logic checks `effectiveNow`. As a result, mock time supplied via `x-mock-now` does not affect the 5-minute reopen window calculation.
   - *Resolution*: Ported 1:1 to Next.js in Phase 4C to maintain parity; post-cutover remediation will harmonize all match time comparisons under a single centralized clock service.
+
+---
+
+### 7. Polling Sends No `entityId` (`/api/sync/version`)
+- **Account Deleted Logout Toast Will Not Fire**:
+  - In `script.js` lines 510–517, the real-time logout toast for a deleted player account checks `if (entity === 'player' && action === 'deleted' && myPlayerId && String(myPlayerId) === String(entityId))`.
+  - The legacy SSE stream (`/api/sync/stream`) pushed granular event payloads containing `entityId`, but `/api/sync/stream` is intentionally omitted in Next.js for serverless compatibility.
+  - The heartbeat version polling (`/api/sync/version`) returns `{ version, clientsCount }` without `entityId`, dispatching a generic update event `{ entity: 'all', action: 'updated' }`.
+  - Consequently, while client views and aggregate data refresh correctly upon version increments, the specific "Your player profile has been permanently removed by an administrator" toast notification and immediate forced `logout()` will not fire via polling; the deleted player account is instead rejected on their next authenticated API call with 401/404.
+  - *Post-cutover remediation*: Harmonize account revocation checks into the polling loop or client session watcher.
+
 
 
 

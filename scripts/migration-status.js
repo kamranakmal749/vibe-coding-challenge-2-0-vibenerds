@@ -19,7 +19,7 @@ const files = fs.readdirSync(parityDir)
   .filter(f => f.endsWith('.parity.test.js'))
   .sort();
 
-// Committed list of ported routes (expanded phase by phase)
+// Committed list of ported routes (all 34 backend endpoints)
 const PORTED_ROUTES = [
   '/api/health',
   '/api/sync/version',
@@ -29,15 +29,38 @@ const PORTED_ROUTES = [
   '/api/auth/me',
   '/api/auth/coaches',
   '/api/players',
+  '/api/players/me',
+  '/api/players/:id',
   '/api/sessions',
+  '/api/sessions/:id',
+  '/api/sessions/:id/save',
+  '/api/sessions/:id/lock',
+  '/api/sessions/:id/unlock',
+  '/api/sessions/:id/toggle-lock',
+  '/api/sessions/:id/mark',
+  '/api/sessions/:id/bulk',
   '/api/matches',
-  '/api/scout'
+  '/api/matches/calendar',
+  '/api/matches/check-eligibility',
+  '/api/matches/history',
+  '/api/matches/:id',
+  '/api/matches/:id/cancel',
+  '/api/matches/:id/complete',
+  '/api/matches/:id/edit-scores',
+  '/api/matches/:id/eligible-players',
+  '/api/matches/:id/entries',
+  '/api/matches/:id/participation',
+  '/api/matches/:id/participation/:playerId',
+  '/api/matches/:id/reopen-for-edit',
+  '/api/matches/:id/save-all',
+  '/api/matches/:id/selected-players',
+  '/api/scout/ready'
 ];
 
 console.log(`\n=== NEXT.JS MIGRATION PARITY STATUS ===`);
 console.log(`Target URL:     ${baseUrl}`);
 console.log(`Database:       ${parityUri.replace(/\/\/.*@/, '//***:***@')}`);
-console.log(`Ported Routes:  ${PORTED_ROUTES.length} endpoints committed`);
+console.log(`Ported Routes:  ${PORTED_ROUTES.length} endpoints committed (all backend routes ported)`);
 console.log(`Found ${files.length} parity test suites.\n`);
 
 const results = [];

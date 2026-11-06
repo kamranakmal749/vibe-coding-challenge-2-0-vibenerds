@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="mGradFavicon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+  </defs>
+  <!-- Transparent background, exact monolithic M shape matching header logo -->
+  <path 
+    d="M 0 200 L 0 0 L 100 100 L 200 0 L 200 200 L 150 200 L 150 80 L 100 140 L 50 80 L 50 200 Z" 
+    fill="url(#mGradFavicon)" 
+  />
+  <rect 
+    x="0" 
+    y="96" 
+    width="200" 
+    height="8" 
+    fill="#0f172a" 
+  />
+</svg>
