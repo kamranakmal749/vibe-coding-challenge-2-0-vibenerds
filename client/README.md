@@ -9,7 +9,7 @@ Maidan Desk is a comprehensive sports academy management and scouting platform e
 - **Backend API**: 100% of the API (35 endpoints across auth, players, attendance sessions, match lifecycles, scouting radar, and sync) is implemented as native Next.js App Router route handlers (`client/src/app/api/**/route.ts`).
 - **Native React Entry (`/`)**: Dedicated React client component with dark glassmorphism, 1-click Quick Login role fill, and automatic session restoration.
 - **Native React Scout Radar (`/app/scout`)**: Dedicated React client component for scouting talent discovery, real-time trial readiness indicators, and performance star evaluations.
-- **Main Academy Workspace (`/app`)**: The main UI is the original battle-tested vanilla JS application (`index.html`, `script.js`, `style.css`, and vendor libraries) served directly by Next.js at `/app` via route rewrite (`{ source: '/app', destination: '/index.html' }`).
+- **Main Academy Workspace (`/app`)**: The main UI is the original battle-tested vanilla JS application (`app.html`, `script.js`, `style.css`, and vendor libraries) served directly by Next.js at `/app` via route rewrite (`{ source: '/app', destination: '/app.html' }`).
 - **Legacy Notice**: The Express codebase in the repo root (`src/`, `server.js`) is legacy and is **not used** by the deployed Next.js application.
 
 ---

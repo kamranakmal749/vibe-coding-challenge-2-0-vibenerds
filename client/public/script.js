@@ -391,7 +391,9 @@ function logout() {
         localStorage.removeItem('user');
     } catch (_) {}
 
-    window.location.href = '/';
+    if (window.location.pathname !== '/') {
+        window.location.href = '/';
+    }
 }
 
 // ── REAL-TIME CROSS-TAB DATA SYNCHRONIZATION ──────────────────────────────
@@ -6873,6 +6875,8 @@ document.addEventListener('DOMContentLoaded', () => {
             logout();
         }
     } else {
-        window.location.href = '/';
+        if (window.location.pathname !== '/') {
+            window.location.href = '/';
+        }
     }
 });
