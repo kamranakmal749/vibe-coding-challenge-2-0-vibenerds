@@ -1,13 +1,72 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+
+type RoleType = 'admin' | 'coach' | 'scout' | 'player';
+
+interface RoleConfig {
+  id: RoleType;
+  label: string;
+  title: string;
+  subtitle: string;
+  usernameLabel: string;
+  usernamePlaceholder: string;
+  testUser: string;
+  testPass: string;
+}
+
+const ROLES: RoleConfig[] = [
+  {
+    id: 'admin',
+    label: 'Admin',
+    title: 'Admin Sign In',
+    subtitle: 'Full control and setup',
+    usernameLabel: 'Username or Email',
+    usernamePlaceholder: 'e.g. admin',
+    testUser: 'admin',
+    testPass: 'admin123',
+  },
+  {
+    id: 'coach',
+    label: 'Coach',
+    title: 'Coach Sign In',
+    subtitle: 'Sessions and matches',
+    usernameLabel: 'Username or Email',
+    usernamePlaceholder: 'e.g. coach',
+    testUser: 'coach',
+    testPass: 'coach123',
+  },
+  {
+    id: 'scout',
+    label: 'Scout',
+    title: 'Scout Sign In',
+    subtitle: 'Athlete scouting',
+    usernameLabel: 'Username or Email',
+    usernamePlaceholder: 'e.g. scout',
+    testUser: 'scout',
+    testPass: 'scout123',
+  },
+  {
+    id: 'player',
+    label: 'Player',
+    title: 'Player Sign In',
+    subtitle: 'Athlete portal',
+    usernameLabel: 'Student ID or Email',
+    usernamePlaceholder: 'e.g. md260001 or email',
+    testUser: 'md260001',
+    testPass: 'player123',
+  },
+];
 
 export default function LoginPage() {
+  const [selectedRole, setSelectedRole] = useState<RoleType>('coach');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   // If already authenticated, redirect to /app (or /app/scout for scout) immediately without hydration mismatch
   useEffect(() => {
@@ -29,9 +88,40 @@ export default function LoginPage() {
     setIsCheckingAuth(false);
   }, []);
 
-  function fillDemo(user: string, pass: string) {
-    setUsername(user);
-    setPassword(pass);
+  const currentRoleConfig = ROLES.find((r) => r.id === selectedRole) || ROLES[1];
+
+  function handleTabKeyDown(e: React.KeyboardEvent, index: number) {
+    let nextIndex = index;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      nextIndex = (index + 1) % ROLES.length;
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      nextIndex = (index - 1 + ROLES.length) % ROLES.length;
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      nextIndex = 0;
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      nextIndex = ROLES.length - 1;
+    }
+
+    if (nextIndex !== index) {
+      const nextRole = ROLES[nextIndex].id;
+      setSelectedRole(nextRole);
+      setError(null);
+      tabRefs.current[nextIndex]?.focus();
+    }
+  }
+
+  function handleRoleSelect(role: RoleType) {
+    setSelectedRole(role);
+    setError(null);
+  }
+
+  function fillTestCredentials() {
+    setUsername(currentRoleConfig.testUser);
+    setPassword(currentRoleConfig.testPass);
     setError(null);
   }
 
@@ -59,6 +149,16 @@ export default function LoginPage() {
 
       if (!res.ok) {
         throw new Error((data && data.error) || 'Invalid credentials');
+      }
+
+      // Role check: do NOT store session if role does not match selected tab
+      if (data.user?.role !== selectedRole) {
+        try {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        } catch (_) {}
+        setError('These credentials belong to a different role. Please choose the correct role tab.');
+        return;
       }
 
       // Store in localStorage using the EXACT keys and format expected by script.js
@@ -138,142 +238,123 @@ export default function LoginPage() {
       {/* Main Login Hero */}
       <main className="login-main">
         <div className="login-card">
-          <div className="login-card-header">
-            <h1 className="login-title">
-              Sign In
-            </h1>
-            <p className="login-subtitle">
-              Enter credentials or pick a role to access the desk.
-            </p>
+          {/* Role Selector Tabs at Top of Card */}
+          <div
+            role="tablist"
+            aria-label="Select role"
+            className="login-role-tabs"
+          >
+            {ROLES.map((role, idx) => {
+              const isSelected = selectedRole === role.id;
+              return (
+                <button
+                  key={role.id}
+                  ref={(el) => { tabRefs.current[idx] = el; }}
+                  id={`tab-${role.id}`}
+                  role="tab"
+                  type="button"
+                  aria-selected={isSelected}
+                  aria-controls={`panel-${role.id}`}
+                  tabIndex={isSelected ? 0 : -1}
+                  onClick={() => handleRoleSelect(role.id)}
+                  onKeyDown={(e) => handleTabKeyDown(e, idx)}
+                  className={`login-role-tab${isSelected ? ' active' : ''}`}
+                >
+                  {role.label}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Error Banner */}
-          {error && (
-            <div className="login-error-banner" role="alert">
-              <span className="login-error-icon">✕</span>
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="login-form">
-            <div className="login-field">
-              <label
-                htmlFor="login-username"
-                className="login-label"
-              >
-                Username or Email
-              </label>
-              <input
-                id="login-username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g. coach, admin, md260001"
-                className="login-input"
-                autoComplete="username"
-                required
-              />
+          <div
+            id={`panel-${currentRoleConfig.id}`}
+            role="tabpanel"
+            aria-labelledby={`tab-${currentRoleConfig.id}`}
+          >
+            <div className="login-card-header">
+              <h1 className="login-title">
+                {currentRoleConfig.title}
+              </h1>
+              <p className="login-subtitle">
+                {currentRoleConfig.subtitle}
+              </p>
             </div>
 
-            <div className="login-field">
-              <label
-                htmlFor="login-password"
-                className="login-label"
-              >
-                Password
-              </label>
-              <input
-                id="login-password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="login-input"
-                autoComplete="current-password"
-                required
-              />
-            </div>
+            {/* Error Banner */}
+            {error && (
+              <div className="login-error-banner" role="alert">
+                <span className="login-error-icon">✕</span>
+                <span>{error}</span>
+              </div>
+            )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="login-submit-btn"
-            >
-              {loading ? (
-                <>
-                  <span className="login-spinner">⏳</span>
-                  <span>Authenticating...</span>
-                </>
-              ) : (
-                <>
-                  <span>Sign In</span>
-                  <span aria-hidden="true">→</span>
-                </>
-              )}
-            </button>
-          </form>
+            {/* Login Form */}
+            <form onSubmit={handleSubmit} className="login-form">
+              <div className="login-field">
+                <label
+                  htmlFor="login-username"
+                  className="login-label"
+                >
+                  {currentRoleConfig.usernameLabel}
+                </label>
+                <input
+                  id="login-username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder={currentRoleConfig.usernamePlaceholder}
+                  className="login-input"
+                  autoComplete="username"
+                  required
+                />
+              </div>
 
-          {/* Quick Login Roles */}
-          <div className="login-quick-fill-section">
-            <p className="login-quick-fill-title">
-              Quick Login
-            </p>
-            <div className="login-quick-fill-grid">
+              <div className="login-field">
+                <label
+                  htmlFor="login-password"
+                  className="login-label"
+                >
+                  Password
+                </label>
+                <input
+                  id="login-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="login-input"
+                  autoComplete="current-password"
+                  required
+                />
+              </div>
+
               <button
-                type="button"
-                onClick={() => fillDemo('admin', 'admin123')}
-                className="login-pill-btn"
+                type="submit"
+                disabled={loading}
+                className="login-submit-btn"
               >
-                <div className="login-pill-row">
-                  <span className="login-pill-role">Admin</span>
-                  <span className="login-pill-user">admin</span>
-                </div>
-                <div className="login-pill-desc">
-                  Full control & setup
-                </div>
+                {loading ? (
+                  <>
+                    <span className="login-spinner">⏳</span>
+                    <span>Authenticating...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Sign In</span>
+                    <span aria-hidden="true">→</span>
+                  </>
+                )}
               </button>
+            </form>
 
+            {/* Fill Test Credentials Link */}
+            <div className="login-test-creds-container">
               <button
                 type="button"
-                onClick={() => fillDemo('coach', 'coach123')}
-                className="login-pill-btn"
+                onClick={fillTestCredentials}
+                className="login-test-creds-btn"
               >
-                <div className="login-pill-row">
-                  <span className="login-pill-role">Coach</span>
-                  <span className="login-pill-user">coach</span>
-                </div>
-                <div className="login-pill-desc">
-                  Sessions & matches
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fillDemo('scout', 'scout123')}
-                className="login-pill-btn"
-              >
-                <div className="login-pill-row">
-                  <span className="login-pill-role">Scout</span>
-                  <span className="login-pill-user">scout</span>
-                </div>
-                <div className="login-pill-desc">
-                  Athlete scouting
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fillDemo('md260001', 'player123')}
-                className="login-pill-btn"
-              >
-                <div className="login-pill-row">
-                  <span className="login-pill-role">Player</span>
-                  <span className="login-pill-user">md260001</span>
-                </div>
-                <div className="login-pill-desc">
-                  Athlete portal
-                </div>
+                Fill test credentials ({currentRoleConfig.testUser} / {currentRoleConfig.testPass})
               </button>
             </div>
           </div>

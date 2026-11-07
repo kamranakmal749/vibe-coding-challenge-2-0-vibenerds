@@ -25,7 +25,7 @@ Maidan Desk is a comprehensive sports academy management and scouting platform e
 
 ## Test Credentials
 
-Sign in with any of the pre-seeded test accounts (also accessible via 1-click **Quick Login** buttons on `/`):
+Sign in with any of the pre-seeded test accounts (or select the role tab and click **Fill test credentials** on `/`):
 
 | Role | Username | Password | Athlete / Profile Details | Scouting Readiness Status |
 |---|---|---|---|---|

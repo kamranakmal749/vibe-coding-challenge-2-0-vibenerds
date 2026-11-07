@@ -291,85 +291,83 @@ html, body {
   box-shadow: none;
 }
 
-/* Quick Fill Demo Roles Section */
-.login-quick-fill-section {
-  margin-top: 1.75rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(51, 65, 85, 0.5);
-}
-
-.login-quick-fill-title {
-  margin: 0 0 0.85rem 0;
-  text-align: center;
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #94a3b8;
-}
-
-.login-quick-fill-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
-}
-
-/* Quick Fill Button (Small Outlined Pill) */
-.login-pill-btn {
+/* Role Tabs Segmented Control */
+.login-role-tabs {
   display: flex;
-  flex-direction: column;
-  padding: 0.6rem 0.75rem;
-  border-radius: 0.65rem;
-  background: rgba(30, 41, 59, 0.35);
+  gap: 0.35rem;
+  padding: 0.3rem;
+  margin-bottom: 1.5rem;
+  background: rgba(2, 6, 23, 0.7);
   border: 1px solid rgba(51, 65, 85, 0.7);
-  color: inherit;
+  border-radius: 0.85rem;
+}
+
+.login-role-tab {
+  flex: 1;
+  padding: 0.55rem 0.5rem;
+  border-radius: 0.6rem;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-weight: 600;
   font-family: inherit;
-  text-align: left;
   cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.login-role-tab:hover:not(.active) {
+  color: #ffffff;
+  background: rgba(51, 65, 85, 0.4);
+}
+
+.login-role-tab.active {
+  background: #10b981;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
+}
+
+.login-role-tab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.5), 0 0 0 1px #ffffff;
+}
+
+/* Fill Test Credentials Link */
+.login-test-creds-container {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(51, 65, 85, 0.5);
+  display: flex;
+  justify-content: center;
+}
+
+.login-test-creds-btn {
+  background: transparent;
+  border: none;
+  color: #10b981;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
   transition: all 0.15s ease;
 }
 
-.login-pill-btn:hover {
-  background: rgba(30, 41, 59, 0.75);
-  border-color: rgba(16, 185, 129, 0.6);
-  transform: translateY(-1px);
+.login-test-creds-btn:hover {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.1);
+  text-decoration: none;
 }
 
-.login-pill-btn:focus-visible {
+.login-test-creds-btn:focus-visible {
   outline: none;
-  border-color: #10b981;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35);
-}
-
-.login-pill-btn:active {
-  transform: translateY(0);
-}
-
-.login-pill-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.login-pill-role {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.login-pill-user {
-  font-size: 0.65rem;
-  color: #94a3b8;
-}
-
-.login-pill-desc {
-  font-size: 0.65rem;
-  color: #64748b;
-  margin-top: 0.15rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4);
 }
 
 /* Footer */
@@ -432,12 +430,18 @@ html, body {
     max-height: 48px;
   }
 
-  .login-quick-fill-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.4rem;
+  .login-role-tabs {
+    gap: 0.2rem;
+    padding: 0.25rem;
+    margin-bottom: 1.25rem;
   }
 
-  .login-pill-btn {
-    padding: 0.5rem 0.6rem;
+  .login-role-tab {
+    padding: 0.45rem 0.35rem;
+    font-size: 0.72rem;
+  }
+
+  .login-test-creds-btn {
+    font-size: 0.72rem;
   }
 }
