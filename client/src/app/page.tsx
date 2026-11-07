@@ -69,30 +69,31 @@ export default function LoginPage() {
 
   if (isCheckingAuth) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-slate-950 text-slate-400">
-        <div className="flex items-center gap-2 text-sm">
-          <span className="inline-block animate-spin text-emerald-500">⏳</span>
-          Loading session...
-        </div>
+      <div className="login-loading-screen">
+        <span className="login-spinner">⏳</span>
+        <span>Loading session...</span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between bg-slate-950 text-slate-100 relative overflow-x-hidden selection:bg-emerald-500/30 selection:text-emerald-300">
+    <div className="login-page">
       {/* Ambient gradient glow in background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-emerald-600/10 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-sky-600/10 blur-[120px]" />
+      <div className="login-bg-glow-container">
+        <div className="login-bg-glow-top" />
+        <div className="login-bg-glow-bottom" />
       </div>
 
       {/* Top Header */}
-      <header className="relative z-10 w-full px-6 py-4 flex items-center justify-between border-b border-slate-800/80 bg-slate-950/60 backdrop-blur-md">
-        <div className="flex items-center gap-3">
+      <header className="login-header">
+        <div className="login-brand">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 200 200"
-            className="w-9 h-9 flex-shrink-0 transition-transform hover:scale-105 duration-300"
+            width="56"
+            height="56"
+            className="login-logo"
+            aria-hidden="true"
           >
             <defs>
               <linearGradient id="mGradNav" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -106,49 +107,49 @@ export default function LoginPage() {
             />
             <rect x="0" y="96" width="200" height="8" fill="#ffffff" />
           </svg>
-          <div>
-            <span className="text-lg font-extrabold tracking-tight text-white flex items-baseline">
-              Maidan <span className="text-emerald-400 font-bold ml-1">Desk</span>
+          <div className="login-brand-text">
+            <span className="login-brand-title">
+              Maidan <span className="login-brand-accent">Desk</span>
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-wider block text-emerald-400">
+            <span className="login-brand-subtitle">
               Dumka Sports OS
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <div>
+          <span className="login-header-status">
+            <span className="login-pulse-dot" />
             Next.js Production
           </span>
         </div>
       </header>
 
       {/* Main Login Hero */}
-      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md p-8 sm:p-10 rounded-3xl bg-slate-900/80 backdrop-blur-xl border border-slate-800 shadow-2xl shadow-black/60">
-          <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+      <main className="login-main">
+        <div className="login-card">
+          <div className="login-card-header">
+            <h1 className="login-title">
               Sign In
             </h1>
-            <p className="text-slate-400 text-xs sm:text-sm font-medium mt-1">
-              Enter credentials or pick a demo role to access the workspace.
+            <p className="login-subtitle">
+              Enter credentials or pick a demo role to access the desk.
             </p>
           </div>
 
           {/* Error Banner */}
           {error && (
-            <div className="mb-5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-400 font-medium flex items-center gap-2">
-              <span className="text-rose-400 font-bold">✕</span>
+            <div className="login-error-banner" role="alert">
+              <span className="login-error-icon">✕</span>
               <span>{error}</span>
             </div>
           )}
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="login-field">
               <label
                 htmlFor="login-username"
-                className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5"
+                className="login-label"
               >
                 Username or Email
               </label>
@@ -158,15 +159,16 @@ export default function LoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="e.g. coach, admin, md260001"
-                className="w-full px-4 py-3 bg-slate-950/60 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                className="login-input"
+                autoComplete="username"
                 required
               />
             </div>
 
-            <div>
+            <div className="login-field">
               <label
                 htmlFor="login-password"
-                className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5"
+                className="login-label"
               >
                 Password
               </label>
@@ -176,7 +178,8 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 bg-slate-950/60 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                className="login-input"
+                autoComplete="current-password"
                 required
               />
             </div>
@@ -184,38 +187,38 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3 px-4 rounded-xl font-semibold text-sm text-white bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="login-submit-btn"
             >
               {loading ? (
                 <>
-                  <span className="inline-block animate-spin">⏳</span>
+                  <span className="login-spinner">⏳</span>
                   <span>Authenticating...</span>
                 </>
               ) : (
                 <>
                   <span>Sign In</span>
-                  <span>→</span>
+                  <span aria-hidden="true">→</span>
                 </>
               )}
             </button>
           </form>
 
           {/* Quick-Fill Demo Roles */}
-          <div className="mt-8 pt-6 border-t border-slate-800">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center mb-3">
+          <div className="login-quick-fill-section">
+            <p className="login-quick-fill-title">
               Quick Fill Demo Roles
             </p>
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="login-quick-fill-grid">
               <button
                 type="button"
                 onClick={() => fillDemo('admin', 'admin123')}
-                className="p-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 text-left transition-all cursor-pointer group"
+                className="login-pill-btn"
               >
-                <div className="flex items-center justify-between text-xs font-bold text-white group-hover:text-emerald-400">
-                  <span>Admin</span>
-                  <span className="text-[10px] text-slate-400">admin</span>
+                <div className="login-pill-row">
+                  <span className="login-pill-role">Admin</span>
+                  <span className="login-pill-user">admin</span>
                 </div>
-                <div className="text-[10px] text-slate-400 mt-0.5 truncate">
+                <div className="login-pill-desc">
                   Full control & setup
                 </div>
               </button>
@@ -223,13 +226,13 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => fillDemo('coach', 'coach123')}
-                className="p-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 text-left transition-all cursor-pointer group"
+                className="login-pill-btn"
               >
-                <div className="flex items-center justify-between text-xs font-bold text-white group-hover:text-emerald-400">
-                  <span>Coach</span>
-                  <span className="text-[10px] text-slate-400">coach</span>
+                <div className="login-pill-row">
+                  <span className="login-pill-role">Coach</span>
+                  <span className="login-pill-user">coach</span>
                 </div>
-                <div className="text-[10px] text-slate-400 mt-0.5 truncate">
+                <div className="login-pill-desc">
                   Sessions & matches
                 </div>
               </button>
@@ -237,13 +240,13 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => fillDemo('scout', 'scout123')}
-                className="p-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 text-left transition-all cursor-pointer group"
+                className="login-pill-btn"
               >
-                <div className="flex items-center justify-between text-xs font-bold text-white group-hover:text-emerald-400">
-                  <span>Scout</span>
-                  <span className="text-[10px] text-slate-400">scout</span>
+                <div className="login-pill-row">
+                  <span className="login-pill-role">Scout</span>
+                  <span className="login-pill-user">scout</span>
                 </div>
-                <div className="text-[10px] text-slate-400 mt-0.5 truncate">
+                <div className="login-pill-desc">
                   Athlete scouting
                 </div>
               </button>
@@ -251,13 +254,13 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => fillDemo('md260001', 'player123')}
-                className="p-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 text-left transition-all cursor-pointer group"
+                className="login-pill-btn"
               >
-                <div className="flex items-center justify-between text-xs font-bold text-white group-hover:text-emerald-400">
-                  <span>Player</span>
-                  <span className="text-[10px] text-slate-400">md260001</span>
+                <div className="login-pill-row">
+                  <span className="login-pill-role">Player</span>
+                  <span className="login-pill-user">md260001</span>
                 </div>
-                <div className="text-[10px] text-slate-400 mt-0.5 truncate">
+                <div className="login-pill-desc">
                   Athlete portal
                 </div>
               </button>
@@ -267,7 +270,7 @@ export default function LoginPage() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 w-full py-4 text-center text-xs text-slate-400 border-t border-slate-800/60">
+      <footer className="login-footer">
         Maidan Desk &bull; Dumka Sports Academy Management Platform
       </footer>
     </div>

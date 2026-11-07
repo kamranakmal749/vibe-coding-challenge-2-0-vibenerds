@@ -1,4 +1,11 @@
 import React from 'react';
+import type { Viewport } from 'next';
+import './login.css';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export const metadata = {
   title: 'Maidan Desk | Sports OS',
@@ -14,16 +21,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
-        <link rel="stylesheet" href="/style.css" />
       </head>
-      <body className="bg-slate-950 text-slate-100 antialiased font-sans min-h-screen m-0 p-0 overflow-auto">
+      <body>
         {children}
       </body>
     </html>
