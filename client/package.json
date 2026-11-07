@@ -6,11 +6,13 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "test": "tsx --test test/db-guard.unit.test.ts test/jwt-guard.unit.test.ts test/ist.unit.test.ts test/login-role.unit.test.ts test/roster.unit.test.ts test/staff-management.unit.test.ts test/admin-player-audit.unit.test.ts"
+    "test": "tsx --test test/db-guard.unit.test.ts test/jwt-guard.unit.test.ts test/ist.unit.test.ts test/login-role.unit.test.ts test/roster.unit.test.ts test/staff-management.unit.test.ts test/admin-player-audit.unit.test.ts test/scout-pdf.unit.test.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.3",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.9",
     "mongoose": "^9.11.4",
     "next": "^15.1.7",
     "react": "^19.0.0",

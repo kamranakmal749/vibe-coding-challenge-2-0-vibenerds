@@ -1,29 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-
-interface ReadyPlayer {
-  _id: string;
-  name: string;
-  sport: string;
-  age: number;
-  playerId?: string;
-  coach?: {
-    _id: string;
-    name: string;
-  } | string;
-  attendanceRate: number;
-  presentSessions?: number;
-  totalSessions?: number;
-  matchesPlayed: number;
-  hasPerformanceStar?: boolean;
-  performanceScore?: number | null;
-  matchHistory?: Array<{
-    played?: boolean;
-    attendanceConflict?: boolean;
-    score?: number | null;
-  }>;
-}
+import {
+  ReadyPlayer,
+  exportScoutRadarPdf,
+  getPlayerStarInfo,
+  getCoachDisplayName,
+} from './scoutPdf';
 
 export default function ScoutRadarPage() {
   const [players, setPlayers] = useState<ReadyPlayer[]>([]);
@@ -32,6 +15,8 @@ export default function ScoutRadarPage() {
   const [user, setUser] = useState<any>(null);
   const [selectedSport, setSelectedSport] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [exporting, setExporting] = useState(false);
+  const [exportNotice, setExportNotice] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
 
   const fetchReadyPlayers = useCallback(async () => {
     try {
@@ -90,34 +75,6 @@ export default function ScoutRadarPage() {
     window.location.href = '/';
   }
 
-  function getCoachName(coach: any): string {
-    if (!coach) return 'Dumka Academy';
-    if (typeof coach === 'string') return coach;
-    return coach.name || 'Dumka Academy';
-  }
-
-  function getStarData(p: ReadyPlayer): { hasStar: boolean; perfScore: number | null } {
-    let perfScore: number | null = null;
-    if (typeof p.performanceScore === 'number') {
-      perfScore = p.performanceScore;
-    } else if (p.matchHistory && p.matchHistory.length) {
-      const scoredMatches = p.matchHistory.filter(
-        m => m.played === true && !m.attendanceConflict && m.score !== null && m.score !== undefined
-      );
-      if (scoredMatches.length) {
-        const total = scoredMatches.reduce((acc, m) => acc + Number(m.score), 0);
-        perfScore = Math.round((total / scoredMatches.length) * 10) / 10;
-      }
-    }
-
-    const hasStar =
-      typeof p.hasPerformanceStar === 'boolean'
-        ? p.hasPerformanceStar
-        : perfScore !== null && perfScore >= 15;
-
-    return { hasStar, perfScore };
-  }
-
   // Filter sports
   const sports = ['all', ...Array.from(new Set(players.map(p => p.sport).filter(Boolean)))];
 
@@ -126,6 +83,41 @@ export default function ScoutRadarPage() {
     const matchesSearch = !searchQuery.trim() || p.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSport && matchesSearch;
   });
+
+  const handleExportPdf = async () => {
+    if (filteredPlayers.length === 0) {
+      setExportNotice({
+        type: 'error',
+        text: 'Nothing to export: no athletes match the current criteria.',
+      });
+      return;
+    }
+
+    try {
+      setExporting(true);
+      setExportNotice(null);
+      const res = await exportScoutRadarPdf(players, selectedSport, searchQuery);
+      if (!res.success) {
+        setExportNotice({
+          type: 'error',
+          text: res.error || 'Failed to generate PDF.',
+        });
+      } else {
+        setExportNotice({
+          type: 'success',
+          text: `Downloaded ${res.filename} (${res.rowCount} trial-eligible athletes).`,
+        });
+        setTimeout(() => setExportNotice(null), 5000);
+      }
+    } catch (err: any) {
+      setExportNotice({
+        type: 'error',
+        text: err.message || 'Error creating PDF document.',
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <div className="scout-page">
@@ -163,7 +155,7 @@ export default function ScoutRadarPage() {
                 fill="none"
               />
               <path
-                d="M112 58 L138 58 C152 58 162 68 162 82 C162 96 152 106 138 106 L112 106 Z M112 106 L140 106 C154 106 164 116 164 130 C164 144 154 148 140 148 L112 148 Z"
+                d="M112 58 L138 58 C152 58 162 68 162 82 C162 96 152 106 138 106 Z M112 106 L140 106 C154 106 164 116 164 130 C164 144 154 148 140 148 L112 148 Z"
                 stroke="url(#scoutLogoGrad)"
                 strokeWidth="14"
                 strokeLinecap="round"
@@ -179,9 +171,6 @@ export default function ScoutRadarPage() {
         </div>
 
         <div className="scout-nav-actions">
-          <a href="/app" className="scout-nav-spa-btn" title="Open Legacy SPA Workspace">
-            <span>Workspace (/app)</span>
-          </a>
           <button type="button" onClick={handleLogout} className="scout-logout-btn">
             <span>Sign Out</span>
           </button>
@@ -205,6 +194,19 @@ export default function ScoutRadarPage() {
             </span>
             <button
               type="button"
+              onClick={handleExportPdf}
+              className="scout-export-btn"
+              disabled={loading || exporting || filteredPlayers.length === 0}
+              title={
+                filteredPlayers.length === 0
+                  ? 'Nothing to export'
+                  : 'Export current scouting radar list to PDF'
+              }
+            >
+              <span>{exporting ? 'Exporting...' : '📄 Export PDF'}</span>
+            </button>
+            <button
+              type="button"
               onClick={fetchReadyPlayers}
               className="scout-refresh-btn"
               disabled={loading}
@@ -214,6 +216,30 @@ export default function ScoutRadarPage() {
             </button>
           </div>
         </div>
+
+        {/* Export Notice / Status Banner */}
+        {exportNotice && (
+          <div className={`scout-notice-banner ${exportNotice.type}`}>
+            <div>
+              <strong>{exportNotice.type === 'error' ? 'Export Error: ' : 'Export Complete: '}</strong>
+              {exportNotice.text}
+            </div>
+            <button
+              type="button"
+              onClick={() => setExportNotice(null)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'inherit',
+                cursor: 'pointer',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+              }}
+            >
+              &times;
+            </button>
+          </div>
+        )}
 
         {/* Error Banner */}
         {error && (
@@ -313,7 +339,7 @@ export default function ScoutRadarPage() {
                   </thead>
                   <tbody>
                     {filteredPlayers.map(p => {
-                      const { hasStar, perfScore } = getStarData(p);
+                      const { hasStar, perfScore } = getPlayerStarInfo(p);
                       return (
                         <tr key={p._id}>
                           <td>
@@ -339,7 +365,7 @@ export default function ScoutRadarPage() {
                                   )}
                                 </div>
                                 <div className="scout-coach-label">
-                                  Coach: {getCoachName(p.coach)}
+                                  Coach: {getCoachDisplayName(p.coach)}
                                 </div>
                               </div>
                             </div>
