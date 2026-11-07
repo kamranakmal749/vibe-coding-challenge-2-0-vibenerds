@@ -7,6 +7,7 @@ node_modules/
 !.env.example
 .tmp_chrome_sync_audit/
 screenshots/
+!docs/assets/screenshots/
 MAIDANDESK_*_AUDIT.md
 .DS_Store
 Thumbs.db
