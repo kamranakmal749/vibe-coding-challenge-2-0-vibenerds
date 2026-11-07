@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install client dependencies
+        working-directory: ./client
+        run: npm ci
+
+      - name: Run client unit tests
+        working-directory: ./client
+        env:
+          MONGODB_URI: "mongodb+srv://ci_dummy_user:ci_dummy_pass@cluster0.example.net/academy_final?retryWrites=true&w=majority"
+          JWT_SECRET: "ci_dummy_jwt_secret_must_be_at_least_32_characters_long_for_guards"
+          ALLOW_PRODUCTION_DB: "true"
+        run: npm test
+
+      - name: Build client Next.js application
+        working-directory: ./client
+        env:
+          MONGODB_URI: "mongodb+srv://ci_dummy_user:ci_dummy_pass@cluster0.example.net/academy_final?retryWrites=true&w=majority"
+          JWT_SECRET: "ci_dummy_jwt_secret_must_be_at_least_32_characters_long_for_guards"
+          ALLOW_PRODUCTION_DB: "true"
+        run: npm run build
+

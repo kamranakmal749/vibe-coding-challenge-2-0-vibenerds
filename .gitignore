@@ -9,4 +9,5 @@ node_modules/
 screenshots/
 MAIDANDESK_*_AUDIT.md
 .DS_Store
+Thumbs.db
 *.log
