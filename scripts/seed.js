@@ -303,13 +303,13 @@ async function seed() {
     sessionId: s1_c_sess1._id,
     selectedPlayers: [set1Players['Simran Kaur']._id, set1Players['Arjun Nair']._id],
     entries: [
-      { player: set1Players['Simran Kaur']._id, result: 'played', score: 38 },
-      { player: set1Players['Arjun Nair']._id,   result: 'played', score: 45 }
+      { player: set1Players['Simran Kaur']._id, result: 'played', score: 15 },
+      { player: set1Players['Arjun Nair']._id,   result: 'played', score: 18 }
     ]
   });
   await MatchParticipation.create([
-    { match: s1_c_m1._id, player: set1Players['Simran Kaur']._id, played: true, score: 38, remarks: 'Opening stand' },
-    { match: s1_c_m1._id, player: set1Players['Arjun Nair']._id,   played: true, score: 45, remarks: 'Top scorer' }
+    { match: s1_c_m1._id, player: set1Players['Simran Kaur']._id, played: true, score: 15, remarks: 'Opening stand' },
+    { match: s1_c_m1._id, player: set1Players['Arjun Nair']._id,   played: true, score: 18, remarks: 'Top scorer' }
   ]);
 
   const s1_c_m2 = await Match.create({
@@ -324,13 +324,13 @@ async function seed() {
     sessionId: s1_c_sess1._id,
     selectedPlayers: [set1Players['Simran Kaur']._id, set1Players['Arjun Nair']._id],
     entries: [
-      { player: set1Players['Simran Kaur']._id, result: 'played', score: 52 },
-      { player: set1Players['Arjun Nair']._id,   result: 'played', score: 28 }
+      { player: set1Players['Simran Kaur']._id, result: 'played', score: 20 },
+      { player: set1Players['Arjun Nair']._id,   result: 'played', score: 12 }
     ]
   });
   await MatchParticipation.create([
-    { match: s1_c_m2._id, player: set1Players['Simran Kaur']._id, played: true, score: 52, remarks: 'Unbeaten half-century' },
-    { match: s1_c_m2._id, player: set1Players['Arjun Nair']._id,   played: true, score: 28, remarks: 'Late boundary surge' }
+    { match: s1_c_m2._id, player: set1Players['Simran Kaur']._id, played: true, score: 20, remarks: 'Unbeaten half-century' },
+    { match: s1_c_m2._id, player: set1Players['Arjun Nair']._id,   played: true, score: 12, remarks: 'Late boundary surge' }
   ]);
 
   // Set 1 Basketball: Vivaan Sharma
