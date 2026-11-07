@@ -157,6 +157,7 @@ document.addEventListener('click', function (event) {
 const roles = {
     admin: [
         { id: 'admin-overview', name: 'Overview', icon: 'layout-dashboard' },
+        { id: 'admin-staff', name: 'Staff', icon: 'shield-check' },
         { id: 'admin-registration', name: 'Registration', icon: 'user-plus' }
     ],
     coach: [
@@ -370,6 +371,7 @@ async function switchPage(targetId) {
             stopGreetingTimer();
         }
         if (targetId === 'admin-overview') await loadAdminOverview();
+        if (targetId === 'admin-staff') await loadAdminStaff();
         if (targetId === 'coach-players') await loadCoachPlayers();
         if (targetId === 'coach-sessions') await loadSessions();
         if (targetId === 'coach-matches') await loadMatchData();
@@ -748,6 +750,658 @@ async function loadAdminOverview() {
         if (rElem) rElem.innerText = readyCount;
     } catch (err) {
         console.error('Admin overview error:', err);
+    }
+}
+
+// ── Admin: Staff Management (Coaches & Scouts) ──────────────────────────────
+let cachedStaff = [];
+
+async function loadAdminStaff() {
+    const tableBody = document.getElementById('admin-staff-table-body');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="7" class="py-10 text-center text-slate-400">
+                <div class="inline-flex items-center gap-2">
+                    <span class="inline-block animate-spin">⏳</span>
+                    <span>Loading staff accounts...</span>
+                </div>
+            </td>
+        </tr>
+    `;
+
+    try {
+        const staff = await api('/api/admin/staff');
+        cachedStaff = Array.isArray(staff) ? staff : [];
+        renderAdminStaffTable(cachedStaff);
+    } catch (err) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="py-8 text-center text-rose-500 font-semibold">
+                    <div class="inline-flex items-center gap-2">
+                        <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                        <span>Failed to load staff accounts: ${escapeHtml(err.message)}</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        initIcons();
+    }
+}
+
+function renderAdminStaffTable(staffList) {
+    const tableBody = document.getElementById('admin-staff-table-body');
+    if (!tableBody) return;
+
+    if (!staffList || staffList.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="py-12 text-center text-slate-400">
+                    <div class="flex flex-col items-center justify-center gap-2">
+                        <i data-lucide="users" class="w-8 h-8 text-slate-500 stroke-1"></i>
+                        <span class="font-medium text-slate-500">No coach or scout accounts found.</span>
+                        <button type="button" onclick="openAddStaffModal()" class="mt-2 text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline cursor-pointer">
+                            + Add First Staff Member
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+        initIcons();
+        return;
+    }
+
+    tableBody.innerHTML = staffList.map((member, index) => {
+        const isCoach = member.role === 'coach';
+        const roleBadge = isCoach
+            ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                 <i data-lucide="shield" class="w-3 h-3"></i> Coach
+               </span>`
+            : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30">
+                 <i data-lucide="target" class="w-3 h-3"></i> Scout
+               </span>`;
+
+        const createdDate = member.createdAt
+            ? new Date(member.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+            : '—';
+
+        const safeId = member._id || member.id;
+        const safeName = (member.name || '').replace(/'/g, "\\'");
+        const safeRole = member.role;
+        const assignedPlayers = member.assignedPlayersCount || 0;
+
+        return `
+            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
+                <td class="py-4 px-4 text-center font-mono text-xs text-slate-500 border-r border-slate-200 dark:border-slate-800">${index + 1}</td>
+                <td class="py-4 px-6 border-r border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl ${isCoach ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'} border border-current/20 flex items-center justify-center font-bold text-xs uppercase shrink-0">
+                            ${escapeHtml((member.name || 'S').slice(0, 2))}
+                        </div>
+                        <div>
+                            <span class="font-bold text-sm text-slate-900 dark:text-white block">${escapeHtml(member.name)}</span>
+                            ${isCoach ? `<span class="text-[11px] text-slate-400 block">${assignedPlayers} assigned athlete${assignedPlayers === 1 ? '' : 's'}</span>` : ''}
+                        </div>
+                    </div>
+                </td>
+                <td class="py-4 px-5 border-r border-slate-200 dark:border-slate-800">
+                    <span class="font-mono text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                        ${escapeHtml(member.username)}
+                    </span>
+                </td>
+                <td class="py-4 px-4 text-center border-r border-slate-200 dark:border-slate-800">${roleBadge}</td>
+                <td class="py-4 px-6 border-r border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
+                    ${member.email ? escapeHtml(member.email) : '<span class="text-slate-400 italic">None</span>'}
+                </td>
+                <td class="py-4 px-5 border-r border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-600 dark:text-slate-400">${createdDate}</td>
+                <td class="py-4 px-4 text-center">
+                    <div class="flex items-center justify-center gap-1.5">
+                        <button type="button" onclick="openEditStaffModal('${safeId}')" class="p-2 rounded-xl text-slate-400 hover:text-brand-600 hover:bg-brand-500/10 dark:hover:bg-brand-500/20 transition-all cursor-pointer inline-flex items-center justify-center" title="Edit ${safeName}">
+                            <i data-lucide="edit-3" class="w-4 h-4 text-brand-500 hover:text-brand-600"></i>
+                        </button>
+                        <button type="button" onclick="openResetStaffPasswordModal('${safeId}')" class="p-2 rounded-xl text-slate-400 hover:text-amber-600 hover:bg-amber-500/10 dark:hover:bg-amber-500/20 transition-all cursor-pointer inline-flex items-center justify-center" title="Reset password for ${safeName}">
+                            <i data-lucide="key-round" class="w-4 h-4 text-amber-500 hover:text-amber-600"></i>
+                        </button>
+                        <button type="button" onclick="confirmDeleteStaff('${safeId}', '${safeName}', '${safeRole}')" class="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-all cursor-pointer inline-flex items-center justify-center" title="Remove ${safeName}">
+                            <i data-lucide="trash-2" class="w-4 h-4 text-rose-500 hover:text-rose-600"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    initIcons();
+}
+
+function openAddStaffModal() {
+    const defaultPassword = generateRandomPasswordClient();
+    const html = `
+        <form id="add-staff-form" onsubmit="submitAddStaff(event)" class="space-y-4 py-1">
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Role <span class="text-rose-500">*</span></label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 cursor-pointer hover:border-brand-500">
+                        <input type="radio" name="staff-role" value="coach" checked class="text-brand-600 focus:ring-brand-500">
+                        <div>
+                            <span class="block text-xs font-bold text-slate-900 dark:text-white">Coach</span>
+                            <span class="block text-[11px] text-slate-400">Sessions & Matches</span>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 cursor-pointer hover:border-brand-500">
+                        <input type="radio" name="staff-role" value="scout" class="text-brand-600 focus:ring-brand-500">
+                        <div>
+                            <span class="block text-xs font-bold text-slate-900 dark:text-white">Scout</span>
+                            <span class="block text-[11px] text-slate-400">Athlete Scouting</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label for="staff-name-input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Full Name <span class="text-rose-500">*</span></label>
+                <input id="staff-name-input" type="text" required placeholder="e.g. Rahul Sharma"
+                    class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500">
+            </div>
+
+            <div>
+                <label for="staff-username-input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Username <span class="text-rose-500">*</span></label>
+                <input id="staff-username-input" type="text" required minlength="3" maxlength="30" pattern="^[a-zA-Z0-9._]+$" placeholder="e.g. coach.rahul"
+                    class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 font-mono">
+                <p class="text-[11px] text-slate-400 mt-1">3–30 chars (lowercase letters, numbers, dot, underscore).</p>
+            </div>
+
+            <div>
+                <label for="staff-email-input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email <span class="text-slate-400 font-normal">(Optional)</span></label>
+                <input id="staff-email-input" type="email" placeholder="staff@example.com"
+                    class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500">
+            </div>
+
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <label for="staff-password-input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Initial Password <span class="text-rose-500">*</span></label>
+                    <button type="button" onclick="generateNewPasswordForInput('staff-password-input')" class="text-[11px] font-bold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1 cursor-pointer">
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> Generate
+                    </button>
+                </div>
+                <div class="relative">
+                    <input id="staff-password-input" type="text" required minlength="8" value="${defaultPassword}"
+                        class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 font-mono">
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1">Minimum 8 characters. Staff will change this on first login.</p>
+            </div>
+
+            <div id="add-staff-error" class="hidden text-xs text-rose-500 font-semibold p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20"></div>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    Cancel
+                </button>
+                <button type="submit" id="add-staff-submit-btn" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i> Create Account
+                </button>
+            </div>
+        </form>
+    `;
+
+    openModal('Add Academy Staff', html, [], 'max-w-lg');
+    initIcons();
+}
+
+function generateRandomPasswordClient() {
+    const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    const lower = 'abcdefghijkmnopqrstuvwxyz';
+    const digits = '23456789';
+    const symbols = '!@#$%^&*';
+    const pool = upper + lower + digits + symbols;
+    let pwd = [
+        upper[Math.floor(Math.random() * upper.length)],
+        lower[Math.floor(Math.random() * lower.length)],
+        digits[Math.floor(Math.random() * digits.length)],
+        symbols[Math.floor(Math.random() * symbols.length)]
+    ];
+    for (let i = 4; i < 10; i++) {
+        pwd.push(pool[Math.floor(Math.random() * pool.length)]);
+    }
+    return pwd.sort(() => Math.random() - 0.5).join('');
+}
+
+function generateNewPasswordForInput(inputId) {
+    const el = document.getElementById(inputId);
+    if (el) el.value = generateRandomPasswordClient();
+}
+
+async function submitAddStaff(event) {
+    event.preventDefault();
+    const errorEl = document.getElementById('add-staff-error');
+    const submitBtn = document.getElementById('add-staff-submit-btn');
+
+    const roleEl = document.querySelector('input[name="staff-role"]:checked');
+    const role = roleEl ? roleEl.value : 'coach';
+    const name = document.getElementById('staff-name-input')?.value?.trim();
+    const username = document.getElementById('staff-username-input')?.value?.trim().toLowerCase();
+    const email = document.getElementById('staff-email-input')?.value?.trim();
+    const password = document.getElementById('staff-password-input')?.value;
+
+    if (errorEl) errorEl.classList.add('hidden');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Creating...';
+    }
+
+    try {
+        const res = await api('/api/admin/staff', {
+            method: 'POST',
+            body: {
+                role,
+                name,
+                username,
+                email: email || undefined,
+                password,
+            }
+        });
+
+        closeModal();
+        showToast(`${role === 'coach' ? 'Coach' : 'Scout'} account created successfully!`, 'success');
+        await loadAdminStaff();
+
+        showStaffCredentialsModal(res.user || { name, username, role }, res.generatedPassword || password);
+    } catch (err) {
+        if (errorEl) {
+            errorEl.innerText = err.message || 'Failed to create staff account';
+            errorEl.classList.remove('hidden');
+        }
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i data-lucide="user-plus" class="w-4 h-4"></i> Create Account';
+            initIcons();
+        }
+    }
+}
+
+function showStaffCredentialsModal(staff, password) {
+    const isCoach = staff.role === 'coach';
+    const html = `
+        <div class="space-y-4 py-2">
+            <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs flex items-start gap-2.5">
+                <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                <div class="leading-relaxed">
+                    <strong class="font-bold">One-Time Credential View:</strong> Make sure to copy this temporary password now. For security, this password cannot be retrieved again after closing this window.
+                </div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-500 uppercase">Staff Member</span>
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${isCoach ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-blue-500/15 text-blue-600 dark:text-blue-400'}">
+                        ${isCoach ? 'Coach' : 'Scout'}
+                    </span>
+                </div>
+                <div class="font-bold text-sm text-slate-900 dark:text-white">${escapeHtml(staff.name)}</div>
+
+                <div class="pt-2 border-t border-slate-200 dark:border-slate-700/80">
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Username</label>
+                    <div class="flex items-center gap-2">
+                        <input id="staff-cred-username" type="text" readonly value="${escapeHtml(staff.username)}"
+                            class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white outline-none">
+                        <button type="button" onclick="navigator.clipboard.writeText('${escapeHtml(staff.username)}'); showToast('Username copied!', 'info');"
+                            class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-800 dark:text-slate-200 shrink-0 cursor-pointer">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Temporary Password</label>
+                    <div class="flex items-center gap-2">
+                        <input id="staff-cred-password" type="text" readonly value="${escapeHtml(password)}"
+                            class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-brand-600 dark:text-brand-400 outline-none">
+                        <button type="button" onclick="navigator.clipboard.writeText('${escapeHtml(password)}'); showToast('Password copied!', 'info');"
+                            class="px-3 py-2 rounded-xl text-xs font-bold bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-800 shrink-0 hover:bg-brand-100 cursor-pointer">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2 flex justify-between items-center gap-2">
+                <button type="button" onclick="navigator.clipboard.writeText('Username: ${escapeHtml(staff.username)}\\nPassword: ${escapeHtml(password)}'); showToast('All credentials copied!', 'info');"
+                    class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-300 cursor-pointer">
+                    Copy All
+                </button>
+                <button type="button" onclick="closeModal()" class="px-6 py-2.5 rounded-xl text-xs font-bold bg-slate-900 dark:bg-brand-600 hover:opacity-90 text-white cursor-pointer">
+                    Done
+                </button>
+            </div>
+        </div>
+    `;
+
+    openModal('Account Credentials', html, [], 'max-w-md');
+    initIcons();
+}
+
+function openEditStaffModal(staffId) {
+    const member = cachedStaff.find(s => (s._id || s.id) === staffId);
+    if (!member) {
+        showToast('Staff member not found', 'error');
+        return;
+    }
+
+    const html = `
+        <form id="edit-staff-form" onsubmit="submitEditStaff('${staffId}', event)" class="space-y-4 py-1">
+            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Username</span>
+                    <span class="font-mono font-bold text-xs text-slate-700 dark:text-slate-300">${escapeHtml(member.username)}</span>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Role</span>
+                    <span class="text-xs font-bold uppercase ${member.role === 'coach' ? 'text-emerald-500' : 'text-blue-500'}">${member.role}</span>
+                </div>
+            </div>
+
+            <div>
+                <label for="edit-staff-name" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Full Name <span class="text-rose-500">*</span></label>
+                <input id="edit-staff-name" type="text" required value="${escapeHtml(member.name)}"
+                    class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500">
+            </div>
+
+            <div>
+                <label for="edit-staff-email" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email</label>
+                <input id="edit-staff-email" type="email" value="${escapeHtml(member.email || '')}" placeholder="staff@example.com"
+                    class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500">
+            </div>
+
+            <div id="edit-staff-error" class="hidden text-xs text-rose-500 font-semibold p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20"></div>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+                    Cancel
+                </button>
+                <button type="submit" id="edit-staff-submit-btn" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="check" class="w-4 h-4"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    `;
+
+    openModal(`Edit Staff • ${member.name}`, html, [], 'max-w-md');
+    initIcons();
+}
+
+async function submitEditStaff(staffId, event) {
+    event.preventDefault();
+    const errorEl = document.getElementById('edit-staff-error');
+    const submitBtn = document.getElementById('edit-staff-submit-btn');
+
+    const name = document.getElementById('edit-staff-name')?.value?.trim();
+    const email = document.getElementById('edit-staff-email')?.value?.trim();
+
+    if (errorEl) errorEl.classList.add('hidden');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Saving...';
+    }
+
+    try {
+        await api(`/api/admin/staff/${staffId}`, {
+            method: 'PATCH',
+            body: { name, email: email || '' }
+        });
+
+        closeModal();
+        showToast('Staff profile updated successfully!', 'success');
+        await loadAdminStaff();
+    } catch (err) {
+        if (errorEl) {
+            errorEl.innerText = err.message || 'Failed to update staff member';
+            errorEl.classList.remove('hidden');
+        }
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Save Changes';
+            initIcons();
+        }
+    }
+}
+
+function openResetStaffPasswordModal(staffId) {
+    const member = cachedStaff.find(s => (s._id || s.id) === staffId);
+    if (!member) {
+        showToast('Staff member not found', 'error');
+        return;
+    }
+
+    const defaultPassword = generateRandomPasswordClient();
+    const html = `
+        <div class="space-y-4 py-1">
+            <p class="text-xs text-slate-600 dark:text-slate-300">
+                Reset password for <strong class="text-slate-900 dark:text-white">${escapeHtml(member.name)}</strong> (<code>${escapeHtml(member.username)}</code>).
+                They will be prompted to set a permanent password upon first login.
+            </p>
+
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <label for="reset-staff-password-input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">New Temporary Password</label>
+                    <button type="button" onclick="generateNewPasswordForInput('reset-staff-password-input')" class="text-[11px] font-bold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1 cursor-pointer">
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> Generate
+                    </button>
+                </div>
+                <input id="reset-staff-password-input" type="text" required minlength="8" value="${defaultPassword}"
+                    class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 font-mono">
+                <p class="text-[11px] text-slate-400 mt-1">Minimum 8 characters.</p>
+            </div>
+
+            <div id="reset-staff-error" class="hidden text-xs text-rose-500 font-semibold p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20"></div>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+                    Cancel
+                </button>
+                <button type="button" id="reset-staff-submit-btn" onclick="submitResetStaffPassword('${staffId}')" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-md flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="key-round" class="w-4 h-4"></i> Reset Password
+                </button>
+            </div>
+        </div>
+    `;
+
+    openModal(`Reset Password • ${member.name}`, html, [], 'max-w-md');
+    initIcons();
+}
+
+async function submitResetStaffPassword(staffId) {
+    const errorEl = document.getElementById('reset-staff-error');
+    const submitBtn = document.getElementById('reset-staff-submit-btn');
+    const password = document.getElementById('reset-staff-password-input')?.value;
+
+    if (!password || password.length < 8) {
+        if (errorEl) {
+            errorEl.innerText = 'Password must be at least 8 characters long';
+            errorEl.classList.remove('hidden');
+        }
+        return;
+    }
+
+    if (errorEl) errorEl.classList.add('hidden');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Resetting...';
+    }
+
+    try {
+        const res = await api(`/api/admin/staff/${staffId}`, {
+            method: 'PATCH',
+            body: { password }
+        });
+
+        closeModal();
+        showToast('Password reset successfully!', 'success');
+        await loadAdminStaff();
+
+        showStaffCredentialsModal(res.user, res.generatedPassword || password);
+    } catch (err) {
+        if (errorEl) {
+            errorEl.innerText = err.message || 'Failed to reset password';
+            errorEl.classList.remove('hidden');
+        }
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i data-lucide="key-round" class="w-4 h-4"></i> Reset Password';
+            initIcons();
+        }
+    }
+}
+
+function confirmDeleteStaff(staffId, staffName, staffRole) {
+    const member = cachedStaff.find(s => (s._id || s.id) === staffId);
+    const assignedCount = member?.assignedPlayersCount || 0;
+    const isCoach = staffRole === 'coach';
+
+    // If coach has assigned players, offer reassignment in the dialog
+    if (isCoach && assignedCount > 0) {
+        const otherCoaches = cachedStaff.filter(s => s.role === 'coach' && (s._id || s.id) !== staffId);
+
+        const coachOptions = otherCoaches.map(c => `
+            <option value="${c._id || c.id}">${escapeHtml(c.name)} (${escapeHtml(c.username)})</option>
+        `).join('');
+
+        const html = `
+            <div class="space-y-4 py-1">
+                <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-start gap-2">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                    <div>
+                        Coach <strong>${escapeHtml(staffName)}</strong> currently has <strong>${assignedCount} active athlete(s)</strong> assigned.
+                    </div>
+                </div>
+
+                ${otherCoaches.length > 0 ? `
+                    <div>
+                        <label for="delete-reassign-coach" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                            Reassign Athletes To <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="delete-reassign-coach" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                            <option value="">Select Target Coach...</option>
+                            ${coachOptions}
+                        </select>
+                        <p class="text-[11px] text-slate-400 mt-1">All ${assignedCount} player profiles will be transferred to this coach immediately.</p>
+                    </div>
+                ` : `
+                    <p class="text-xs text-rose-500 font-semibold">
+                        There are no other coaches in the academy to reassign players to. Please add another coach before removing this account.
+                    </p>
+                `}
+
+                <div id="delete-staff-error" class="hidden text-xs text-rose-500 font-semibold p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20"></div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+                        Cancel
+                    </button>
+                    ${otherCoaches.length > 0 ? `
+                        <button type="button" id="confirm-delete-btn" onclick="executeDeleteStaffWithReassign('${staffId}')" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md flex items-center gap-1.5 cursor-pointer">
+                            <i data-lucide="user-x" class="w-4 h-4"></i> Reassign & Remove
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+
+        openModal(`Remove Coach • ${staffName}`, html, [], 'max-w-md');
+        initIcons();
+        return;
+    }
+
+    // Direct deletion confirmation for Scouts or Coaches with 0 players
+    const html = `
+        <div class="space-y-4 py-1">
+            <p class="text-xs text-slate-600 dark:text-slate-300">
+                Are you sure you want to permanently delete the ${staffRole} account for <strong class="text-slate-900 dark:text-white">${escapeHtml(staffName)}</strong>? This action cannot be undone.
+            </p>
+
+            <div id="delete-staff-error" class="hidden text-xs text-rose-500 font-semibold p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20"></div>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+                    Cancel
+                </button>
+                <button type="button" id="confirm-delete-btn" onclick="executeDeleteStaff('${staffId}')" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i> Permanently Delete
+                </button>
+            </div>
+        </div>
+    `;
+
+    openModal(`Remove Staff • ${staffName}`, html, [], 'max-w-md');
+    initIcons();
+}
+
+async function executeDeleteStaff(staffId) {
+    const errorEl = document.getElementById('delete-staff-error');
+    const deleteBtn = document.getElementById('confirm-delete-btn');
+
+    if (errorEl) errorEl.classList.add('hidden');
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerText = 'Deleting...';
+    }
+
+    try {
+        await api(`/api/admin/staff/${staffId}`, { method: 'DELETE' });
+        closeModal();
+        showToast('Staff member removed successfully!', 'success');
+        await loadAdminStaff();
+    } catch (err) {
+        if (errorEl) {
+            errorEl.innerText = err.message || 'Failed to remove staff member';
+            errorEl.classList.remove('hidden');
+        }
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i> Permanently Delete';
+            initIcons();
+        }
+    }
+}
+
+async function executeDeleteStaffWithReassign(staffId) {
+    const errorEl = document.getElementById('delete-staff-error');
+    const deleteBtn = document.getElementById('confirm-delete-btn');
+    const reassignSelect = document.getElementById('delete-reassign-coach');
+    const reassignTo = reassignSelect?.value;
+
+    if (!reassignTo) {
+        if (errorEl) {
+            errorEl.innerText = 'Please select a coach to reassign athletes to';
+            errorEl.classList.remove('hidden');
+        }
+        return;
+    }
+
+    if (errorEl) errorEl.classList.add('hidden');
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerText = 'Reassigning & Deleting...';
+    }
+
+    try {
+        await api(`/api/admin/staff/${staffId}`, {
+            method: 'DELETE',
+            body: { reassignTo }
+        });
+        closeModal();
+        showToast('Athletes reassigned and coach removed successfully!', 'success');
+        await loadAdminStaff();
+    } catch (err) {
+        if (errorEl) {
+            errorEl.innerText = err.message || 'Failed to remove coach';
+            errorEl.classList.remove('hidden');
+        }
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = '<i data-lucide="user-x" class="w-4 h-4"></i> Reassign & Remove';
+            initIcons();
+        }
     }
 }
 
@@ -6775,6 +7429,19 @@ window.openTodayRegisterModal = openTodayRegisterModal;
 window.openTakeAttendanceAction = openTakeAttendanceAction;
 window.searchGlobalAcademy = searchGlobalAcademy;
 window.exportScoutReportPDF = exportScoutReportPDF;
+window.loadAdminStaff = loadAdminStaff;
+window.renderAdminStaffTable = renderAdminStaffTable;
+window.openAddStaffModal = openAddStaffModal;
+window.submitAddStaff = submitAddStaff;
+window.generateNewPasswordForInput = generateNewPasswordForInput;
+window.openEditStaffModal = openEditStaffModal;
+window.submitEditStaff = submitEditStaff;
+window.openResetStaffPasswordModal = openResetStaffPasswordModal;
+window.submitResetStaffPassword = submitResetStaffPassword;
+window.showStaffCredentialsModal = showStaffCredentialsModal;
+window.confirmDeleteStaff = confirmDeleteStaff;
+window.executeDeleteStaff = executeDeleteStaff;
+window.executeDeleteStaffWithReassign = executeDeleteStaffWithReassign;
 
 // ── Resizable Left Sidebar ──────────────────────────────────────────────────
 function initSidebarResizer() {

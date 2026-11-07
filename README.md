@@ -39,7 +39,19 @@ Sign in with any of the pre-seeded accounts (or select the role tab and click **
 | **Player** | `md260001` | `player123` | Kamran Akmal (Football) | **READY** (100% attendance, 2 matches) |
 | **Player** | `md260003` | `player123` | Aadil Azhar (Football) | **NOT READY** (50% attendance, 1 match) |
 
-> **Dataset Scope**: The academy database contains **24 seeded players, 10 trial-ready, plus any added** through the registration interface.
+> **Dataset Scope**: The seeded baseline contains **27 users (1 admin, 1 coach, 1 scout, 24 players)** with **24 seeded players (10 trial-ready)**. Any players or staff accounts created in the live app are persisted in `academy_final`, but will be overwritten if the database is re-seeded.
+
+---
+
+## Admin Staff Management
+
+The Admin role possesses full staff lifecycle management privileges directly in the workspace (`/app` > **Staff** sidebar navigation):
+- **Create Staff**: Admins can provision new **Coach** and **Scout** accounts with unique usernames (3–30 chars), optional emails, and secure passwords (minimum 8 characters or 1-click cryptographically generated temporary password).
+- **One-Time Credential Reveal**: Account creation and password resets present a one-time credential modal with individual and bulk copy actions.
+- **Mandatory First-Time Password Change**: Newly created staff accounts have `mustChangePassword = true` enforced on the server, requiring a permanent password change upon their first login.
+- **Edit & Reset Password**: Admins can edit names, update emails, and trigger secure password resets.
+- **Safe Staff Deletion**: Deleting a coach with assigned athletes is guarded: it requires either reassigning the athletes to another coach or will be blocked with a clear error. Scouts can be deleted freely, and admins cannot delete themselves.
+- **Seeding Baseline Notice**: Any staff accounts or athletes added via the live UI are stored live in MongoDB Atlas `academy_final`. Re-running `node scripts/seed.js` will reset the database back to the seeded baseline (27 users, 24 players).
 
 ---
 
