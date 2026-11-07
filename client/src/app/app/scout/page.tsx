@@ -8,6 +8,14 @@ import {
   getCoachDisplayName,
 } from './scoutPdf';
 
+function getPlayerInitials(name?: string): string {
+  if (!name) return 'P';
+  const parts = name.trim().split(/\s+/);
+  return parts.length > 1
+    ? (parts[0][0] + parts[1][0]).toUpperCase()
+    : parts[0].slice(0, 2).toUpperCase();
+}
+
 export default function ScoutRadarPage() {
   const [players, setPlayers] = useState<ReadyPlayer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -344,11 +352,13 @@ export default function ScoutRadarPage() {
                         <tr key={p._id}>
                           <td>
                             <div className="scout-player-cell">
-                              <img
-                                src={`https://i.pravatar.cc/150?u=${p._id}`}
-                                alt={p.name}
+                              <div
                                 className="scout-avatar"
-                              />
+                                aria-label={p.name}
+                                title={p.name}
+                              >
+                                {getPlayerInitials(p.name)}
+                              </div>
                               <div>
                                 <div className="scout-player-name-row">
                                   <span className="scout-player-name">{p.name}</span>

@@ -147,7 +147,7 @@ function toggleNotifications() {
 
 document.addEventListener('click', function (event) {
     const panel = document.getElementById('notification-panel');
-    const btn = event.target.closest('button[onclick="toggleNotifications()"]');
+    const btn = event.target && event.target.closest ? event.target.closest('button[onclick="toggleNotifications()"]') : null;
     if (!btn && panel && !panel.contains(event.target) && !panel.classList.contains('hidden')) {
         panel.classList.add('hidden');
     }
@@ -259,7 +259,6 @@ function renderAppForUser(role, userObj) {
         const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].slice(0, 2).toUpperCase();
         avatarBadge.innerText = initials;
     }
-    if (avatarElem) avatarElem.src = role === 'player' ? "https://i.pravatar.cc/150?img=3" : "https://i.pravatar.cc/150?img=11";
 
     const nav = document.getElementById('sidebar-nav');
     if (!nav) return;
@@ -6146,15 +6145,20 @@ async function loadScoutPlayers() {
                 ? `<span class="inline-flex items-center text-amber-400 ml-1.5 cursor-help" title="Performance score: 15 or above${perfScore !== null ? ` (Avg: ${perfScore})` : ''}" aria-label="Performance score: 15 or above">⭐</span>`
                 : '';
 
+            const pNameParts = (p.name || 'P').trim().split(/\s+/);
+            const pInitials = pNameParts.length > 1 ? (pNameParts[0][0] + pNameParts[1][0]).toUpperCase() : pNameParts[0].slice(0, 2).toUpperCase();
+
             return `
             <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors border-b border-slate-200/80 dark:border-slate-800/80">
                 <td class="px-6 py-4.5 flex items-center gap-3.5 border-r border-slate-200/80 dark:border-slate-800/80">
-                    <img src="https://i.pravatar.cc/150?u=${p._id}" class="w-11 h-11 rounded-full border-2 border-brand-500/40 shadow-xs shrink-0">
+                    <div class="w-11 h-11 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+                        ${escapeHtml(pInitials)}
+                    </div>
                     <div>
                         <p class="font-bold text-base text-slate-900 dark:text-white flex items-center leading-tight">
-                            <span>${p.name}</span>${starHtml}
+                            <span>${escapeHtml(p.name)}</span>${starHtml}
                         </p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">${p.coach ? 'Coach: ' + p.coach.name : 'Dumka Academy'}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">${p.coach ? 'Coach: ' + escapeHtml(p.coach.name) : 'Dumka Academy'}</p>
                     </div>
                 </td>
                 <td class="px-6 py-4.5 text-sm font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-200/80 dark:border-slate-800/80">${p.sport} &bull; Age ${p.age}</td>
@@ -6380,6 +6384,14 @@ async function loadPlayerData() {
                 : 'bg-brand-500/20 text-brand-700 dark:text-brand-400 px-3 py-1 rounded-md text-xs font-bold border border-brand-500/30';
         }
         if (journeyStatus) journeyStatus.innerText = me.isReady ? 'Ready for Scout Trial' : 'In Training';
+
+        // Update Initials Avatars (Hero Card & Profile Detail)
+        const nameParts = (me.name || 'P').trim().split(/\s+/);
+        const playerInitials = nameParts.length > 1 ? (nameParts[0][0] + nameParts[1][0]).toUpperCase() : nameParts[0].slice(0, 2).toUpperCase();
+        const avatar1 = document.getElementById('player-profile-card-avatar');
+        const avatar2 = document.getElementById('player-profile-detail-avatar');
+        if (avatar1) avatar1.innerText = playerInitials;
+        if (avatar2) avatar2.innerText = playerInitials;
 
         // Dedicated "My Profile" Page View (view-player-profile)
         const detailName = document.getElementById('player-profile-detail-name');

@@ -295,14 +295,6 @@
                 </div>
 
                 <div class="flex items-center gap-2 lg:gap-3.5 ml-auto">
-                    <!-- Notification Bell with Red Dot -->
-                    <button onclick="toggleNotifications()"
-                        class="relative p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
-                        title="Notifications" aria-label="Notifications">
-                        <i data-lucide="bell" class="w-4.5 h-4.5"></i>
-                        <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-[#090D16]"></span>
-                    </button>
-
                     <!-- Theme Toggle -->
                     <button onclick="toggleDarkMode()"
                         class="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
@@ -1472,14 +1464,11 @@
                         <!-- Top Athlete Header Banner -->
                         <div class="desk-card p-6 sm:p-8 rounded-2xl mb-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
                             <div class="flex items-center gap-5">
-                                <div class="relative w-18 h-18 shrink-0 group cursor-pointer" onclick="document.getElementById('player-avatar-upload').click()">
-                                    <img id="player-profile-card-avatar" src="https://i.pravatar.cc/150?img=3"
-                                        class="w-18 h-18 rounded-2xl border-2 border-brand-500/40 shadow-sm object-cover transition-opacity group-hover:opacity-75"
-                                        alt="Athlete Avatar">
-                                    <div class="absolute inset-0 bg-slate-900/60 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-200">
-                                        <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                                <div class="w-18 h-18 shrink-0">
+                                    <div id="player-profile-card-avatar"
+                                        class="w-18 h-18 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-2 border-emerald-500/30 flex items-center justify-center font-extrabold text-2xl shadow-sm">
+                                        KA
                                     </div>
-                                    <input type="file" id="player-avatar-upload" class="hidden" accept="image/*" onchange="handleAvatarUpload(event)">
                                 </div>
                                 <div>
                                     <div class="flex items-center gap-3 flex-wrap">
@@ -1790,12 +1779,10 @@
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                             <!-- Left Column: Identity & Photo Card -->
                             <div class="desk-card p-7 sm:p-8 rounded-2xl text-center space-y-5 shadow-xs">
-                                <div class="relative w-32 h-32 mx-auto group cursor-pointer" onclick="document.getElementById('player-avatar-upload').click()">
-                                    <img id="player-profile-detail-avatar" src="https://i.pravatar.cc/150?img=3"
-                                        class="w-32 h-32 rounded-2xl border-4 border-white dark:border-slate-800 shadow-md object-cover transition-opacity group-hover:opacity-75"
-                                        alt="Player Profile Avatar">
-                                    <div class="absolute inset-0 bg-slate-900/60 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-200">
-                                        <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                                <div class="w-28 h-28 mx-auto">
+                                    <div id="player-profile-detail-avatar"
+                                        class="w-28 h-28 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-2 border-emerald-500/30 flex items-center justify-center font-extrabold text-4xl shadow-md mx-auto">
+                                        KA
                                     </div>
                                 </div>
 
