@@ -517,6 +517,24 @@ async function handleIncomingSyncEvent(payload) {
                 return;
             }
 
+            // Do not disrupt user input while typing inside search box or any form inputs
+            const activeEl = document.activeElement;
+            const isTyping = activeEl && (
+                activeEl.id === 'header-global-search' ||
+                activeEl.tagName === 'INPUT' ||
+                activeEl.tagName === 'TEXTAREA' ||
+                activeEl.isContentEditable
+            );
+
+            if (isTyping) {
+                // Refresh cached players silently in background without re-rendering DOM table
+                try {
+                    const freshPlayers = await api('/api/players');
+                    if (freshPlayers) cachedPlayers = freshPlayers;
+                } catch (_) {}
+                return;
+            }
+
             // Selectively refresh the currently active view and dashboard aggregates
             const refreshPromises = [loadCoachStats()];
             if (activePage === 'view-coach-players') refreshPromises.push(loadCoachPlayers());
@@ -2798,22 +2816,111 @@ function renderDashboardRecentActivity(players = [], sessions = [], matches = []
     initIcons();
 }
 
-// Global search bar handler
-function searchGlobalAcademy(query) {
-    if (!query) return;
-    const q = query.trim().toLowerCase();
-    switchPage('coach-players');
-    setTimeout(() => {
-        if (cachedPlayers && cachedPlayers.length) {
-            const filtered = cachedPlayers.filter(p =>
-                (p.name && p.name.toLowerCase().includes(q)) ||
-                (p.sport && p.sport.toLowerCase().includes(q)) ||
-                (p.age && p.age.toString().includes(q)) ||
-                (p.username && p.username.toLowerCase().includes(q))
-            );
-            renderCoachPlayersTable(filtered);
+// ── GLOBAL SEARCH STATE & FILTERING ENGINE ───────────────────────────────────
+let currentSearchQuery = '';
+let searchDebounceTimer = null;
+let searchRequestCounter = 0;
+
+/**
+ * Pure filter function for players:
+ * - Case-insensitive
+ * - Trims whitespace
+ * - Matches player name or username
+ * - If query is empty / whitespace-only / null / undefined, returns all players untouched
+ */
+function filterPlayersByQuery(players, query) {
+    if (!Array.isArray(players)) return [];
+    const q = (query || '').trim().toLowerCase();
+    if (!q) return [...players];
+    return players.filter(p => {
+        if (!p) return false;
+        const name = (p.name || '').trim().toLowerCase();
+        const username = (p.username || '').trim().toLowerCase();
+        return name.includes(q) || username.includes(q);
+    });
+}
+
+function clearGlobalSearch() {
+    clearTimeout(searchDebounceTimer);
+    searchRequestCounter++;
+    currentSearchQuery = '';
+    const searchInput = document.getElementById('header-global-search');
+    if (searchInput) searchInput.value = '';
+
+    if (cachedPlayers && cachedPlayers.length > 0) {
+        renderCoachPlayersTable(cachedPlayers);
+    } else {
+        loadCoachPlayers().catch(() => {});
+    }
+
+    if (typeof filterSessionsTable === 'function') {
+        const sessionPage = document.getElementById('view-coach-sessions');
+        if (sessionPage && sessionPage.classList.contains('active')) {
+            filterSessionsTable();
         }
-    }, 200);
+    }
+}
+
+async function performGlobalSearch(query) {
+    const trimmed = (query || '').trim();
+    currentSearchQuery = trimmed;
+    const reqId = ++searchRequestCounter;
+
+    // Keep header search input in sync if called programmatically
+    const searchInput = document.getElementById('header-global-search');
+    if (searchInput && searchInput.value !== (query || '') && document.activeElement !== searchInput) {
+        searchInput.value = query || '';
+    }
+
+    // Switch to coach-players if not already active
+    const activePage = document.querySelector('.page.active')?.id;
+    if (activePage !== 'view-coach-players' && currentActivePageId !== 'coach-players') {
+        switchPage('coach-players');
+    }
+
+    // If data is already in memory, filter instantly with ZERO API calls
+    if (cachedPlayers && cachedPlayers.length > 0) {
+        const filtered = filterPlayersByQuery(cachedPlayers, currentSearchQuery);
+        renderCoachPlayersTable(filtered);
+        return;
+    }
+
+    // If cachedPlayers is not yet loaded, fetch once with request counter protection against stale responses
+    try {
+        const players = await api('/api/players');
+        if (reqId !== searchRequestCounter) return; // Stale request discarded
+        cachedPlayers = players || [];
+        const filtered = filterPlayersByQuery(cachedPlayers, currentSearchQuery);
+        renderCoachPlayersTable(filtered);
+    } catch (err) {
+        console.warn('[GlobalSearch] Error loading players for search:', err);
+    }
+}
+
+function handleGlobalSearchInput(val) {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+        performGlobalSearch(val);
+    }, 250);
+}
+
+function handleGlobalSearchKeyDown(e) {
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        clearGlobalSearch();
+        const searchInput = document.getElementById('header-global-search');
+        if (searchInput) searchInput.blur();
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        clearTimeout(searchDebounceTimer);
+        const searchInput = document.getElementById('header-global-search');
+        performGlobalSearch(searchInput ? searchInput.value : '');
+    }
+}
+
+function searchGlobalAcademy(query) {
+    clearTimeout(searchDebounceTimer);
+    performGlobalSearch(query);
 }
 
 // Global search keyboard shortcut: Ctrl + K (Windows) / Cmd + K to focus search bar
@@ -2861,11 +2968,12 @@ function renderCoachPlayersTable(players) {
     if (!tableBody) return;
 
     if (!players || !players.length) {
+        const isSearch = Boolean(currentSearchQuery && currentSearchQuery.trim());
         tableBody.innerHTML = `
             <tr>
                 <td colspan="7" class="py-12 text-center text-slate-400">
-                    <p class="font-semibold text-xs">No athletes registered yet</p>
-                    <button onclick="switchPage('admin-registration')" class="mt-2 text-brand-600 dark:text-brand-400 font-bold hover:underline">+ Register First Player</button>
+                    <p class="font-semibold text-xs">${isSearch ? `No athletes found matching "${escapeHtml(currentSearchQuery.trim())}"` : 'No athletes registered yet'}</p>
+                    ${isSearch ? `<button onclick="clearGlobalSearch()" class="mt-2 text-brand-600 dark:text-brand-400 font-bold hover:underline">Clear Search</button>` : `<button onclick="switchPage('admin-registration')" class="mt-2 text-brand-600 dark:text-brand-400 font-bold hover:underline">+ Register First Player</button>`}
                 </td>
             </tr>
         `;
@@ -2983,7 +3091,7 @@ async function loadCoachPlayers() {
 
     // Fast render: If cachedPlayers are already available in memory, render immediately with 0 delay!
     if (cachedPlayers && cachedPlayers.length > 0) {
-        renderCoachPlayersTable(cachedPlayers);
+        renderCoachPlayersTable(filterPlayersByQuery(cachedPlayers, currentSearchQuery));
     } else if (tableBody) {
         tableBody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-slate-400"><div class="flex items-center justify-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin text-brand-600"></i><span>Loading players from database...</span></div></td></tr>';
         initIcons();
@@ -3000,7 +3108,7 @@ async function loadCoachPlayers() {
         }
 
         cachedPlayers = players || [];
-        renderCoachPlayersTable(cachedPlayers);
+        renderCoachPlayersTable(filterPlayersByQuery(cachedPlayers, currentSearchQuery));
     } catch (err) {
         if (tableBody && (!cachedPlayers || cachedPlayers.length === 0)) {
             tableBody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-rose-500">Error loading players: ${err.message}</td></tr>`;
@@ -3058,7 +3166,7 @@ async function executeRemovePlayer(playerId) {
 
         // 1. Instant optimistic update in memory & DOM (0ms delay)
         cachedPlayers = (cachedPlayers || []).filter(p => p._id !== playerId);
-        renderCoachPlayersTable(cachedPlayers);
+        renderCoachPlayersTable(filterPlayersByQuery(cachedPlayers, currentSearchQuery));
 
         const res = await api(`/api/players/${playerId}`, {
             method: 'DELETE'
@@ -3212,7 +3320,7 @@ async function submitEditPlayer(playerId) {
         const pIdx = (cachedPlayers || []).findIndex(p => p._id === playerId);
         if (pIdx !== -1) {
             cachedPlayers[pIdx] = Object.assign({}, cachedPlayers[pIdx], updated);
-            renderCoachPlayersTable(cachedPlayers);
+            renderCoachPlayersTable(filterPlayersByQuery(cachedPlayers, currentSearchQuery));
         }
 
         // Refresh dependent modules in background
@@ -4253,7 +4361,8 @@ function filterSessionsTable() {
     const searchInput = document.getElementById('session-search-input');
     const sportFilter = document.getElementById('session-sport-filter');
 
-    const query = (searchInput?.value || '').trim().toLowerCase();
+    const sessionQuery = (searchInput?.value || '').trim().toLowerCase();
+    const query = sessionQuery || (currentSearchQuery || '').trim().toLowerCase();
     const sport = sportFilter?.value || 'ALL';
 
     const filtered = cachedSessions.filter(s => {
@@ -8399,6 +8508,18 @@ window.submitEditPlayer = submitEditPlayer;
 window.openTodayRegisterModal = openTodayRegisterModal;
 window.openTakeAttendanceAction = openTakeAttendanceAction;
 window.searchGlobalAcademy = searchGlobalAcademy;
+window.performGlobalSearch = performGlobalSearch;
+window.clearGlobalSearch = clearGlobalSearch;
+window.handleGlobalSearchInput = handleGlobalSearchInput;
+window.handleGlobalSearchKeyDown = handleGlobalSearchKeyDown;
+window.filterPlayersByQuery = filterPlayersByQuery;
+try {
+    Object.defineProperty(window, 'currentSearchQuery', {
+        get: () => currentSearchQuery,
+        set: (v) => { currentSearchQuery = v; },
+        configurable: true
+    });
+} catch (_) {}
 window.exportScoutReportPDF = exportScoutReportPDF;
 window.loadAdminStaff = loadAdminStaff;
 window.renderAdminStaffTable = renderAdminStaffTable;
@@ -8525,11 +8646,26 @@ function handleAuthInitFailure(reason) {
     }
 }
 
+function initGlobalSearchListeners() {
+    const searchInput = document.getElementById('header-global-search');
+    if (!searchInput || searchInput.dataset.searchBound) return;
+    searchInput.dataset.searchBound = 'true';
+
+    searchInput.addEventListener('input', (e) => {
+        handleGlobalSearchInput(e.target.value);
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+        handleGlobalSearchKeyDown(e);
+    });
+}
+
 // On page load: check if already logged in with JWT
 document.addEventListener('DOMContentLoaded', async () => {
     applySavedTheme();
     initIcons();
     initSidebarResizer();
+    initGlobalSearchListeners();
 
     const storedUser = localStorage.getItem('user');
     if (!authToken || !storedUser) {
