@@ -6,20 +6,20 @@ Maidan Desk is a comprehensive sports academy management and scouting platform e
 
 ## Architecture & Frontend Strategy
 
-- **Backend API**: 100% of the API (35 endpoints across auth, players, attendance sessions, match lifecycles, scouting radar, and sync) is implemented as native Next.js App Router route handlers (`client/src/app/api/**/route.ts`).
-- **Native React Entry (`/`)**: Dedicated React client component with dark glassmorphism, 1-click Quick Login role fill, and automatic session restoration.
+- **Backend API**: 100% of the API (43 endpoints across auth, admin staff & player management, attendance sessions, match lifecycles, scouting radar, audit logging, and sync) is implemented as native Next.js App Router route handlers (`client/src/app/api/**/route.ts`).
+- **Native React Entry (`/`)**: Dedicated React client component with dark glassmorphism, 4 segmented role buttons (Admin, Coach, Scout, Player), 1-click test credential fill, and automatic session restoration.
 - **Native React Scout Radar (`/app/scout`)**: Dedicated React client component for scouting talent discovery, real-time trial readiness indicators, and performance star evaluations.
 - **Main Academy Workspace (`/app`)**: The main UI is the original battle-tested vanilla JS application (`app.html`, `script.js`, `style.css`, and vendor libraries) served directly by Next.js at `/app` via route rewrite (`{ source: '/app', destination: '/app.html' }`).
-- **Legacy Notice**: The Express codebase in the repo root (`src/`, `server.js`) is legacy and is **not used** by the deployed Next.js application.
+- **Legacy Notice**: The Express codebase in `../legacy/` (`legacy/src`, `legacy/server.js`, `legacy/test/`) is legacy and is **not used** by the deployed Next.js application.
 
 ---
 
 ## Live Deployment
 
-- **Live Application URL**: `<LIVE_URL>`
-- **Entry & Login Portal**: `<LIVE_URL>/`
-- **Scout Radar (Native React)**: `<LIVE_URL>/app/scout`
-- **Academy Workspace (Main UI)**: `<LIVE_URL>/app`
+- **Live Application URL**: [https://maidandesk.vercel.app](https://maidandesk.vercel.app)
+- **Entry & Login Portal**: [https://maidandesk.vercel.app/](https://maidandesk.vercel.app/)
+- **Scout Radar (Native React)**: [https://maidandesk.vercel.app/app/scout](https://maidandesk.vercel.app/app/scout)
+- **Academy Workspace (Main UI)**: [https://maidandesk.vercel.app/app](https://maidandesk.vercel.app/app)
 
 ---
 

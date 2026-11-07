@@ -1,91 +1,39 @@
-# Known Issues & Deferred Technical Debt
+# Known Issues, Resolutions & Technical Debt
 
-These items represent pre-existing bugs, schema mismatches, and legacy fixtures in the codebase prior to the Next.js migration. Per Prime Directives 1 and 2, **behavior parity is maintained over refactoring** during migration: the Next.js implementation ports current behavior 1:1. These issues are catalogued here to be addressed systematically **after final cutover and verification**.
-
----
-
-### 1. Pre-Existing Backend Bugs
-- **`AuditLog` Never Written**:
-  - In [`src/routes/players.js`](file:///c:/Users/pooki/Desktop/hackathon/src/routes/players.js#L380-L382), administrative player deletion performs a `console.log("[AUDIT] Admin ...")` statement rather than creating and persisting an `AuditLog` document (`AuditLog.create(...)`). As a result, the `auditlogs` collection in MongoDB remains empty.
-- **`audit.js` Route Unmounted**:
-  - [`src/routes/audit.js`](file:///c:/Users/pooki/Desktop/hackathon/src/routes/audit.js) defines admin endpoints `GET /api/audit-logs` and `GET /api/audit-logs/:id`, but it is never mounted in [`src/app.js`](file:///c:/Users/pooki/Desktop/hackathon/src/app.js). It is currently dead code in the Express backend.
-- **Omission of `broadcastServerSync` in `PUT /api/matches/:id/entries`**:
-  - In [`src/routes/matches.js`](file:///c:/Users/pooki/Desktop/hackathon/src/routes/matches.js#L1122), the deprecated `PUT /api/matches/:id/entries` endpoint saves entries and returns HTTP 200, but omits `broadcastServerSync(...)`. Consequently, it does not change `/api/sync/version` on Express. (All other 20 mutation routes in sessions, matches, and players call `broadcastServerSync`).
+This document catalogs pre-existing bugs, resolved discrepancies, schema notes, and architectural considerations across the MaidanDesk codebase.
 
 ---
 
-### 2. Seed Script vs Model Schema Inconsistency
-- **Cricket Score Upper Limit Mismatch**:
-  - [`src/models/Match.js`](file:///c:/Users/pooki/Desktop/hackathon/src/models/Match.js#L7-L11) defines validation on player scores: `max: [20, 'Score cannot exceed 20']`.
-  - [`scripts/seed.js`](file:///c:/Users/pooki/Desktop/hackathon/scripts/seed.js#L306-L308) attempts to insert cricket scores of `38` and `45` for Simran Kaur and Arjun Nair in match `s1_c_m1`.
-  - Running `scripts/seed.js` fails midway with `ValidationError: Match validation failed: entries.0.score: Score cannot exceed 20`, halting execution before Set 2 players and matches are created.
-  - *Resolution deferred*: Adjust either sport-specific score limits or seed fixture scores post-cutover.
+## 1. Resolved Issues
+
+### 1.1 Locked Session Roster Discrepancy (RESOLVED)
+- **Symptom**: On locked training sessions, certain eligible players appeared as "NOT IN ROSTER" in the session detail view, but upon unlocking and entering edit mode, all players were displayed and defaulted to "Present".
+- **Root Cause**: Divergent roster construction logic between view and edit modes. The view mode only rendered players who had existing attendance records on the session document, while edit mode computed the complete active roster for that coach, sport, and registration date.
+- **Resolution**: Harmonized view and edit modes across `client/src/app/api/sessions/[id]/route.ts` and `client/public/script.js`. Both modes now use the identical roster computation logic based on active registered players for that sport and coach, eliminating "NOT IN ROSTER" inconsistencies for valid athletes.
+
+### 1.2 Audit Log Persistence & Inspection (RESOLVED)
+- **Status in Legacy Express**: `AuditLog.create()` was uncalled on player deletion (only `console.log` was executed), and `src/routes/audit.js` was unmounted in `src/app.js`.
+- **Resolution in Next.js**: Full administrative audit logging is implemented in Next.js. Administrative actions across staff management (`create`, `edit`, `reset_password`, `remove`) and player operations (`edit`, `reset_password`, `delete`, `reassign_coach`) persist immutable records to the `auditlogs` collection. The endpoint `GET /api/admin/audit` serves paginated, sanitized logs to the admin workspace at `/app`.
+
+### 1.3 Seed Script & Cricket Score Schema Alignment (RESOLVED)
+- **Status in Legacy Express**: Seed script cricket scores previously exceeded the legacy schema's upper score limit.
+- **Resolution**: Harmonized in `legacy/src/models/Match.js` and `client/src/lib/models/Match.ts`. `scripts/seed.js` runs cleanly against `academy_final` without schema validation errors.
+
+### 1.4 Timezone & Calendar Month Boundaries (RESOLVED)
+- **Resolution**: Addressed in `client/src/lib/ist.ts` (`istDateTime`, `istDateString`, `getWidenedDateWindow`, `getIstMonthRange`). Explicit Indian Standard Time (UTC+05:30) calculations eliminate host-local timezone dependencies on UTC serverless environments (Vercel).
 
 ---
 
-### 3. Stale Legacy Test Fixtures
-- **11-Player Minimum Team Size Rule**:
-  - When the standard team size validation (`minTeamSize`: Football 11, Cricket 11) was added to `matches.js`, test suites written for earlier phases (`match-phase2.test.js`, `match-phase3.test.js`, `data-synchronization.test.js` tests 1–5, `checklist.test.js` check 2) used test fixtures with only 0 to 4 registered players. `POST /api/matches` rightly rejects these with `400 Bad Request`.
-- **Future Date Validation**:
-  - `sessions.js` enforces that attendance sessions cannot be scheduled in the future (`Cannot create attendance sessions for future dates`).
-  - `session-roster-integrity.test.js` and `acceptance.test.js` use static future dates (`2027-01-15` and `2027-01-01`), triggering 400 Bad Request.
-- **Deprecated `PUT /api/matches/:id/entries` Endpoint**:
-  - `acceptance.test.js` tests 6–12 target the deprecated Phase 2 `PUT /entries` endpoint, which was replaced in Phase 7/8 by the unified `/save-all` and `/complete` workflow.
-- **Client Sync Test Contract in `player-removal-unit.test.js`**:
-  - Test 7 checks for specific regex strings inside `script.js`. This test is retired by design at cutover once `script.js` is replaced by the Next.js client.
+## 2. Active Technical Considerations & Parity Notes
 
----
+### 2.1 Stale Legacy Express Test Fixtures (in `legacy/test/`)
+- **11-Player Minimum Team Size**: Legacy test suites written for early prototypes (`match-phase2.test.js`, `match-phase3.test.js`) used test fixtures with 0–4 registered players. `POST /api/matches` enforces standard team size validation (`minTeamSize`: Football 11, Cricket 11) and rejects fixtures with fewer players with `400 Bad Request`.
+- **Future Date Validation**: Attendance sessions cannot be scheduled for future dates. Legacy tests using static future dates trigger `400 Bad Request`.
+- **Deprecated `PUT /api/matches/:id/entries`**: Legacy acceptance tests targeting this deprecated endpoint have been superseded by the atomic `/save-all` and `/complete` workflows.
 
-### 4. Auth & Token Invalidation
-- **Deleted Coach/Admin Tokens Valid Until Expiry**:
-  - In Express [`src/middleware/auth.js`](file:///c:/Users/pooki/Desktop/hackathon/src/middleware/auth.js#L18), the database user lookup (`User.findById`) and profile revocation check are executed only if `req.user.role === 'player'`.
-  - For coach and admin roles, tokens are validated purely cryptographically against `JWT_SECRET`. If a coach or admin account is deleted or removed from MongoDB, existing JWT tokens issued to that account continue to work on endpoints that do not explicitly perform a fresh `User.findById` query until the 8-hour token TTL expires.
-  - *Resolution*: Ported 1:1 to Next.js during migration to preserve behavior parity; post-cutover remediation can add universal user lookup or token revocation across all roles.
+### 2.2 Auth & Token Invalidation Parity
+- **Token Invalidation Scope**: For coach and admin roles, tokens are validated cryptographically against `JWT_SECRET`. If a coach account is deleted, existing JWT tokens remain valid until expiration (8 hours) on routes that do not perform a fresh `User.findById` query. This maintains 1:1 parity with the original Express specification.
 
----
-
-### 5. Timezone & Calendar Month Boundaries (Decision A: CLOSED)
-- **Host-Local Time Dependency vs Explicit IST Representation (RESOLVED)**:
-  - In Express, date boundary queries and match schedule enrichments in `matches.js` constructed Date ranges using host-local methods, relying on the host laptop running in `Asia/Kolkata` (UTC+05:30).
-  - Next.js runs on UTC hosts (Vercel/serverless).
-  - **Decision A is CLOSED**: Next.js implements explicit Indian Standard Time helpers in `client/src/lib/ist.ts` (`istDateTime`, `istDateString`, `getWidenedDateWindow`, `getIstMonthRange`) that parse date components with explicit `+05:30` offsets, eliminating all host-local `new Date(y, m, d, h, min)` and `.setHours()` calls across kickoff, unlock, calendar month boundaries, and status progression. Kickoff and unlock instants match Express under `Asia/Kolkata` identically.
-
----
-
-### 6. Phase 5 Reopen Window Uses Raw `Date.now()`
-- **`editUnlockedUntil` Bypasses `getEffectiveNow`**:
-  - In [`src/routes/matches.js`](file:///c:/Users/pooki/Desktop/hackathon/src/routes/matches.js#L467-L469), lines 467, 651, and 1146 check and set `editUnlockedUntil` using wall-clock `Date.now()`, bypassing `getEffectiveNow(req)`.
-  - In contrast, kickoff and scoring unlock logic checks `effectiveNow`. As a result, mock time supplied via `x-mock-now` does not affect the 5-minute reopen window calculation.
-  - *Resolution*: Ported 1:1 to Next.js in Phase 4C to maintain parity; post-cutover remediation will harmonize all match time comparisons under a single centralized clock service.
-
----
-
-### 8. Deliberate Deviations: Upfront ObjectId Validation & Route Guards
-- **Upfront 400 Bad Request for Malformed ObjectIds**:
-  - In Next.js route handlers across matches endpoints:
-    - `GET /api/matches/:id`
-    - `PATCH /api/matches/:id`
-    - `DELETE /api/matches/:id`
-    - `PATCH /api/matches/:id/cancel`
-    - `PATCH /api/matches/:id/complete`
-    - `PATCH /api/matches/:id/reopen-for-edit`
-    - `PATCH /api/matches/:id/edit-scores`
-    - `GET /api/matches/:id/eligible-players`
-    - `PUT /api/matches/:id/selected-players`
-    - `GET /api/matches/:id/participation`
-    - `PATCH /api/matches/:id/participation/:playerId`
-    - `PUT /api/matches/:id/entries`
-    - `POST /api/matches/:id/save-all`
-  - Next.js explicitly checks `!mongoose.Types.ObjectId.isValid(id)` and returns `400 { error: 'Invalid match ID format' }` (or `400 { error: 'Invalid ID format' }` for invalid player IDs).
-  - In Express, passing an invalid ObjectId string (such as `123` or `invalid-id`) directly into `Match.findById(id)` throws a Mongoose `CastError`, which unhandled falls into the route's `catch (err)` block returning either `500 { error: err.message }` or an unhandled exception. Next.js handles this safely at the HTTP boundary with standard 400 Client Error.
-- **Coach Ownership Guard on `PUT /api/matches/:id/selected-players`**:
-  - Next.js adds `if (auth.user.role === 'coach' && match.coach.toString() !== coachId) return 403 { error: 'Forbidden' }`. Express previously omitted this ownership guard, allowing a coach to alter player selections on other coaches' matches.
-- **Team Size Validation on `POST /api/matches/:id/save-all` (Line ~125 Reconciled)**:
-  - Both Express (lines 695 and 701 of `src/routes/matches.js`) and Next.js (lines 115 and 124 of `client/src/app/api/matches/[id]/save-all/route.ts`) check minimum team size.
-  - When `selectedPlayerIds: []` is submitted with `complete: true`, line 695 (`uniquePlayerIds.length > 0`) is skipped, but line 701 (`complete && uniquePlayerIds.length < minTeamSize`) triggers in both Express and Next.js, returning HTTP 400 `${match.sport} requires at least ${minTeamSize} selected players to complete the match, but only 0 were selected.`.
-  - There is zero divergence: no valid or invalid input exists that Express accepts which Next.js rejects.
-
-
-
-
-
+### 2.3 Deliberate Improvements in Next.js API Routes
+- **Upfront ObjectId Format Validation**: Next.js route handlers validate MongoDB ObjectIds upfront with `mongoose.Types.ObjectId.isValid(id)` and return clean `400 Bad Request` responses instead of unhandled Mongoose `CastError` 500s.
+- **Coach Ownership Guard**: Next.js enforces ownership verification on match player selections (`PUT /api/matches/:id/selected-players`), ensuring coaches can modify selections only on their own matches.
