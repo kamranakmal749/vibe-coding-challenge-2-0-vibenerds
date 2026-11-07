@@ -1,0 +1,478 @@
+/* ==========================================================================
+   Scout Radar Page Styles — Maidan Desk (Native React)
+   Theme: Dark Slate & Emerald Glassmorphism (#0B0F19 background, #10B981 accent)
+   ========================================================================== */
+
+.scout-page {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #0B0F19;
+  color: #F8FAFC;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ambient Background Glow */
+.scout-bg-glow-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.scout-bg-glow-top {
+  position: absolute;
+  top: -150px;
+  right: 15%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0) 70%);
+  filter: blur(80px);
+}
+
+.scout-bg-glow-bottom {
+  position: absolute;
+  bottom: -150px;
+  left: 10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(5, 150, 105, 0.08) 0%, rgba(5, 150, 105, 0) 70%);
+  filter: blur(100px);
+}
+
+/* Top Navigation Bar */
+.scout-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.scout-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.scout-nav-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.scout-nav-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.scout-nav-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.scout-nav-subtitle {
+  font-size: 0.75rem;
+  color: #10B981;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.scout-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scout-nav-spa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #E2E8F0;
+  font-size: 0.825rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scout-nav-spa-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+
+.scout-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #FCA5A5;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scout-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #FEF2F2;
+}
+
+/* Main Container */
+.scout-container {
+  flex: 1;
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 24px 64px 24px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Page Header & Criteria Banner */
+.scout-header-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+@media (min-width: 768px) {
+  .scout-header-row {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.scout-heading {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.03em;
+  margin: 0 0 6px 0;
+}
+
+.scout-description {
+  font-size: 0.9rem;
+  color: #94A3B8;
+  margin: 0;
+  font-weight: 500;
+}
+
+.scout-header-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.scout-criteria-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34D399;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.scout-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #CBD5E1;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scout-refresh-btn:hover {
+  background: rgba(51, 65, 85, 0.9);
+  color: #FFFFFF;
+}
+
+/* Status Cards & Banners */
+.scout-card {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+.scout-loading-state,
+.scout-error-state,
+.scout-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.scout-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(16, 185, 129, 0.2);
+  border-top-color: #10B981;
+  border-radius: 50%;
+  animation: scoutSpin 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes scoutSpin {
+  to { transform: rotate(360deg); }
+}
+
+.scout-state-text {
+  font-size: 0.95rem;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.scout-error-banner {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #FCA5A5;
+  border-radius: 12px;
+  padding: 18px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.scout-retry-btn {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #FFFFFF;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.scout-retry-btn:hover {
+  background: rgba(239, 68, 68, 0.35);
+}
+
+/* Table Design */
+.scout-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scout-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.scout-table th {
+  background: rgba(30, 41, 59, 0.55);
+  color: #94A3B8;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.scout-table th:not(:last-child) {
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.scout-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.scout-table td:not(:last-child) {
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.scout-table tr:last-child td {
+  border-bottom: none;
+}
+
+.scout-table tr:hover td {
+  background: rgba(30, 41, 59, 0.35);
+}
+
+/* Column Specifics */
+.scout-player-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.scout-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(16, 185, 129, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.scout-player-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scout-player-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #F8FAFC;
+  line-height: 1.2;
+}
+
+.scout-star {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1rem;
+  color: #FBBF24;
+  cursor: help;
+  transform: translateY(-1px);
+}
+
+.scout-coach-label {
+  font-size: 0.775rem;
+  color: #64748B;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.scout-sport-badge {
+  font-weight: 600;
+  color: #E2E8F0;
+}
+
+.scout-attendance-pct {
+  font-weight: 800;
+  color: #34D399;
+  font-size: 1rem;
+}
+
+.scout-attendance-sessions {
+  font-size: 0.75rem;
+  color: #64748B;
+  font-weight: 500;
+  margin-left: 6px;
+}
+
+.scout-matches-count {
+  font-weight: 700;
+  color: #E2E8F0;
+}
+
+.scout-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34D399;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.scout-status-icon {
+  font-size: 0.85rem;
+}
+
+/* Mobile Responsiveness (375px) */
+@media (max-width: 640px) {
+  .scout-navbar {
+    padding: 12px 16px;
+  }
+  
+  .scout-nav-title {
+    font-size: 0.95rem;
+  }
+  
+  .scout-nav-subtitle {
+    font-size: 0.65rem;
+  }
+  
+  .scout-nav-spa-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+  
+  .scout-logout-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+  
+  .scout-container {
+    padding: 20px 12px 40px 12px;
+  }
+  
+  .scout-heading {
+    font-size: 1.4rem;
+  }
+  
+  .scout-description {
+    font-size: 0.825rem;
+  }
+  
+  .scout-table th,
+  .scout-table td {
+    padding: 12px 14px;
+  }
+  
+  .scout-avatar {
+    width: 36px;
+    height: 36px;
+  }
+}

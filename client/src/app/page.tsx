@@ -9,12 +9,19 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  // If already authenticated, redirect to /app immediately without hydration mismatch
+  // If already authenticated, redirect to /app (or /app/scout for scout) immediately without hydration mismatch
   useEffect(() => {
     try {
       const token = localStorage.getItem('token');
       const user = localStorage.getItem('user');
       if (token && user) {
+        try {
+          const parsed = JSON.parse(user);
+          if (parsed?.role === 'scout') {
+            window.location.href = '/app/scout';
+            return;
+          }
+        } catch (_) {}
         window.location.href = '/app';
         return;
       }
@@ -58,8 +65,12 @@ export default function LoginPage() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      // Redirect to the SPA workspace
-      window.location.href = '/app';
+      // Redirect to scout radar for scout role, or SPA workspace for others
+      if (data.user?.role === 'scout') {
+        window.location.href = '/app/scout';
+      } else {
+        window.location.href = '/app';
+      }
     } catch (err: any) {
       setError(err.message || 'Login failed. Please check credentials.');
     } finally {
