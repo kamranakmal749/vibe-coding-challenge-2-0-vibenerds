@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> Historical design notes. Parts describe the original Express backend and are outdated. See README.md for the current architecture (Next.js route handlers in client/).
+
 # MaidanDesk (Academy ERP) — Complete Project Context & AI Chatbot Knowledge Base
 
 > **Purpose of this Document:**  

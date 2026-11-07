@@ -4,9 +4,10 @@ import assert from 'node:assert/strict';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 
-const JWT_SECRET = 'test-jwt-secret-staff-unit';
+const JWT_SECRET = 'test-jwt-secret-staff-unit-must-be-min-32-chars';
 process.env.JWT_SECRET = JWT_SECRET;
 process.env.MONGODB_URI = 'mongodb://localhost:27017/academy_dev';
+process.env.ALLOW_PRODUCTION_DB = 'false';
 
 // Prevent actual DB network connections by priming global mongoose cache
 (globalThis as any).mongooseConnection = {
@@ -14,8 +15,16 @@ process.env.MONGODB_URI = 'mongodb://localhost:27017/academy_dev';
   promise: Promise.resolve(mongoose),
 };
 
+const dbModule = require('../src/lib/db');
+if ((dbModule as any).cached) {
+  (dbModule as any).cached.conn = mongoose;
+  (dbModule as any).cached.promise = Promise.resolve(mongoose);
+}
+
 const User = require('../src/lib/models/User');
 const Player = require('../src/lib/models/Player');
+
+User.findById = async () => ({ _id: '507f1f77bcf86cd799439004', role: 'player' });
 
 // Helper to craft mock Request
 function makeRequest(

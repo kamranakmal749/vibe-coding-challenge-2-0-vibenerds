@@ -8,7 +8,7 @@ Maidan Desk is a comprehensive sports academy management and talent scouting pla
 
 The platform provides dedicated, role-isolated portals for each academy stakeholder:
 
-- **Admin**: Complete academy oversight, staff provisioning (Coach/Scout creation, password resets, deletion), athlete lifecycle and roster management, bulk coach reassignment, immutable audit log tracking, and directory CSV export.
+- **Admin**: Complete academy oversight, staff provisioning (Coach/Scout creation, password resets, deletion), athlete lifecycle and roster management, bulk coach reassignment, audit log tracking, and directory CSV export.
 - **Coach**: Daily training attendance sessions (default Present with per-entry participation granularity), atomic session saving and locking, match scheduling, dynamic squad eligibility validation, and match scoring.
 - **Scout**: Talent discovery radar filtered strictly for trial-ready athletes meeting performance criteria ($\ge 75\%$ attendance turnout and $\ge 2$ matches played).
 - **Player**: Athlete personal portal displaying profile details, historical session attendance record, match participation history, and scouting readiness status.
@@ -25,7 +25,7 @@ The platform provides dedicated, role-isolated portals for each academy stakehol
   - **Native React Entry (`/`)**: Dark glassmorphic React login component featuring 4 dedicated role tabs (**Admin**, **Coach**, **Scout**, **Player**), dynamic role descriptions and placeholders, and a 1-click test credential helper.
   - **Native React Scout Radar (`/app/scout`)**: Dedicated React client component for scouting talent discovery, real-time trial readiness indicators, and performance star evaluations.
   - **Main Academy Workspace (`/app`)**: The main UI is the original battle-tested vanilla JS single-page application served directly by Next.js at `/app` via route rewrite from `client/public/`.
-  - **Legacy Codebase Notice**: The original Express codebase in [`legacy/`](legacy/) (`legacy/src`, `legacy/server.js`, `legacy/test/`) is preserved for historical reference and parity testing only; it is **not used** by the deployed Next.js application.
+  - **Legacy Codebase Notice**: The original Express codebase in [`legacy/`](legacy/) (`legacy/src`, `legacy/server.js`, `legacy/test/`) is preserved for historical reference and parity testing only; it is **not used** by the deployed Next.js application. Note that `scripts/seed.js` and the maintenance scripts still import Mongoose models from `legacy/src/models`, so `legacy/` must not be deleted.
 
 ---
 
@@ -75,12 +75,15 @@ maidandesk/
 │   ├── seed.js                 # Guarded database seed script (strictly restricted to academy_final)
 │   └── verify-academy-final.js # Read-only database link integrity and readiness verification
 │
-├── legacy/                     # Original Express implementation (archived for reference)
+├── legacy/                     # Original Express implementation (models required by scripts/seed.js; do not delete)
 │   ├── src/                    # Original Express 5 controllers, middleware, routes, and models
 │   ├── public/                 # Original standalone vanilla HTML/JS/CSS assets
 │   ├── test/                   # Legacy Jest / Supertest integration suites
 │   ├── server.js               # Original Express entrypoint (port 3000)
 │   └── README.md               # Legacy architecture documentation
+│
+├── docs/                       # Project documentation & historical design specifications
+│   └── PROJECT_CONTEXT.md      # Historical design notes & domain rules (archived)
 │
 ├── KNOWN_ISSUES.md             # Technical debt, solved items, and known limitations
 ├── LICENSE                     # MIT License (Kamran Akmal)
@@ -109,7 +112,7 @@ The Admin role possesses full governance, athlete lifecycle management, staff pr
 - **Bulk Coach Reassignment**: Select multiple athletes via row checkboxes (or select all) and reassign them to another coach in a single atomic operation.
 
 ### 3. Audit Log (`/app` > Audit Log)
-- **Immutable Operation Trail**: Real-time chronological tracking of all administrative actions, including staff creation, editing, password resets, and deletions, as well as player editing, password resets, deletions, and coach reassignments.
+- **Audit Trail**: Real-time chronological tracking of all administrative actions, including staff creation, editing, password resets, and deletions, as well as player editing, password resets, deletions, and coach reassignments.
 - **Strict Credential Privacy**: Passwords, secrets, and sensitive tokens are strictly sanitized and redacted before any audit record is persisted (`details` never stores passwords).
 - **Paginated Inspection**: Browse audit history with server-side pagination, timestamps, actor details, action tags, and structured operation details.
 
