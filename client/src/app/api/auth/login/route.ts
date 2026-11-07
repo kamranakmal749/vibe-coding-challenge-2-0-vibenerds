@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import connectToDatabase from '@/lib/db';
+import { getJwtSecret } from '@/lib/auth';
 
 const User = require('@/lib/models/User');
 
@@ -35,7 +36,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    const jwtSecret = process.env.JWT_SECRET || 'your_super_secret_jwt_key_here';
+    const jwtSecret = getJwtSecret();
     const token = jwt.sign(
       {
         id: user._id,

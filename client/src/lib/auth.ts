@@ -21,10 +21,19 @@ export type AuthResult =
   | { user: AuthUser; errorResponse?: never }
   | { user?: never; errorResponse: NextResponse };
 
+export function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT authentication configuration error: JWT_SECRET environment variable is not defined');
+  }
+  return secret;
+}
+
 /**
  * Authenticates request using Authorization: Bearer <token>.
  * Enforces:
  * - Missing token -> 401 { error: 'No token provided' }
+ * - Missing JWT_SECRET -> 500 { error: 'Server configuration error: JWT_SECRET is not configured' }
  * - Invalid/expired token -> 401 { error: 'Invalid or expired token' }
  * - Player account removed in DB -> 401 { error: 'Account has been removed' }
  * - Player profile removed in DB -> 401 { error: 'Player profile has been removed' }
@@ -42,7 +51,17 @@ export async function authenticateRequest(
   }
 
   const token = authHeader.slice(7);
-  const jwtSecret = process.env.JWT_SECRET || 'your_super_secret_jwt_key_here';
+  let jwtSecret: string;
+  try {
+    jwtSecret = getJwtSecret();
+  } catch (err: any) {
+    return {
+      errorResponse: NextResponse.json(
+        { error: 'Server configuration error: JWT_SECRET is not configured' },
+        { status: 500 }
+      ),
+    };
+  }
 
   let payload: AuthUser;
   try {

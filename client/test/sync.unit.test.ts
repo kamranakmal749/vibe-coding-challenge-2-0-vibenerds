@@ -1,3 +1,4 @@
+require('dns').setServers(['8.8.8.8', '1.1.1.1']);
 // client/test/sync.unit.test.ts
 import test from 'node:test';
 import assert from 'node:assert/strict';

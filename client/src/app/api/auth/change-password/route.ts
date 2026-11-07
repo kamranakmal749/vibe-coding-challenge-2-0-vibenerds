@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import connectToDatabase from '@/lib/db';
-import { authenticateRequest } from '@/lib/auth';
+import { authenticateRequest, getJwtSecret } from '@/lib/auth';
 
 const User = require('@/lib/models/User');
 
@@ -54,7 +54,7 @@ export async function PATCH(req: Request) {
     user.mustChangePassword = false;
     await user.save();
 
-    const jwtSecret = process.env.JWT_SECRET || 'your_super_secret_jwt_key_here';
+    const jwtSecret = getJwtSecret();
     const token = jwt.sign(
       {
         id: user._id,
