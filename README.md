@@ -1,208 +1,352 @@
-# Maidan Desk — Sports Academy OS
+<!-- Hero Banner -->
+<p align="center">
+  <a href="https://maidandesk.vercel.app">
+    <img src="docs/assets/maidan-desk-banner.svg" alt="Maidan Desk — Sports Academy OS Banner" width="100%">
+  </a>
+</p>
 
-Maidan Desk is a comprehensive sports academy management and talent scouting platform engineered for sports academies and grassroots athlete development across multi-sport operations (Football, Cricket, Basketball). It streamlines daily attendance logging, match scheduling, dynamic squad eligibility, scoring, performance star tracking, and professional scouting evaluation.
+<!-- Dynamic Shields & Status Badges -->
+<p align="center">
+  <a href="https://github.com/kamranakmal749/vibe-coding-challenge-2-0-vibenerds/actions/workflows/ci.yml">
+    <img src="https://github.com/kamranakmal749/vibe-coding-challenge-2-0-vibenerds/actions/workflows/ci.yml/badge.svg" alt="CI Workflow Status">
+  </a>
+  <a href="https://maidandesk.vercel.app">
+    <img src="https://img.shields.io/badge/Deployment-Live%20on%20Vercel-10B981?style=flat&logo=vercel&logoColor=white" alt="Live Deployment">
+  </a>
+  <a href="https://nextjs.org">
+    <img src="https://img.shields.io/badge/Next.js-15.1.7-000000?style=flat&logo=next.js&logoColor=white" alt="Next.js 15">
+  </a>
+  <a href="https://react.dev">
+    <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=black" alt="React 19">
+  </a>
+  <a href="https://www.typescriptlang.org">
+    <img src="https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat&logo=typescript&logoColor=white" alt="TypeScript 5.7">
+  </a>
+  <a href="https://www.mongodb.com/atlas">
+    <img src="https://img.shields.io/badge/Database-MongoDB%20Atlas-47A248?style=flat&logo=mongodb&logoColor=white" alt="MongoDB Atlas">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat" alt="MIT License">
+  </a>
+</p>
 
----
-
-## The Four Roles
-
-The platform provides dedicated, role-isolated portals for each academy stakeholder:
-
-- **Admin**: Complete academy oversight, staff provisioning (Coach/Scout creation, password resets, deletion), athlete lifecycle and roster management, bulk coach reassignment, audit log tracking, and directory CSV export.
-- **Coach**: Daily training attendance sessions (default Present with per-entry participation granularity), atomic session saving and locking, match scheduling, dynamic squad eligibility validation, and match scoring.
-- **Scout**: Talent discovery radar filtered strictly for trial-ready athletes meeting performance criteria ($\ge 75\%$ attendance turnout and $\ge 2$ matches played).
-- **Player**: Athlete personal portal displaying profile details, historical session attendance record, match participation history, and scouting readiness status.
-
----
-
-## Architecture & Tech Stack
-
-- **Framework**: Next.js 15 (located in [`client/`](client/))
-- **Backend API**: 100% Next.js App Router route handlers in [`client/src/app/api/`](client/src/app/api/) (**43 endpoints** across auth, admin staff & player management, attendance sessions, match lifecycles, scouting radar, audit logging, and sync tracking).
-- **Database**: MongoDB Atlas with atomic sync tracking (`syncstates`), optimistic concurrency locking, and strict database safety guards.
-- **Authentication**: HS256 JWT auth read strictly from environment variables without default fallback secrets.
-- **Frontend Architecture**:
-  - **Native React Entry (`/`)**: Dark glassmorphic React login component featuring 4 dedicated role tabs (**Admin**, **Coach**, **Scout**, **Player**), dynamic role descriptions and placeholders, and a 1-click test credential helper.
-  - **Native React Scout Radar (`/app/scout`)**: Dedicated React client component for scouting talent discovery, real-time trial readiness indicators, and performance star evaluations.
-  - **Main Academy Workspace (`/app`)**: The main UI is the original battle-tested vanilla JS single-page application served directly by Next.js at `/app` via route rewrite from `client/public/`.
-  - **Legacy Codebase Notice**: The original Express codebase in [`legacy/`](legacy/) (`legacy/src`, `legacy/server.js`, `legacy/test/`) is preserved for historical reference and parity testing only; it is **not used** by the deployed Next.js application. Note that `scripts/seed.js` and the maintenance scripts still import Mongoose models from `legacy/src/models`, so `legacy/` must not be deleted.
-
----
-
-## Live Deployment
-
-- **Live Application URL**: [https://maidandesk.vercel.app](https://maidandesk.vercel.app)
-- **Entry & Login Portal**: [https://maidandesk.vercel.app/](https://maidandesk.vercel.app/)
-- **Scout Radar (Native React)**: [https://maidandesk.vercel.app/app/scout](https://maidandesk.vercel.app/app/scout)
-- **Academy Workspace (Main UI)**: [https://maidandesk.vercel.app/app](https://maidandesk.vercel.app/app)
-
----
-
-## Role Selection & Test Credentials
-
-The login card at [`/`](https://maidandesk.vercel.app/) features four segmented role buttons at the top (**Admin**, **Coach**, **Scout**, **Player**). Selecting a role dynamically tailors the card heading, description, and input placeholder. Click **Fill test credentials** under the form to populate login fields with standard demo credentials:
-
-| Role | Username | Password | Athlete / Profile Details | Scouting Readiness Status |
-|---|---|---|---|---|
-| **Admin** | `admin` | `admin123` | Academy Admin | System governance & staff management |
-| **Coach** | `coach` | `coach123` | Coach Sharma | Attendance locking & match operations |
-| **Scout** | `scout` | `scout123` | Scout Verma | Talent discovery & trial evaluations |
-| **Player** | `md260001` | `player123` | Kamran Akmal (Football) | **READY** (100% attendance, 2 matches) |
-| **Player** | `md260003` | `player123` | Aadil Azhar (Football) | **NOT READY** (50% attendance, 1 match) |
-
-> **Dataset Scope**: The clean baseline contains 24 seeded players, 10 trial-ready, plus any added through the live application. Any players or staff accounts created in the live app are persisted in `academy_final`. If the database is re-seeded using `node scripts/seed.js`, all collections will be reset to the clean baseline.
+<!-- Primary Action Links -->
+<p align="center">
+  <a href="https://maidandesk.vercel.app"><b>🚀 Live Application</b></a> •
+  <a href="#-evaluation-access--test-credentials"><b>🔑 Test Credentials</b></a> •
+  <a href="#-system-architecture"><b>📐 Architecture</b></a> •
+  <a href="docs/SCREENSHOTS.md"><b>📸 Visual Tour & Gallery</b></a> •
+  <a href="docs/README.md"><b>📚 Documentation Index</b></a>
+</p>
 
 ---
 
-## Project Structure
+## 📌 Executive Summary
+
+**Maidan Desk** is a high-performance sports academy management system and talent scouting platform engineered for grassroots athletic academies across multi-sport disciplines (**Football**, **Cricket**, and **Basketball**).
+
+Developed with Next.js 15 App Router, React 19, TypeScript, and MongoDB Atlas, Maidan Desk solves the critical operational bottlenecks of athletic academies: eliminating paper attendance tracking, enforcing dynamic squad eligibility rules for competitive fixtures, safeguarding athlete health and participation metrics, and empowering talent scouts with real-time, data-backed trial readiness radars.
+
+### Key Capabilities at a Glance
+
+- 🏟️ **Multi-Sport Operational Hub**: Unified roster and fixture scheduling across Football, Cricket, and Basketball.
+- ⚡ **Atomic Attendance Sessions**: Fast, default-present daily attendance with per-athlete participation granularity (`practice`, `match`, `both`) and tamper-resistant session locking.
+- 🎯 **Scouting Radar**: Automated talent discovery filtering athletes against strict quantitative criteria ($\ge 75\%$ attendance and $\ge 2$ competitive matches) with client-side PDF dossier export.
+- 🛡️ **Role-Based Governance**: Four isolated user spaces (**Admin**, **Coach**, **Scout**, **Player**) backed by HS256 JWT security and comprehensive administrative audit logging.
+- 🔄 **Real-Time Synchronisation**: Optimistic concurrency control and version-tracked sync polling across distributed client sessions.
+
+---
+
+## 📸 Interface Showcase
+
+| Role-Segmented Login (`/`) | Coach Command Center (`/app`) |
+|:---:|:---:|
+| <a href="docs/SCREENSHOTS.md#1-role-segmented-authentication"><img src="docs/assets/screenshots/01-landing-role-login.png" alt="Login Portal" width="100%"></a> | <a href="docs/SCREENSHOTS.md#2-coach-overview--command-center"><img src="docs/assets/screenshots/02-coach-overview-command-center.png" alt="Coach Command Center" width="100%"></a> |
+| *Segmented 4-role switcher with 1-click test credentials* | *Upcoming fixtures, turnout metrics, and squad breakdown* |
+
+| Scouting Talent Radar (`/app/scout`) | Attendance Session Ledger (`/app`) |
+|:---:|:---:|
+| <a href="docs/SCREENSHOTS.md#6-scouting-radar--talent-discovery"><img src="docs/assets/screenshots/06-scouting-radar-talent.png" alt="Scouting Radar" width="100%"></a> | <a href="docs/SCREENSHOTS.md#4-training-attendance-sessions--roster"><img src="docs/assets/screenshots/04-attendance-sessions-roster.png" alt="Attendance Roster" width="100%"></a> |
+| *Real-time trial qualification radar with PDF export* | *Default-present marking, participation modes & lock* |
+
+👉 **[View the Complete 9-Screen Visual Tour in docs/SCREENSHOTS.md](docs/SCREENSHOTS.md)**
+
+---
+
+## 🔑 Evaluation Access & Test Credentials
+
+The live deployment at **[https://maidandesk.vercel.app](https://maidandesk.vercel.app)** is pre-seeded with a comprehensive test dataset in `academy_final`. The login screen at `/` features **one-click credential buttons** for each role:
+
+| Segment Tab | Role | Username | Password | Target Portal / Assigned Profile | Core Permissions & Focus |
+|:---:|:---:|:---:|:---:|:---|:---|
+| **Admin** | Academy Administrator | `admin` | `admin123` | Governance Workspace (`/app`) | Staff provisioning, password resets, roster management, CSV exports, audit trail |
+| **Coach** | Senior Academy Coach | `coach` | `coach123` | Coach Workspace (`/app`) | Training sessions, attendance locking, match creation, squad eligibility, match scoring |
+| **Scout** | Talent Evaluator | `scout` | `scout123` | Scout Radar (`/app/scout`) | Talent discovery radar, multi-sport filters, trial qualification dossier, PDF export |
+| **Player** | Athlete (Ready) | `md260001` | `player123` | Player Portal (`/app`) | Kamran Akmal (Football) — **TRIAL READY** (100% attendance, 2 matches played) |
+| **Player** | Athlete (Developing) | `md260003` | `player123` | Player Portal (`/app`) | Aadil Azhar (Football) — **NOT READY** (50% attendance, 1 match played) |
+
+> [!NOTE]
+> Evaluators never need to run database seeds. All collections are persistent, operational, and immediately accessible.
+
+---
+
+## 👥 The Four User Roles
+
+Maidan Desk features strict architectural separation of concerns across four distinct user personas:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        MAIDAN DESK USER ROLES                          │
+├──────────────┬──────────────────┬─────────────────┬────────────────────┤
+│   🛡️ ADMIN   │    📋 COACH      │    🔍 SCOUT     │     🏃 PLAYER      │
+├──────────────┼──────────────────┼─────────────────┼────────────────────┤
+│ • Staff CRUD │ • Daily Sessions │ • Talent Radar  │ • Personal Portal  │
+│ • Password   │ • Attendance     │ • Readiness     │ • Attendance       │
+│   Resets       Locking            Thresholds      │   Record           │
+│ • Player     │ • Match Fixtures │ • Performance   │ • Match Ledger     │
+│   Lifecycle  │ • Squad Selection  Star Ratings    │ • Readiness        │
+│ • Audit Log  │ • Match Scores   │ • PDF Dossier   │   Indicator        │
+│ • CSV Export │ • Squad Analytics  Export          │ • Coach Feedback   │
+└──────────────┴──────────────────┴─────────────────┴────────────────────┘
+```
+
+### 1. Academy Administrator (`admin`)
+- **Staff Provisioning**: Create and manage Coaches and Scouts with unique usernames and minimum 8-character passwords.
+- **One-Time Credential Reveal**: Displays temporary credentials upon creation or reset with single and bulk copy actions.
+- **Enforced Security**: Newly created staff accounts have `mustChangePassword` enforced upon initial login.
+- **Athlete Lifecycle**: Search, filter, edit athlete profiles, bulk-reassign athletes across coaches, and execute guarded cascade deletions (`{ confirm: true }`).
+- **Audit Governance**: Chronological inspection of administrative activities with automatic sanitization of sensitive tokens and passwords.
+- **CSV Data Export**: Instant export of player rosters and key performance indicators (`GET /api/admin/export/players?format=csv`).
+
+### 2. Academy Coach (`coach`)
+- **Attendance Workflows**: Create dated training sessions with automatic roster population based on assigned sport.
+- **Granular Participation**: Mark athletes as Present/Absent with participation modes (`practice`, `match`, `both`).
+- **Atomic Locking**: Finalize and lock attendance sessions to ensure immutable records.
+- **Match Management**: Schedule competitive fixtures across sports with venue and opponent details.
+- **Squad Eligibility**: Dynamic validation ensuring only eligible athletes meeting attendance standards can be drafted.
+- **Live Scoring**: Record match results, scores, and participating athlete statistics.
+
+### 3. Talent Scout (`scout`)
+- **Native React Scouting Radar (`/app/scout`)**: Dedicated high-speed discovery interface tailored for scouts and talent scouts.
+- **Objective Readiness Metric**: Athletes automatically qualify for scouting trials when meeting both benchmarks:
+  $$\text{Turnout} \ge 75\% \quad \text{AND} \quad \text{Matches} \ge 2$$
+- **Sport-Specific Filtering**: Switch instantly across Football, Cricket, and Basketball prospects.
+- **Dynamic Search**: Instant client-side search across athlete names and player identifiers.
+- **Client-Side PDF Dossier Export**: Generate and download formatted scouting dossiers in India Standard Time (`Asia/Kolkata`) with zero server overhead.
+
+### 4. Academy Athlete / Player (`player`)
+- **Self-Service Portal**: Direct visibility into personal athletic development and academy standing.
+- **Readiness Tracking**: Transparent view of current trial eligibility status and metrics required to unlock scouting evaluation.
+- **Attendance Ledger**: Complete chronological breakdown of attended sessions and training consistency.
+- **Match History**: Verified record of competitive match participations, fixture dates, and scores.
+
+---
+
+## 📐 System Architecture
+
+Maidan Desk employs a hybrid Next.js 15 App Router architecture that balances rapid React component rendering with a battle-tested workspace:
+
+```mermaid
+graph TD
+    User([User Browser]) -->|HTTPS Request| Edge[Vercel Edge / CDN]
+    
+    subgraph Frontend ["Client Layer (client/)"]
+        Edge -->|/| ReactLogin["React 19 Segmented Login (page.tsx)"]
+        Edge -->|/app/scout| ReactScout["React Scout Radar (app/scout/page.tsx)"]
+        Edge -->|/app| VanillaWorkspace["Vanilla Workspace SPA (public/app.html)"]
+    end
+    
+    subgraph Backend ["Next.js 15 App Router API (client/src/app/api/)"]
+        ReactLogin & ReactScout & VanillaWorkspace -->|REST / JSON| APIRoutes["43 Route Handlers"]
+        
+        APIRoutes --> AuthAPI["/api/auth/* (JWT Login & Me)"]
+        APIRoutes --> AdminAPI["/api/admin/* (Staff, Players, Audit, Export)"]
+        APIRoutes --> CoachAPI["/api/sessions/* & /api/matches/*"]
+        APIRoutes --> ScoutAPI["/api/scout/players"]
+        APIRoutes --> SyncAPI["/api/sync/* (Version Polling)"]
+    end
+
+    subgraph Security ["Security & Guard Layer"]
+        APIRoutes --> JWTMiddleware["HS256 JWT Authentication & Role RBAC"]
+        APIRoutes --> DBGuard["Database Isolation Guard (academy_final)"]
+        APIRoutes --> OptimisticLock["Version Concurrency Engine (syncstates)"]
+    end
+
+    subgraph Storage ["Persistence Layer"]
+        DBGuard --> MongoAtlas[("MongoDB Atlas (academy_final)")]
+    end
+```
+
+### Architectural Highlights
+- **100% Next.js Route Handlers**: 43 modular endpoints handling authentication, athlete lifecycle, attendance records, match fixtures, and audit logs.
+- **Database Safety Guard**: The database client strictly enforces connection to the target database `academy_final`.
+- **Zero-Secret Client Bundles**: JWT secrets and database connection strings are confined strictly to server-side environments.
+- **Dynamic PDF Generation**: Client-side dynamic import of `jspdf` and `jspdf-autotable` prevents bundle bloat on non-scout pages.
+- **Legacy Preservation**: The original Express codebase is archived in [`legacy/`](legacy/) for historical reference and test parity; active maintenance scripts in [`scripts/`](scripts/) import Mongoose schemas directly from `legacy/src/models`.
+
+---
+
+## 💻 Tech Stack
+
+| Domain | Technology | Purpose |
+|---|---|---|
+| **Frontend Framework** | [Next.js 15.1.7](https://nextjs.org/) (App Router) | Core application routing, server components, and asset pipeline |
+| **UI Library** | [React 19](https://react.dev/) | Glassmorphic login card and native scouting radar components |
+| **Language** | [TypeScript 5.7](https://www.typescriptlang.org/) | Strict type-safety across client models, API payloads, and test suites |
+| **Database** | [MongoDB Atlas](https://www.mongodb.com/atlas) / Mongoose | Scalable NoSQL document store with schemas for users, sessions, matches, and audit logs |
+| **Authentication** | [jsonwebtoken (HS256)](https://github.com/auth0/node-jsonwebtoken) & [bcryptjs](https://github.com/dcodeIO/bcrypt.js) | Cryptographic password hashing and role-based token validation |
+| **Export Utilities** | [jsPDF](https://github.com/parallax/jsPDF) & [jsPDF-AutoTable](https://github.com/simonbengtsson/jsPDF-AutoTable) | Client-side scouting dossier generation |
+| **Testing** | Node.js Native Test Runner (`node:test`) | Ultra-fast unit, security, and concurrency test suites |
+| **Deployment** | [Vercel](https://vercel.com/) | Global serverless edge hosting (Root Directory: `client`) |
+
+---
+
+## 📁 Repository Structure
 
 ```text
 maidandesk/
 ├── client/                     # Active production Next.js 15 application (Vercel Root)
-│   ├── public/                 # Static assets & vanilla SPA (app.html, script.js, style.css)
+│   ├── public/                 # Static assets & workspace SPA (app.html, script.js, style.css)
 │   ├── src/
 │   │   ├── app/                # App Router: login (/), scout (/app/scout), and 43 API routes
 │   │   │   ├── api/            # Route handlers (admin, auth, matches, players, sessions, scout, sync)
-│   │   │   ├── app/scout/      # React Scout Radar page
-│   │   │   ├── page.tsx        # React segmented 4-role login page
-│   │   │   └── layout.tsx      # Root Next.js layout & theme providers
+│   │   │   ├── app/scout/      # React Scout Radar page & styles
+│   │   │   ├── page.tsx        # React segmented 4-role login component
+│   │   │   └── layout.tsx      # Root Next.js layout & global styles
 │   │   └── lib/                # Database connection, Mongoose models, auth guards, IST helpers
-│   ├── test/                   # Fast automated unit and integration tests (zero external dependencies)
-│   ├── next.config.mjs         # Production Next.js configuration & rewrite rules
+│   ├── test/                   # Automated unit, integration, and security tests (61 tests)
+│   ├── next.config.mjs         # Production Next.js config & rewrite rules
 │   └── package.json            # Client dependencies and build scripts
 │
-├── scripts/                    # Operational & maintenance scripts
-│   ├── seed.js                 # Guarded database seed script (strictly restricted to academy_final)
-│   └── verify-academy-final.js # Read-only database link integrity and readiness verification
-│
-├── legacy/                     # Original Express implementation (models required by scripts/seed.js; do not delete)
-│   ├── src/                    # Original Express 5 controllers, middleware, routes, and models
-│   ├── public/                 # Original standalone vanilla HTML/JS/CSS assets
-│   ├── test/                   # Legacy Jest / Supertest integration suites
-│   ├── server.js               # Original Express entrypoint (port 3000)
-│   └── README.md               # Legacy architecture documentation
-│
-├── docs/                       # Project documentation & historical design specifications
+├── docs/                       # Comprehensive documentation & asset showcase
+│   ├── assets/                 # Vector brand banners & production screenshots
+│   │   ├── maidan-desk-banner.svg
+│   │   └── screenshots/        # 9 high-resolution production screen captures
+│   ├── README.md               # Documentation directory index
+│   ├── SCREENSHOTS.md          # Visual tour & screenshot gallery
 │   └── PROJECT_CONTEXT.md      # Historical design notes & domain rules (archived)
 │
-├── KNOWN_ISSUES.md             # Technical debt, solved items, and known limitations
-├── LICENSE                     # MIT License (Kamran Akmal)
-└── package.json                # Root package manifest & developer scripts
+├── scripts/                    # Operational & maintenance utilities
+│   ├── seed.js                 # Guarded database seed script (restricted to academy_final)
+│   └── verify-academy-final.js # Read-only database link integrity & readiness verifier
+│
+├── legacy/                     # Archived Express implementation (models used by scripts/seed.js)
+│   ├── src/                    # Original Express controllers, middleware, and models
+│   ├── public/                 # Original standalone vanilla HTML/JS/CSS assets
+│   ├── server.js               # Original Express entrypoint
+│   └── README.md               # Legacy architecture notes
+│
+├── .github/                    # GitHub actions CI workflows and issue templates
+├── KNOWN_ISSUES.md             # Resolved items, technical debt, and architectural trade-offs
+├── CHANGELOG.md                # Chronological history of releases and enhancements
+├── CONTRIBUTING.md             # Developer contribution guidelines
+├── SECURITY.md                 # Security vulnerability disclosure policy
+├── LICENSE                     # MIT License
+└── package.json                # Root package manifest & workspace scripts
 ```
 
 ---
 
-## Admin Features
+## 🛠️ Local Development Setup
 
-The Admin role possesses full governance, athlete lifecycle management, staff provisioning, and audit oversight directly from the workspace (`/app`):
+### Prerequisites
+- Node.js `18.x` or higher (Node.js 20+ recommended)
+- npm `9.x` or higher
+- A MongoDB Atlas cluster (with database named `academy_final`)
 
-### 1. Staff Management (`/app` > Staff)
-- **Provision Staff Accounts**: Create new **Coach** and **Scout** accounts with unique usernames (3–30 characters), optional emails, and secure passwords (minimum 8 characters or 1-click cryptographically generated temporary password).
-- **One-Time Credential Reveal**: Account creation and password resets present a one-time credential modal with individual and bulk copy actions.
-- **Mandatory First-Time Password Change**: Newly created staff accounts have `mustChangePassword = true` enforced on the server, requiring a permanent password change upon their first login.
-- **Edit & Reset Password**: Edit names, update emails, and trigger secure password resets.
-- **Guarded Staff Deletion**: Deleting a coach with assigned athletes requires reassigning the athletes to another coach or is blocked with a clear warning. Scouts can be removed freely, and admins cannot delete themselves.
+### Quickstart
 
-### 2. Player Management (`/app` > Players)
-- **Centralized Directory**: View all academy athletes across sports with real-time dynamic stats: attendance rate (%), matches played, assigned coach, age, and trial readiness.
-- **Search & Multi-Filter**: Filter athletes instantly by sport (Football, Cricket, Basketball), assigned coach, or text search matching athlete name, username, ID, or coach name.
-- **Profile Editing**: Edit athlete name, age (5–50), sport, coach assignment, and default participation mode (`practice`, `match`, `both`). Updates automatically sync the linked user login account.
-- **Temporary Password Reset**: Generate or assign a temporary password (min 8 chars) that sets `mustChangePassword = true`. Credentials are shown **once** in a secure modal with a 1-click copy action.
-- **Cascade Deletion**: Safely removes the athlete AND permanently deletes their associated user login account (`User.deleteMany`), strips roster entries from draft/unsaved sessions, and removes selections from upcoming matches while preserving historical completed match integrity. Requires an explicit `{ confirm: true }` guard.
-- **Bulk Coach Reassignment**: Select multiple athletes via row checkboxes (or select all) and reassign them to another coach in a single atomic operation.
+```bash
+# 1. Clone repository
+git clone https://github.com/kamranakmal749/vibe-coding-challenge-2-0-vibenerds.git
+cd vibe-coding-challenge-2-0-vibenerds/client
 
-### 3. Audit Log (`/app` > Audit Log)
-- **Audit Trail**: Real-time chronological tracking of all administrative actions, including staff creation, editing, password resets, and deletions, as well as player editing, password resets, deletions, and coach reassignments.
-- **Strict Credential Privacy**: Passwords, secrets, and sensitive tokens are strictly sanitized and redacted before any audit record is persisted (`details` never stores passwords).
-- **Paginated Inspection**: Browse audit history with server-side pagination, timestamps, actor details, action tags, and structured operation details.
+# 2. Install dependencies
+npm ci
 
-### 4. Player Directory CSV Export
-- **One-Click Export**: Export the full athlete directory or current filter subset to CSV via `GET /api/admin/export/players?format=csv`.
-- **Columns Exported**: Player ID, Full Name, Username, Sport, Age, Coach, Default Participation, Attendance %, Matches Played, Trial Ready Status, and Registration Date.
+# 3. Configure environment variables
+# Copy template and populate your MongoDB URI and JWT Secret
+cp .env.example .env.local
 
-### 5. Academy Overview Breakdowns (`/app` > Overview)
-- **Attendance Turnout by Sport**: Average attendance percentage and visual progress bars across Football, Cricket, and Basketball.
-- **Trial-Ready Breakdown by Sport**: Proportion and count of athletes meeting readiness thresholds ($\ge 75\%$ attendance and $\ge 2$ valid matches played) per sport.
+# 4. Run automated test suite (61 tests, zero external dependencies)
+npm test
+
+# 5. Launch local development server
+npm run dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000) to access the application.
 
 ---
 
-## Known Limitations
+## ⚙️ Environment Variables
 
-For details on resolved discrepancies (including the unified view/edit session roster fix) and remaining architectural considerations, consult [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+Configure the following variables in `client/.env.local` for local execution, or in the Vercel Dashboard for production:
 
----
-
-## Environment Variables
-
-Configure the following environment variables (defined in `client/.env.local` for local execution, or in the Vercel Dashboard for production):
-
-| Variable | Description | Requirement | Example Value |
+| Variable | Description | Type | Example Value |
 |---|---|:---:|---|
-| `MONGODB_URI` | MongoDB Atlas connection string. **Must end in `/academy_final`**. | **Required** | `mongodb+srv://<user>:<password>@<cluster-host>/academy_final?retryWrites=true&w=majority` |
-| `JWT_SECRET` | Secret key for signing HS256 JWT tokens (min 32 characters, no default value). | **Required** | `your_secure_random_production_jwt_secret_min_32_chars` |
-| `ALLOW_PRODUCTION_DB` | Safety guard flag enabling production database connections. Enforces connection exclusively to `academy_final`. | **Required** | `true` |
-
-> [!CAUTION]
-> `ALLOW_MOCK_NOW` must **NOT** be set in production. Time-travel mocking is restricted strictly to local automated testing.
+| `MONGODB_URI` | MongoDB Atlas connection string. **Must end in `/academy_final`**. | Required | `mongodb+srv://<user>:<password>@cluster.mongodb.net/academy_final?retryWrites=true&w=majority` |
+| `JWT_SECRET` | Secret key for signing HS256 JWT authentication tokens (min 32 characters). | Required | `production_jwt_signing_secret_min_32_characters_long` |
+| `ALLOW_PRODUCTION_DB` | Safety guard confirming connection to production database `academy_final`. | Required | `true` |
+| `ALLOW_MOCK_NOW` | Time-travel testing flag. **Strictly prohibited in production environments.** | Dev Only | `false` |
 
 ---
 
-## Guarded Database Seeding
+## 🔒 Guarded Database Seeding
 
 > [!WARNING]
-> **DO NOT run database seeding during standard evaluation or testing.**
-> The live deployment at [https://maidandesk.vercel.app](https://maidandesk.vercel.app) is already fully seeded and operational. Running `scripts/seed.js` will permanently drop and reset all existing collections (`users`, `players`, `sessions`, `matches`, `matchparticipations`, `counters`). An evaluator never needs to seed the database to evaluate the application.
+> **DO NOT execute database seeding during evaluation.**
+> The production database at [https://maidandesk.vercel.app](https://maidandesk.vercel.app) is pre-populated with active athletes, attendance sessions, and match records. Seeding will wipe and recreate all collections.
 
-For authorized developers setting up a fresh local or staging database, `scripts/seed.js` is protected by **multi-tier safety guards**:
-1. Target database in `MONGODB_URI` must be strictly `academy_final`.
+For authorized maintainers provisioning a fresh development or staging cluster, `scripts/seed.js` enforces **multi-tier safety checks**:
+1. Target database in `MONGODB_URI` must end with `/academy_final`.
 2. `ALLOW_PRODUCTION_DB=true` must be set.
-3. An explicit destructive confirmation variable `CONFIRM_DESTRUCTIVE_SEED="I_ACKNOWLEDGE_THIS_DESTROYS_DATA"` is strictly required to prevent accidental execution from automated scripts or ambient shell environments:
+3. An explicit destructive confirmation variable `CONFIRM_DESTRUCTIVE_SEED` must be passed:
 
-```powershell
-$env:ALLOW_PRODUCTION_DB = "true"
-$env:CONFIRM_DESTRUCTIVE_SEED = "I_ACKNOWLEDGE_THIS_DESTROYS_DATA"
-$env:MONGODB_URI = "mongodb+srv://<user>:<password>@<cluster-host>/academy_final?retryWrites=true&w=majority"
+```bash
+ALLOW_PRODUCTION_DB="true" \
+CONFIRM_DESTRUCTIVE_SEED="I_ACKNOWLEDGE_THIS_DESTROYS_DATA" \
+MONGODB_URI="mongodb+srv://<user>:<pass>@cluster.mongodb.net/academy_final?retryWrites=true&w=majority" \
 node scripts/seed.js
 ```
 
 ---
 
-## Local Development & Run Steps
+## 🚀 Deployment to Vercel
 
-The Next.js application resides entirely in the `client/` directory:
+1. **Import Repository**: In the [Vercel Dashboard](https://vercel.com/), import the repository.
+2. **Configure Project Settings**:
+   - Set **Root Directory** to `client`.
+   - Framework Preset: **Next.js** (detected automatically).
+3. **Set Environment Variables**:
+   - `MONGODB_URI`: Atlas connection string targeting `academy_final`.
+   - `JWT_SECRET`: Random 32+ character signing key.
+   - `ALLOW_PRODUCTION_DB`: Set to `true`.
+4. **Deploy**: Click **Deploy**. Vercel will build and host both the Next.js API route handlers and static workspace assets seamlessly.
+
+---
+
+## 🧪 Testing & Verification
+
+The test suite in `client/test/` runs natively without requiring an active database or live network connection:
 
 ```bash
-# 1. Navigate to the client directory
 cd client
 
-# 2. Install dependencies
-npm ci
+# Run all 61 automated tests
+npm test
 
-# 3. Configure local environment variables
-# Copy client/.env.example to client/.env.local (git-ignored)
-cp .env.example .env.local
+# Run TypeScript type check
+npm run typecheck
 
-# 4. Start local development server
-npm run dev
-# Server boots at http://localhost:3000
-
-# 5. Production build & local start
+# Run production Next.js build
 npm run build
-npm run start
 ```
 
 ---
 
-## Vercel Deployment Instructions
+## 📄 License & Maintainer
 
-1. **Import Repository**: In the Vercel Dashboard, import this repository.
-2. **Project Settings**:
-   - Set **Root Directory** to `client`.
-   - Framework Preset: **Next.js** (automatically detected from `client/package.json`).
-   - No custom build overrides or additional configuration required.
-3. **Configure Environment Variables**:
-   In **Settings** > **Environment Variables**, add:
-   - `MONGODB_URI`: Connection string ending in `/academy_final`.
-   - `JWT_SECRET`: Random secret string (minimum 32 characters).
-   - `ALLOW_PRODUCTION_DB`: Set to `true`.
-4. **Deploy**: Trigger deployment. Vercel will execute `next build` and deploy the route handlers and static assets cleanly.
+Distributed under the **MIT License**. See [LICENSE](LICENSE) for full details.
+
+Developed & Maintained by **Kamran Akmal** ([@kamranakmal749](https://github.com/kamranakmal749)) for the **Vibe Coding Challenge 2.0**.

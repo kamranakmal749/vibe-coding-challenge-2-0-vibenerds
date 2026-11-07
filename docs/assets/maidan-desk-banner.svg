@@ -1,0 +1,172 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050B17" />
+      <stop offset="45%" stop-color="#0B1528" />
+      <stop offset="100%" stop-color="#040914" />
+    </linearGradient>
+
+    <!-- Emerald Glow Gradients -->
+    <radialGradient id="emeraldRadial" cx="85%" cy="30%" r="55%">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.25" />
+      <stop offset="60%" stop-color="#059669" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#059669" stop-opacity="0" />
+    </radialGradient>
+
+    <radialGradient id="cyanRadial" cx="20%" cy="85%" r="50%">
+      <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#06B6D4" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Monolith Brand Gradient -->
+    <linearGradient id="monolithGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="50%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+
+    <!-- Subtle Grid Pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1E293B" stroke-width="0.75" stroke-opacity="0.45" />
+    </pattern>
+
+    <!-- Pitch Arc Pattern -->
+    <linearGradient id="fieldLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.0" />
+      <stop offset="50%" stop-color="#10B981" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0.0" />
+    </linearGradient>
+  </defs>
+
+  <style>
+    .brand-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 58px; font-weight: 900; letter-spacing: -1.5px; fill: #FFFFFF; }
+    .brand-title-accent { fill: #34D399; }
+    .tagline-main { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.2px; fill: #F1F5F9; }
+    .tagline-sub { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 2.2px; fill: #10B981; text-transform: uppercase; }
+    .pill-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 600; fill: #94A3B8; }
+    .badge-tag { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 1.2px; fill: #059669; text-transform: uppercase; }
+  </style>
+
+  <!-- Base Canvas Background -->
+  <rect width="1200" height="360" rx="16" fill="url(#bgGrad)" />
+  <rect width="1200" height="360" rx="16" fill="url(#grid)" />
+  <rect width="1200" height="360" rx="16" fill="url(#emeraldRadial)" />
+  <rect width="1200" height="360" rx="16" fill="url(#cyanRadial)" />
+
+  <!-- Outer Border Frame -->
+  <rect x="1" y="1" width="1198" height="358" rx="15" fill="none" stroke="#334155" stroke-width="1.2" stroke-opacity="0.6" />
+
+  <!-- Geometric Tactical Pitch & Sports Elements (Right Side Graphic) -->
+  <g transform="translate(860, 180)" opacity="0.85">
+    <!-- Stadium Pitch Penalty Arc / Center Circle -->
+    <circle cx="60" cy="0" r="140" fill="none" stroke="url(#fieldLineGrad)" stroke-width="1.5" stroke-dasharray="6 6" />
+    <circle cx="60" cy="0" r="85" fill="none" stroke="#10B981" stroke-width="1" stroke-opacity="0.25" />
+    <circle cx="60" cy="0" r="6" fill="#10B981" fill-opacity="0.8" />
+    
+    <!-- Basketball Court Key / Free Throw Circle -->
+    <path d="M-60 -110 L60 -110 L60 110 L-60 110" fill="none" stroke="#38BDF8" stroke-width="1" stroke-opacity="0.2" stroke-dasharray="4 4" />
+    
+    <!-- Cricket Pitch Wicket Marks -->
+    <line x1="-120" y1="-80" x2="-120" y2="80" stroke="#F59E0B" stroke-width="1.2" stroke-opacity="0.3" />
+    <line x1="-120" y1="-40" x2="-100" y2="-40" stroke="#F59E0B" stroke-width="1" stroke-opacity="0.3" />
+    <line x1="-120" y1="40" x2="-100" y2="40" stroke="#F59E0B" stroke-width="1" stroke-opacity="0.3" />
+
+    <!-- 3 Floating Sports Nodes -->
+    <!-- Football Node -->
+    <g transform="translate(140, -60)">
+      <circle cx="0" cy="0" r="26" fill="#0B1329" stroke="#10B981" stroke-width="1.8" />
+      <polygon points="0,-10 9,-3 6,8 -6,8 -9,-3" fill="#10B981" fill-opacity="0.25" stroke="#34D399" stroke-width="1.2" />
+      <circle cx="0" cy="0" r="3" fill="#34D399" />
+    </g>
+
+    <!-- Cricket Node -->
+    <g transform="translate(20, 95)">
+      <circle cx="0" cy="0" r="24" fill="#0B1329" stroke="#F59E0B" stroke-width="1.8" />
+      <circle cx="0" cy="0" r="14" fill="none" stroke="#FBBF24" stroke-width="1" stroke-dasharray="3 3" />
+      <!-- Seam -->
+      <path d="M-10 -10 C-2 0, 2 0, 10 10" fill="none" stroke="#FCD34D" stroke-width="1.8" stroke-linecap="round" />
+    </g>
+
+    <!-- Basketball Node -->
+    <g transform="translate(180, 70)">
+      <circle cx="0" cy="0" r="22" fill="#0B1329" stroke="#38BDF8" stroke-width="1.8" />
+      <circle cx="0" cy="0" r="12" fill="none" stroke="#38BDF8" stroke-width="1" stroke-opacity="0.4" />
+      <path d="M-12 0 L12 0 M0 -12 L0 12" stroke="#38BDF8" stroke-width="1.2" stroke-opacity="0.7" />
+    </g>
+
+    <!-- Scouting Radar Sweep Lines -->
+    <line x1="60" y1="0" x2="230" y2="-100" stroke="#34D399" stroke-width="1" stroke-opacity="0.4" />
+    <line x1="60" y1="0" x2="220" y2="110" stroke="#34D399" stroke-width="1" stroke-opacity="0.3" />
+  </g>
+
+  <!-- Left Main Brand Identity -->
+  <g transform="translate(80, 68)">
+    
+    <!-- Top Pill / Release Badge -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="270" height="28" rx="14" fill="#064E3B" fill-opacity="0.4" stroke="#059669" stroke-width="1" stroke-opacity="0.6" />
+      <circle cx="14" cy="14" r="4.5" fill="#34D399" />
+      <text x="27" y="18" class="badge-tag">NEXT.JS 15 • SPORTS ACADEMY OS</text>
+    </g>
+
+    <!-- Logo & Typography Lockup -->
+    <g transform="translate(0, 44)">
+      
+      <!-- Brand Icon: The Monolith 'M' With Data Horizon -->
+      <g transform="translate(0, 4)">
+        <!-- Outer Glowing Container -->
+        <rect x="0" y="0" width="76" height="76" rx="18" fill="#0B132B" stroke="#10B981" stroke-width="2" stroke-opacity="0.8" />
+        <g transform="translate(11, 11) scale(0.27)">
+          <!-- Scaled Monolith 'M' -->
+          <path d="M 0 200 L 0 0 L 100 100 L 200 0 L 200 200 L 150 200 L 150 80 L 100 140 L 50 80 L 50 200 Z" fill="url(#monolithGrad)" />
+          <rect x="0" y="96" width="200" height="12" fill="#FFFFFF" />
+        </g>
+      </g>
+
+      <!-- Main Title -->
+      <text x="96" y="58" class="brand-title">Maidan <tspan class="brand-title-accent">Desk</tspan></text>
+    </g>
+
+    <!-- Tagline & Description -->
+    <g transform="translate(2, 160)">
+      <text x="0" y="0" class="tagline-main">Sports Academy Management &amp; Talent Scouting Platform</text>
+      <text x="0" y="26" class="tagline-sub">Manage. Train. Analyze. Discover Talent.</text>
+    </g>
+
+    <!-- Sports Pills Bar -->
+    <g transform="translate(2, 218)">
+      <!-- Football Pill -->
+      <g transform="translate(0, 0)">
+        <rect x="0" y="0" width="106" height="30" rx="8" fill="#1E293B" fill-opacity="0.75" stroke="#334155" stroke-width="1" />
+        <circle cx="16" cy="15" r="4" fill="#10B981" />
+        <text x="28" y="20" class="pill-text">Football</text>
+      </g>
+      <!-- Cricket Pill -->
+      <g transform="translate(116, 0)">
+        <rect x="0" y="0" width="104" height="30" rx="8" fill="#1E293B" fill-opacity="0.75" stroke="#334155" stroke-width="1" />
+        <circle cx="16" cy="15" r="4" fill="#F59E0B" />
+        <text x="28" y="20" class="pill-text">Cricket</text>
+      </g>
+      <!-- Basketball Pill -->
+      <g transform="translate(230, 0)">
+        <rect x="0" y="0" width="124" height="30" rx="8" fill="#1E293B" fill-opacity="0.75" stroke="#334155" stroke-width="1" />
+        <circle cx="16" cy="15" r="4" fill="#38BDF8" />
+        <text x="28" y="20" class="pill-text">Basketball</text>
+      </g>
+      <!-- Live Deploy Indicator -->
+      <g transform="translate(364, 0)">
+        <rect x="0" y="0" width="190" height="30" rx="8" fill="#042F2E" fill-opacity="0.8" stroke="#0D9488" stroke-width="1" stroke-opacity="0.7" />
+        <circle cx="16" cy="15" r="4" fill="#2DD4BF" />
+        <text x="28" y="20" class="pill-text" style="fill: #2DD4BF; font-weight: 700;">maidandesk.vercel.app</text>
+      </g>
+    </g>
+
+  </g>
+</svg>
+
