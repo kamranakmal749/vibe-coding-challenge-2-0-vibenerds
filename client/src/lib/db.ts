@@ -70,28 +70,30 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
 
   validateDatabaseUri(uri);
 
-  if (cached.conn) {
-    return cached.conn;
+  const activeCache = (globalThis as any).mongooseConnection || cached;
+
+  if (activeCache.conn) {
+    return activeCache.conn;
   }
 
-  if (!cached.promise) {
+  if (!activeCache.promise) {
     const opts: mongoose.ConnectOptions = {
       bufferCommands: false,
     };
 
-    cached.promise = mongoose.connect(uri, opts).then((m) => {
+    activeCache.promise = mongoose.connect(uri, opts).then((m: any) => {
       return m;
     });
   }
 
   try {
-    cached.conn = await cached.promise;
+    activeCache.conn = await activeCache.promise;
   } catch (e) {
-    cached.promise = null;
+    activeCache.promise = null;
     throw e;
   }
 
-  return cached.conn;
+  return activeCache.conn;
 }
 
 export default connectToDatabase;

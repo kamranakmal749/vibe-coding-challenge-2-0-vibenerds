@@ -483,6 +483,158 @@
                                 <p id="admin-stat-ready" class="text-3xl sm:text-4xl font-extrabold text-emerald-500 dark:text-emerald-400 leading-tight">0</p>
                             </div>
                         </div>
+
+                        <!-- Sport Breakdown Summary Lists -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Attendance Turnout by Sport -->
+                            <div class="desk-card p-6 sm:p-7 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col">
+                                <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-500 flex items-center justify-center font-bold">
+                                            <i data-lucide="check-square" class="w-4 h-4"></i>
+                                        </div>
+                                        <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Attendance by Sport</h3>
+                                    </div>
+                                    <span class="text-xs text-slate-400 font-medium">Academy Average</span>
+                                </div>
+                                <div id="admin-attendance-by-sport" class="space-y-3.5 flex-1">
+                                    <p class="text-xs text-slate-400 py-4 text-center">Loading sport metrics...</p>
+                                </div>
+                            </div>
+
+                            <!-- Trial-Ready Players by Sport -->
+                            <div class="desk-card p-6 sm:p-7 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col">
+                                <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-lg bg-brand-500/15 text-brand-500 flex items-center justify-center font-bold">
+                                            <i data-lucide="target" class="w-4 h-4"></i>
+                                        </div>
+                                        <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Ready Athletes by Sport</h3>
+                                    </div>
+                                    <span class="text-xs text-slate-400 font-medium">Trial-Eligible</span>
+                                </div>
+                                <div id="admin-ready-by-sport" class="space-y-3.5 flex-1">
+                                    <p class="text-xs text-slate-400 py-4 text-center">Loading readiness metrics...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= ADMIN PLAYERS VIEW ================= -->
+                    <div id="view-admin-players" class="page space-y-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-2">
+                            <div>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Player Management</h2>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">Manage athlete profiles, credentials, coach assignments, and exports</p>
+                            </div>
+                            <div class="flex items-center gap-2.5 flex-wrap">
+                                <button type="button" id="admin-players-reassign-btn" onclick="openReassignAdminPlayersModal()" disabled
+                                    class="opacity-50 cursor-not-allowed bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-sm transition-all flex items-center gap-2">
+                                    <i data-lucide="user-check" class="w-4 h-4"></i> <span>Reassign Coach</span>
+                                </button>
+                                <button type="button" id="admin-players-export-btn" onclick="exportAdminPlayersCsv()"
+                                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-sm transition-all flex items-center gap-2 cursor-pointer">
+                                    <i data-lucide="download" class="w-4 h-4"></i> <span>Export CSV</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filter Bar -->
+                        <div class="desk-card p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                            <!-- Search Input -->
+                            <div class="relative flex-1">
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="search" class="w-4 h-4"></i>
+                                </div>
+                                <input type="text" id="admin-players-search" oninput="debounceFilterAdminPlayers()"
+                                    placeholder="Search by player name, username, ID, or coach..."
+                                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <!-- Sport Filter -->
+                                <select id="admin-players-sport-filter" onchange="filterAdminPlayers()"
+                                    class="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                                    <option value="all">All Sports</option>
+                                    <option value="Football">Football</option>
+                                    <option value="Cricket">Cricket</option>
+                                    <option value="Basketball">Basketball</option>
+                                </select>
+
+                                <!-- Coach Filter -->
+                                <select id="admin-players-coach-filter" onchange="filterAdminPlayers()"
+                                    class="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                                    <option value="all">All Coaches</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Players Table Card -->
+                        <div class="desk-card rounded-2xl overflow-hidden shadow-xs border border-slate-200 dark:border-slate-800">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-100/90 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 uppercase tracking-wider font-bold text-xs sm:text-sm border-b border-slate-300 dark:border-slate-700 select-none">
+                                            <th class="py-4 px-4 w-12 text-center border-r border-slate-200 dark:border-slate-700/80">
+                                                <input type="checkbox" id="admin-players-select-all" onchange="toggleSelectAllAdminPlayers(this.checked)" class="rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
+                                            </th>
+                                            <th class="py-4 px-5 min-w-[200px] border-r border-slate-200 dark:border-slate-700/80">Player</th>
+                                            <th class="py-4 px-4 min-w-[120px] border-r border-slate-200 dark:border-slate-700/80">Username</th>
+                                            <th class="py-4 px-4 min-w-[100px] text-center border-r border-slate-200 dark:border-slate-700/80">Sport</th>
+                                            <th class="py-4 px-3 w-16 text-center border-r border-slate-200 dark:border-slate-700/80">Age</th>
+                                            <th class="py-4 px-5 min-w-[160px] border-r border-slate-200 dark:border-slate-700/80">Assigned Coach</th>
+                                            <th class="py-4 px-4 min-w-[120px] text-center border-r border-slate-200 dark:border-slate-700/80">Attendance</th>
+                                            <th class="py-4 px-3 min-w-[90px] text-center border-r border-slate-200 dark:border-slate-700/80">Matches</th>
+                                            <th class="py-4 px-4 min-w-[110px] text-center border-r border-slate-200 dark:border-slate-700/80">Readiness</th>
+                                            <th class="py-4 px-4 min-w-[160px] text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-players-table-body" class="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                                        <tr>
+                                            <td colspan="10" class="py-8 text-center text-slate-400">Loading players directory...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= ADMIN STAFF MANAGEMENT VIEW ================= -->
+                    <div id="view-admin-staff" class="page space-y-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
+                            <div>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Staff Management</h2>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">Manage Academy Coaches and Talent Scouts</p>
+                            </div>
+                            <button type="button" onclick="openAddStaffModal()"
+                                class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-2 cursor-pointer">
+                                <i data-lucide="user-plus" class="w-4.5 h-4.5"></i> <span>Add Staff</span>
+                            </button>
+                        </div>
+
+                        <!-- Staff Table Card -->
+                        <div class="desk-card rounded-2xl overflow-hidden shadow-xs border border-slate-200 dark:border-slate-800">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-100/90 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 uppercase tracking-wider font-bold text-xs sm:text-sm border-b border-slate-300 dark:border-slate-700 select-none">
+                                            <th class="py-4 px-4 w-16 text-center border-r border-slate-200 dark:border-slate-700/80">S.No.</th>
+                                            <th class="py-4 px-6 min-w-[200px] border-r border-slate-200 dark:border-slate-700/80">Name</th>
+                                            <th class="py-4 px-5 min-w-[140px] border-r border-slate-200 dark:border-slate-700/80">Username</th>
+                                            <th class="py-4 px-4 min-w-[110px] text-center border-r border-slate-200 dark:border-slate-700/80">Role</th>
+                                            <th class="py-4 px-6 min-w-[180px] border-r border-slate-200 dark:border-slate-700/80">Email</th>
+                                            <th class="py-4 px-5 min-w-[150px] border-r border-slate-200 dark:border-slate-700/80">Created Date</th>
+                                            <th class="py-4 px-4 min-w-[170px] text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-staff-table-body" class="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                                        <tr>
+                                            <td colspan="7" class="py-8 text-center text-slate-400">Loading staff members...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="view-admin-registration" class="page space-y-6">
@@ -555,40 +707,54 @@
                         </div>
                     </div>
 
-                    <!-- ================= ADMIN STAFF MANAGEMENT VIEW ================= -->
-                    <div id="view-admin-staff" class="page space-y-6">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
+                    <!-- ================= ADMIN AUDIT LOG VIEW ================= -->
+                    <div id="view-admin-audit" class="page space-y-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-2">
                             <div>
-                                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Staff Management</h2>
-                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">Manage Academy Coaches and Talent Scouts</p>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Audit Log</h2>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">Immutable chronological trail of staff and player administrative operations</p>
                             </div>
-                            <button type="button" onclick="openAddStaffModal()"
-                                class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-2 cursor-pointer">
-                                <i data-lucide="user-plus" class="w-4.5 h-4.5"></i> <span>Add Staff</span>
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="loadAdminAudit(1)"
+                                    class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer">
+                                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> <span>Refresh</span>
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- Staff Table Card -->
+                        <!-- Audit Log Table Card -->
                         <div class="desk-card rounded-2xl overflow-hidden shadow-xs border border-slate-200 dark:border-slate-800">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left border-collapse">
                                     <thead>
                                         <tr class="bg-slate-100/90 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 uppercase tracking-wider font-bold text-xs sm:text-sm border-b border-slate-300 dark:border-slate-700 select-none">
-                                            <th class="py-4 px-4 w-16 text-center border-r border-slate-200 dark:border-slate-700/80">S.No.</th>
-                                            <th class="py-4 px-6 min-w-[200px] border-r border-slate-200 dark:border-slate-700/80">Name</th>
-                                            <th class="py-4 px-5 min-w-[140px] border-r border-slate-200 dark:border-slate-700/80">Username</th>
-                                            <th class="py-4 px-4 min-w-[110px] text-center border-r border-slate-200 dark:border-slate-700/80">Role</th>
-                                            <th class="py-4 px-6 min-w-[180px] border-r border-slate-200 dark:border-slate-700/80">Email</th>
-                                            <th class="py-4 px-5 min-w-[150px] border-r border-slate-200 dark:border-slate-700/80">Created Date</th>
-                                            <th class="py-4 px-4 min-w-[170px] text-center">Actions</th>
+                                            <th class="py-4 px-5 min-w-[160px] border-r border-slate-200 dark:border-slate-700/80">Timestamp</th>
+                                            <th class="py-4 px-5 min-w-[150px] border-r border-slate-200 dark:border-slate-700/80">Actor</th>
+                                            <th class="py-4 px-4 min-w-[140px] text-center border-r border-slate-200 dark:border-slate-700/80">Action</th>
+                                            <th class="py-4 px-5 min-w-[180px] border-r border-slate-200 dark:border-slate-700/80">Target</th>
+                                            <th class="py-4 px-6 min-w-[240px]">Details</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="admin-staff-table-body" class="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                                    <tbody id="admin-audit-table-body" class="divide-y divide-slate-200/80 dark:divide-slate-800/80">
                                         <tr>
-                                            <td colspan="7" class="py-8 text-center text-slate-400">Loading staff members...</td>
+                                            <td colspan="5" class="py-8 text-center text-slate-400">Loading audit history...</td>
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+                            <!-- Pagination Controls -->
+                            <div id="admin-audit-pagination" class="py-3 px-6 bg-slate-50 dark:bg-slate-900/40 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                                <span id="admin-audit-page-info" class="text-xs text-slate-500 font-medium">Showing page 1</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" id="admin-audit-prev-btn" onclick="changeAdminAuditPage(-1)" disabled
+                                        class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed">
+                                        Previous
+                                    </button>
+                                    <button type="button" id="admin-audit-next-btn" onclick="changeAdminAuditPage(1)" disabled
+                                        class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed">
+                                        Next
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

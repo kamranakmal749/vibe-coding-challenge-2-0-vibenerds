@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import connectToDatabase from '@/lib/db';
 import { authenticateRequest } from '@/lib/auth';
 import { generateSecureTemporaryPassword } from '@/lib/utils/credentials';
+import { logAdminAction } from '@/lib/utils/auditLogger';
 
 const User = require('@/lib/models/User');
 const Player = require('@/lib/models/Player');
@@ -99,6 +100,24 @@ export async function PATCH(
 
     await staff.save();
 
+    await logAdminAction({
+      actorId: auth.user.id,
+      actorName: auth.user.name || 'Admin',
+      actorRole: auth.user.role || 'admin',
+      actorEmail: auth.user.email || '',
+      action: plainPassword ? 'staff:reset_password' : 'staff:edit',
+      targetType: 'Staff',
+      targetId: staff._id.toString(),
+      targetName: staff.name,
+      details: {
+        role: staff.role,
+        username: staff.username,
+        nameUpdated: name !== undefined,
+        emailUpdated: email !== undefined,
+        passwordReset: !!plainPassword,
+      },
+    });
+
     return NextResponse.json({
       message: 'Staff member updated successfully',
       user: {
@@ -166,6 +185,7 @@ export async function DELETE(
     }
 
     // Coach reassignment check
+    let reassignToTarget: string | null = null;
     if (staff.role === 'coach') {
       const assignedCount = await Player.countDocuments({ coach: staff._id });
 
@@ -197,6 +217,7 @@ export async function DELETE(
 
           // Reassign all players to target coach
           await Player.updateMany({ coach: staff._id }, { coach: targetCoach._id });
+          reassignToTarget = targetCoach._id.toString();
         } else {
           return NextResponse.json(
             {
@@ -211,6 +232,23 @@ export async function DELETE(
 
     // Delete staff account
     await User.findByIdAndDelete(staff._id);
+
+    await logAdminAction({
+      actorId: auth.user.id,
+      actorName: auth.user.name || 'Admin',
+      actorRole: auth.user.role || 'admin',
+      actorEmail: auth.user.email || '',
+      action: 'staff:delete',
+      targetType: 'Staff',
+      targetId: staff._id.toString(),
+      targetName: staff.name,
+      details: {
+        role: staff.role,
+        username: staff.username,
+        email: staff.email || null,
+        reassignedTo: reassignToTarget || null,
+      },
+    });
 
     return NextResponse.json({
       message: `${staff.role.charAt(0).toUpperCase() + staff.role.slice(1)} account '${staff.name}' (${staff.username}) removed successfully`,

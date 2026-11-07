@@ -157,8 +157,10 @@ document.addEventListener('click', function (event) {
 const roles = {
     admin: [
         { id: 'admin-overview', name: 'Overview', icon: 'layout-dashboard' },
+        { id: 'admin-players', name: 'Players', icon: 'users' },
         { id: 'admin-staff', name: 'Staff', icon: 'shield-check' },
-        { id: 'admin-registration', name: 'Registration', icon: 'user-plus' }
+        { id: 'admin-registration', name: 'Registration', icon: 'user-plus' },
+        { id: 'admin-audit', name: 'Audit Log', icon: 'history' }
     ],
     coach: [
         { id: 'coach-overview', name: 'Command Center', icon: 'home' },
@@ -371,7 +373,9 @@ async function switchPage(targetId) {
             stopGreetingTimer();
         }
         if (targetId === 'admin-overview') await loadAdminOverview();
+        if (targetId === 'admin-players') await loadAdminPlayers();
         if (targetId === 'admin-staff') await loadAdminStaff();
+        if (targetId === 'admin-audit') await loadAdminAudit();
         if (targetId === 'coach-players') await loadCoachPlayers();
         if (targetId === 'coach-sessions') await loadSessions();
         if (targetId === 'coach-matches') await loadMatchData();
@@ -748,8 +752,73 @@ async function loadAdminOverview() {
         if (sElem) sElem.innerText = sessions.filter(s => s.saved || s.locked).length;
         if (mElem) mElem.innerText = matches.length;
         if (rElem) rElem.innerText = readyCount;
+
+        renderAdminOverviewBreakdowns(players);
     } catch (err) {
         console.error('Admin overview error:', err);
+    }
+}
+
+function renderAdminOverviewBreakdowns(players) {
+    const attContainer = document.getElementById('admin-attendance-by-sport');
+    const readyContainer = document.getElementById('admin-ready-by-sport');
+    if (!attContainer && !readyContainer) return;
+
+    if (!players || players.length === 0) {
+        if (attContainer) attContainer.innerHTML = '<p class="text-xs text-slate-400 py-3 text-center">No athletes enrolled</p>';
+        if (readyContainer) readyContainer.innerHTML = '<p class="text-xs text-slate-400 py-3 text-center">No athletes enrolled</p>';
+        return;
+    }
+
+    const sportsMap = {};
+    players.forEach(p => {
+        const sp = (p.sport || 'Unassigned').trim();
+        if (!sportsMap[sp]) {
+            sportsMap[sp] = { total: 0, ready: 0, sumAttendance: 0 };
+        }
+        sportsMap[sp].total++;
+        if (p.isReady) sportsMap[sp].ready++;
+        sportsMap[sp].sumAttendance += (typeof p.attendanceRate === 'number' ? p.attendanceRate : 0);
+    });
+
+    const sportNames = Object.keys(sportsMap).sort();
+
+    if (attContainer) {
+        attContainer.innerHTML = sportNames.map(sp => {
+            const data = sportsMap[sp];
+            const avg = Math.round(data.sumAttendance / data.total);
+            const colorClass = avg >= 75 ? 'text-emerald-600 dark:text-emerald-400' : (avg >= 50 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400');
+            const barClass = avg >= 75 ? 'bg-emerald-500' : (avg >= 50 ? 'bg-amber-500' : 'bg-rose-500');
+            return `
+                <div class="space-y-1.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-slate-800 dark:text-slate-200">${escapeHtml(sp)}</span>
+                        <span class="font-mono font-extrabold ${colorClass}">${avg}%</span>
+                    </div>
+                    <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                        <div class="h-full rounded-full ${barClass}" style="width: ${Math.min(100, Math.max(0, avg))}%"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    if (readyContainer) {
+        readyContainer.innerHTML = sportNames.map(sp => {
+            const data = sportsMap[sp];
+            const pct = Math.round((data.ready / data.total) * 100);
+            return `
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800">
+                    <div>
+                        <span class="font-bold text-xs text-slate-800 dark:text-slate-200 block">${escapeHtml(sp)}</span>
+                        <span class="text-[11px] text-slate-400">${data.ready} of ${data.total} athletes ready</span>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold ${data.ready > 0 ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}">
+                        ${pct}% Trial Ready
+                    </span>
+                </div>
+            `;
+        }).join('');
     }
 }
 
@@ -1402,6 +1471,869 @@ async function executeDeleteStaffWithReassign(staffId) {
             deleteBtn.innerHTML = '<i data-lucide="user-x" class="w-4 h-4"></i> Reassign & Remove';
             initIcons();
         }
+    }
+}
+
+// ── Admin: Player Management ────────────────────────────────────────────────
+let cachedAdminPlayers = [];
+let cachedAdminCoaches = [];
+let selectedAdminPlayerIds = new Set();
+let adminPlayersFilterDebounceTimer = null;
+
+async function loadAdminPlayers() {
+    const tableBody = document.getElementById('admin-players-table-body');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="10" class="py-10 text-center text-slate-400">
+                <div class="inline-flex items-center gap-2">
+                    <span class="inline-block animate-spin">⏳</span>
+                    <span>Loading player directory...</span>
+                </div>
+            </td>
+        </tr>
+    `;
+
+    try {
+        const [players, coaches] = await Promise.all([
+            api('/api/admin/players'),
+            api('/api/auth/coaches').catch(() => [])
+        ]);
+
+        cachedAdminPlayers = Array.isArray(players) ? players : [];
+        cachedAdminCoaches = Array.isArray(coaches) ? coaches : [];
+
+        // Populate Coach Filter dropdown
+        const coachFilter = document.getElementById('admin-players-coach-filter');
+        if (coachFilter) {
+            const currentVal = coachFilter.value;
+            coachFilter.innerHTML = '<option value="all">All Coaches</option>' + cachedAdminCoaches.map(c => `
+                <option value="${c._id || c.id}">${escapeHtml(c.name)}</option>
+            `).join('');
+            coachFilter.value = currentVal || 'all';
+        }
+
+        selectedAdminPlayerIds.clear();
+        updateAdminPlayerSelectionUI();
+        filterAdminPlayers();
+    } catch (err) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="10" class="py-8 text-center text-rose-500 font-semibold">
+                    <div class="inline-flex items-center gap-2">
+                        <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                        <span>Failed to load players: ${escapeHtml(err.message)}</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        initIcons();
+    }
+}
+
+function debounceFilterAdminPlayers() {
+    clearTimeout(adminPlayersFilterDebounceTimer);
+    adminPlayersFilterDebounceTimer = setTimeout(() => {
+        filterAdminPlayers();
+    }, 250);
+}
+
+function filterAdminPlayers() {
+    const searchInput = document.getElementById('admin-players-search');
+    const sportFilter = document.getElementById('admin-players-sport-filter');
+    const coachFilter = document.getElementById('admin-players-coach-filter');
+
+    const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    const sportVal = sportFilter ? sportFilter.value : 'all';
+    const coachVal = coachFilter ? coachFilter.value : 'all';
+
+    let filtered = cachedAdminPlayers;
+
+    if (sportVal && sportVal !== 'all') {
+        filtered = filtered.filter(p => (p.sport || '').toLowerCase() === sportVal.toLowerCase());
+    }
+
+    if (coachVal && coachVal !== 'all') {
+        filtered = filtered.filter(p => {
+            const cId = p.coach ? (p.coach.id || p.coach._id || p.coach) : '';
+            return cId === coachVal;
+        });
+    }
+
+    if (searchVal) {
+        filtered = filtered.filter(p => {
+            const name = (p.name || '').toLowerCase();
+            const username = (p.username || '').toLowerCase();
+            const playerId = (p.playerId || '').toLowerCase();
+            const sport = (p.sport || '').toLowerCase();
+            const coachName = (p.coach && p.coach.name ? p.coach.name : '').toLowerCase();
+            return name.includes(searchVal) || username.includes(searchVal) || playerId.includes(searchVal) || sport.includes(searchVal) || coachName.includes(searchVal);
+        });
+    }
+
+    renderAdminPlayersTable(filtered);
+}
+
+function renderAdminPlayersTable(players) {
+    const tableBody = document.getElementById('admin-players-table-body');
+    if (!tableBody) return;
+
+    if (!players || players.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="10" class="py-12 text-center text-slate-400">
+                    <div class="flex flex-col items-center justify-center gap-2">
+                        <i data-lucide="users" class="w-8 h-8 text-slate-500 stroke-1"></i>
+                        <span class="font-medium text-slate-500">No players match the current filters.</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        initIcons();
+        updateAdminPlayerSelectionUI();
+        return;
+    }
+
+    tableBody.innerHTML = players.map(p => {
+        const safeId = p._id || p.id;
+        const safeName = (p.name || '').replace(/'/g, "\\'");
+        const isChecked = selectedAdminPlayerIds.has(safeId);
+
+        const isReady = !!p.isReady;
+        const readinessBadge = isReady
+            ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                 <i data-lucide="check-circle" class="w-3 h-3"></i> Ready
+               </span>`
+            : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                 <i data-lucide="clock" class="w-3 h-3"></i> Not Ready
+               </span>`;
+
+        const att = typeof p.attendanceRate === 'number' ? p.attendanceRate : 0;
+        const attColor = att >= 75 ? 'text-emerald-500' : (att >= 50 ? 'text-amber-500' : 'text-rose-500');
+
+        const sport = p.sport || 'General';
+        const coachName = p.coach ? (p.coach.name || 'Assigned Coach') : 'Unassigned';
+
+        return `
+            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
+                <td class="py-4 px-4 text-center border-r border-slate-200 dark:border-slate-800">
+                    <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleAdminPlayerSelect('${safeId}', this.checked)" class="rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
+                </td>
+                <td class="py-4 px-5 border-r border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 flex items-center justify-center font-bold text-xs uppercase shrink-0">
+                            ${escapeHtml((p.name || 'P').slice(0, 2))}
+                        </div>
+                        <div>
+                            <span class="font-bold text-sm text-slate-900 dark:text-white block">${escapeHtml(p.name)}</span>
+                            <span class="text-[11px] font-mono text-slate-400 block">${escapeHtml(p.playerId || p.username || '')}</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="py-4 px-4 border-r border-slate-200 dark:border-slate-800">
+                    <span class="font-mono text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                        ${escapeHtml(p.username || p.playerId || '')}
+                    </span>
+                </td>
+                <td class="py-4 px-4 text-center border-r border-slate-200 dark:border-slate-800">
+                    <span class="inline-block px-2 py-0.5 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                        ${escapeHtml(sport)}
+                    </span>
+                </td>
+                <td class="py-4 px-3 text-center border-r border-slate-200 dark:border-slate-800 font-mono text-xs text-slate-700 dark:text-slate-300">
+                    ${p.age || '—'}
+                </td>
+                <td class="py-4 px-5 border-r border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300">
+                    ${escapeHtml(coachName)}
+                </td>
+                <td class="py-4 px-4 text-center border-r border-slate-200 dark:border-slate-800">
+                    <span class="font-mono text-xs font-extrabold ${attColor}">
+                        ${att}%
+                    </span>
+                </td>
+                <td class="py-4 px-3 text-center border-r border-slate-200 dark:border-slate-800 font-mono text-xs font-bold text-slate-700 dark:text-slate-300">
+                    ${p.matchesPlayed || 0}
+                </td>
+                <td class="py-4 px-4 text-center border-r border-slate-200 dark:border-slate-800">
+                    ${readinessBadge}
+                </td>
+                <td class="py-4 px-4 text-center">
+                    <div class="flex items-center justify-center gap-1.5">
+                        <button type="button" onclick="openEditAdminPlayerModal('${safeId}')" class="p-2 rounded-xl text-slate-400 hover:text-brand-600 hover:bg-brand-500/10 dark:hover:bg-brand-500/20 transition-all cursor-pointer inline-flex items-center justify-center" title="Edit ${safeName}">
+                            <i data-lucide="edit-3" class="w-4 h-4 text-brand-500 hover:text-brand-600"></i>
+                        </button>
+                        <button type="button" onclick="openResetAdminPlayerPasswordModal('${safeId}')" class="p-2 rounded-xl text-slate-400 hover:text-amber-600 hover:bg-amber-500/10 dark:hover:bg-amber-500/20 transition-all cursor-pointer inline-flex items-center justify-center" title="Reset password for ${safeName}">
+                            <i data-lucide="key-round" class="w-4 h-4 text-amber-500 hover:text-amber-600"></i>
+                        </button>
+                        <button type="button" onclick="confirmDeleteAdminPlayer('${safeId}', '${safeName}')" class="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-all cursor-pointer inline-flex items-center justify-center" title="Remove ${safeName}">
+                            <i data-lucide="trash-2" class="w-4 h-4 text-rose-500 hover:text-rose-600"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    initIcons();
+    updateAdminPlayerSelectionUI();
+}
+
+function toggleAdminPlayerSelect(id, checked) {
+    if (checked) {
+        selectedAdminPlayerIds.add(id);
+    } else {
+        selectedAdminPlayerIds.delete(id);
+    }
+    updateAdminPlayerSelectionUI();
+}
+
+function toggleSelectAllAdminPlayers(checked) {
+    const tableBody = document.getElementById('admin-players-table-body');
+    if (!tableBody) return;
+
+    const checkboxes = tableBody.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+        cb.checked = checked;
+    });
+
+    if (checked) {
+        cachedAdminPlayers.forEach(p => {
+            const safeId = p._id || p.id;
+            selectedAdminPlayerIds.add(safeId);
+        });
+    } else {
+        selectedAdminPlayerIds.clear();
+    }
+
+    updateAdminPlayerSelectionUI();
+}
+
+function updateAdminPlayerSelectionUI() {
+    const reassignBtn = document.getElementById('admin-players-reassign-btn');
+    const selectAllCheckbox = document.getElementById('admin-players-select-all');
+
+    const count = selectedAdminPlayerIds.size;
+    if (reassignBtn) {
+        if (count > 0) {
+            reassignBtn.disabled = false;
+            reassignBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            reassignBtn.classList.add('cursor-pointer');
+            reassignBtn.innerHTML = `<i data-lucide="user-check" class="w-4 h-4"></i> <span>Reassign Coach (${count})</span>`;
+        } else {
+            reassignBtn.disabled = true;
+            reassignBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            reassignBtn.classList.remove('cursor-pointer');
+            reassignBtn.innerHTML = `<i data-lucide="user-check" class="w-4 h-4"></i> <span>Reassign Coach</span>`;
+        }
+        initIcons();
+    }
+
+    if (selectAllCheckbox) {
+        const total = cachedAdminPlayers.length;
+        selectAllCheckbox.checked = total > 0 && count === total;
+        selectAllCheckbox.indeterminate = count > 0 && count < total;
+    }
+}
+
+// ── Admin: Edit Player Modal ──
+function openEditAdminPlayerModal(playerId) {
+    const player = cachedAdminPlayers.find(p => (p._id || p.id) === playerId);
+    if (!player) return;
+
+    const coachId = player.coach ? (player.coach.id || player.coach._id || player.coach) : '';
+    const coachOptions = cachedAdminCoaches.map(c => `
+        <option value="${c._id || c.id}" ${c._id === coachId || c.id === coachId ? 'selected' : ''}>
+            ${escapeHtml(c.name)} (${escapeHtml(c.username || 'coach')})
+        </option>
+    `).join('');
+
+    const html = `
+        <form id="admin-edit-player-form" onsubmit="submitEditAdminPlayer(event, '${playerId}')" class="space-y-4 py-1">
+            <div>
+                <label for="edit-player-name" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Full Name <span class="text-rose-500">*</span></label>
+                <input id="edit-player-name" type="text" required value="${escapeHtml(player.name || '')}"
+                    class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label for="edit-player-age" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Age (5–50) <span class="text-rose-500">*</span></label>
+                    <input id="edit-player-age" type="number" min="5" max="50" required value="${player.age || ''}"
+                        class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label for="edit-player-sport" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Sport <span class="text-rose-500">*</span></label>
+                    <select id="edit-player-sport" required
+                        class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                        <option value="Football" ${(player.sport || '').toLowerCase() === 'football' ? 'selected' : ''}>Football</option>
+                        <option value="Cricket" ${(player.sport || '').toLowerCase() === 'cricket' ? 'selected' : ''}>Cricket</option>
+                        <option value="Basketball" ${(player.sport || '').toLowerCase() === 'basketball' ? 'selected' : ''}>Basketball</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label for="edit-player-coach" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Assigned Coach <span class="text-rose-500">*</span></label>
+                <select id="edit-player-coach" required
+                    class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                    ${coachOptions || '<option value="">No coaches available</option>'}
+                </select>
+            </div>
+
+            <div>
+                <label for="edit-player-part" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Default Participation</label>
+                <select id="edit-player-part"
+                    class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                    <option value="both" ${player.defaultParticipation === 'both' ? 'selected' : ''}>Both (Practice & Matches)</option>
+                    <option value="practice" ${player.defaultParticipation === 'practice' ? 'selected' : ''}>Practice Sessions Only</option>
+                    <option value="match" ${player.defaultParticipation === 'match' ? 'selected' : ''}>Competitive Matches Only</option>
+                </select>
+            </div>
+
+            <div id="admin-edit-player-error" class="hidden text-xs text-rose-500 font-semibold p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20"></div>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    Cancel
+                </button>
+                <button type="submit" id="admin-edit-player-btn" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="check" class="w-4 h-4"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    `;
+
+    openModal(`Edit Player • ${player.name}`, html, [], 'max-w-lg');
+    initIcons();
+}
+
+async function submitEditAdminPlayer(e, playerId) {
+    if (e) e.preventDefault();
+    const errorEl = document.getElementById('admin-edit-player-error');
+    const submitBtn = document.getElementById('admin-edit-player-btn');
+
+    const name = document.getElementById('edit-player-name')?.value.trim();
+    const age = parseInt(document.getElementById('edit-player-age')?.value, 10);
+    const sport = document.getElementById('edit-player-sport')?.value;
+    const coach = document.getElementById('edit-player-coach')?.value;
+    const defaultParticipation = document.getElementById('edit-player-part')?.value;
+
+    if (errorEl) errorEl.classList.add('hidden');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Saving...';
+    }
+
+    try {
+        await api(`/api/admin/players/${playerId}`, {
+            method: 'PATCH',
+            body: { name, age, sport, coach, defaultParticipation }
+        });
+
+        closeModal();
+        showToast('Player profile updated successfully!', 'success');
+        await loadAdminPlayers();
+        await loadAdminOverview();
+    } catch (err) {
+        if (errorEl) {
+            errorEl.innerText = err.message || 'Failed to update player';
+            errorEl.classList.remove('hidden');
+        }
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Save Changes';
+            initIcons();
+        }
+    }
+}
+
+// ── Admin: Reset Player Password Modal ──
+function openResetAdminPlayerPasswordModal(playerId) {
+    const player = cachedAdminPlayers.find(p => (p._id || p.id) === playerId);
+    if (!player) return;
+
+    const defaultPassword = generateRandomPasswordClient();
+
+    const html = `
+        <form id="admin-reset-player-form" onsubmit="submitResetAdminPlayerPassword(event, '${playerId}')" class="space-y-4 py-1">
+            <p class="text-xs text-slate-600 dark:text-slate-300">
+                Generate a new password for <strong class="text-slate-900 dark:text-white">${escapeHtml(player.name)}</strong> (${escapeHtml(player.username || player.playerId)}). The athlete will be required to change it on their next login.
+            </p>
+
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <label for="reset-player-password-input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">New Password <span class="text-rose-500">*</span></label>
+                    <button type="button" onclick="generateNewPasswordForInput('reset-player-password-input')" class="text-[11px] font-bold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1 cursor-pointer">
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> Generate
+                    </button>
+                </div>
+                <input id="reset-player-password-input" type="text" required minlength="8" value="${defaultPassword}"
+                    class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 font-mono">
+                <p class="text-[11px] text-slate-400 mt-1">Minimum 8 characters.</p>
+            </div>
+
+            <div id="admin-reset-player-error" class="hidden text-xs text-rose-500 font-semibold p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20"></div>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    Cancel
+                </button>
+                <button type="submit" id="admin-reset-player-btn" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-md flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="key" class="w-4 h-4"></i> Reset Password
+                </button>
+            </div>
+        </form>
+    `;
+
+    openModal(`Reset Password • ${player.name}`, html, [], 'max-w-md');
+    initIcons();
+}
+
+async function submitResetAdminPlayerPassword(e, playerId) {
+    if (e) e.preventDefault();
+    const errorEl = document.getElementById('admin-reset-player-error');
+    const submitBtn = document.getElementById('admin-reset-player-btn');
+    const password = document.getElementById('reset-player-password-input')?.value;
+
+    if (errorEl) errorEl.classList.add('hidden');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Resetting...';
+    }
+
+    try {
+        const res = await api(`/api/admin/players/${playerId}/reset-password`, {
+            method: 'POST',
+            body: { password }
+        });
+
+        closeModal();
+        showToast('Password reset successfully!', 'success');
+
+        // Show dedicated one-time credentials card
+        showAdminPlayerCredentialsModal({
+            name: cachedAdminPlayers.find(p => (p._id || p.id) === playerId)?.name || 'Athlete',
+            username: res.username,
+            password: res.password
+        });
+    } catch (err) {
+        if (errorEl) {
+            errorEl.innerText = err.message || 'Failed to reset password';
+            errorEl.classList.remove('hidden');
+        }
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i data-lucide="key" class="w-4 h-4"></i> Reset Password';
+            initIcons();
+        }
+    }
+}
+
+function showAdminPlayerCredentialsModal(creds) {
+    const credText = `Username: ${creds.username}\nTemporary Password: ${creds.password}`;
+
+    const html = `
+        <div class="space-y-4 py-1">
+            <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs flex items-start gap-2.5">
+                <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                <div>
+                    <strong>One-Time Presentation:</strong> This temporary password is shown once and cannot be recovered from the database. Please copy and provide it to the athlete now.
+                </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-3 font-mono text-xs">
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Athlete</span>
+                    <span class="font-bold text-sm text-slate-900 dark:text-white font-sans">${escapeHtml(creds.name)}</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Username</span>
+                    <span class="font-bold text-slate-800 dark:text-slate-200">${escapeHtml(creds.username)}</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Temporary Password</span>
+                    <span class="font-bold text-emerald-600 dark:text-emerald-400 text-sm select-all">${escapeHtml(creds.password)}</span>
+                </div>
+            </div>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button type="button" onclick="navigator.clipboard.writeText('${creds.password}').then(() => showToast('Password copied to clipboard!', 'success'))" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Password
+                </button>
+                <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md cursor-pointer">
+                    Done
+                </button>
+            </div>
+        </div>
+    `;
+
+    openModal(`Credentials • ${creds.name}`, html, [], 'max-w-md');
+    initIcons();
+}
+
+// ── Admin: Delete Player ──
+function confirmDeleteAdminPlayer(playerId, playerName) {
+    const html = `
+        <div class="space-y-4 py-1">
+            <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-start gap-2.5">
+                <i data-lucide="alert-triangle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                <div>
+                    <strong class="block mb-1">Permanent Cascade Deletion</strong>
+                    Deleting <strong>${escapeHtml(playerName)}</strong> will permanently remove:
+                    <ul class="list-disc list-inside mt-1.5 space-y-0.5 text-[11px]">
+                        <li>The player profile document</li>
+                        <li>Their user login account</li>
+                        <li>Roster entries from draft / unsaved sessions</li>
+                        <li>Selection from upcoming matches</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600 dark:text-slate-300">
+                Are you completely sure you want to proceed? This operation cannot be reversed.
+            </p>
+
+            <div id="admin-delete-player-error" class="hidden text-xs text-rose-500 font-semibold p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20"></div>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+                    Cancel
+                </button>
+                <button type="button" id="admin-delete-player-btn" onclick="executeDeleteAdminPlayer('${playerId}')" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i> Permanently Delete
+                </button>
+            </div>
+        </div>
+    `;
+
+    openModal(`Delete Player • ${playerName}`, html, [], 'max-w-md');
+    initIcons();
+}
+
+async function executeDeleteAdminPlayer(playerId) {
+    const errorEl = document.getElementById('admin-delete-player-error');
+    const deleteBtn = document.getElementById('admin-delete-player-btn');
+
+    if (errorEl) errorEl.classList.add('hidden');
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerText = 'Deleting...';
+    }
+
+    try {
+        await api(`/api/admin/players/${playerId}`, {
+            method: 'DELETE',
+            body: { confirm: true }
+        });
+
+        selectedAdminPlayerIds.delete(playerId);
+        closeModal();
+        showToast('Player and user login account permanently removed.', 'success');
+        await loadAdminPlayers();
+        await loadAdminOverview();
+    } catch (err) {
+        if (errorEl) {
+            errorEl.innerText = err.message || 'Failed to remove player';
+            errorEl.classList.remove('hidden');
+        }
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i> Permanently Delete';
+            initIcons();
+        }
+    }
+}
+
+// ── Admin: Reassign Coach Bulk Action ──
+function openReassignAdminPlayersModal() {
+    const count = selectedAdminPlayerIds.size;
+    if (count === 0) {
+        showToast('Please select at least one player to reassign', 'warning');
+        return;
+    }
+
+    const selectedPlayers = cachedAdminPlayers.filter(p => selectedAdminPlayerIds.has(p._id || p.id));
+    const coachOptions = cachedAdminCoaches.map(c => `
+        <option value="${c._id || c.id}">${escapeHtml(c.name)} (${escapeHtml(c.username || 'coach')})</option>
+    `).join('');
+
+    const html = `
+        <form id="admin-reassign-form" onsubmit="submitReassignAdminPlayers(event)" class="space-y-4 py-1">
+            <p class="text-xs text-slate-600 dark:text-slate-300">
+                You are about to reassign <strong>${count} athlete${count === 1 ? '' : 's'}</strong> to a different coach:
+            </p>
+
+            <div class="max-h-36 overflow-y-auto p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-1">
+                ${selectedPlayers.map(p => `
+                    <div class="text-xs flex items-center justify-between text-slate-800 dark:text-slate-200">
+                        <span class="font-medium">${escapeHtml(p.name)}</span>
+                        <span class="text-slate-400 font-mono text-[11px]">${escapeHtml(p.sport || '')}</span>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div>
+                <label for="reassign-target-coach" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                    Assign To Coach <span class="text-rose-500">*</span>
+                </label>
+                <select id="reassign-target-coach" required
+                    class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                    ${coachOptions || '<option value="">No coaches available</option>'}
+                </select>
+            </div>
+
+            <div id="admin-reassign-error" class="hidden text-xs text-rose-500 font-semibold p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20"></div>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    Cancel
+                </button>
+                <button type="submit" id="admin-reassign-submit-btn" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="user-check" class="w-4 h-4"></i> Reassign Athletes
+                </button>
+            </div>
+        </form>
+    `;
+
+    openModal(`Reassign Coach (${count} Athletes)`, html, [], 'max-w-md');
+    initIcons();
+}
+
+async function submitReassignAdminPlayers(e) {
+    if (e) e.preventDefault();
+    const errorEl = document.getElementById('admin-reassign-error');
+    const submitBtn = document.getElementById('admin-reassign-submit-btn');
+    const coachId = document.getElementById('reassign-target-coach')?.value;
+
+    if (!coachId) {
+        if (errorEl) {
+            errorEl.innerText = 'Please select a target coach';
+            errorEl.classList.remove('hidden');
+        }
+        return;
+    }
+
+    if (errorEl) errorEl.classList.add('hidden');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Reassigning...';
+    }
+
+    try {
+        const playerIds = Array.from(selectedAdminPlayerIds);
+        const res = await api('/api/admin/players/reassign', {
+            method: 'POST',
+            body: { playerIds, coachId }
+        });
+
+        selectedAdminPlayerIds.clear();
+        closeModal();
+        showToast(res.message || 'Players reassigned successfully!', 'success');
+        await loadAdminPlayers();
+        await loadAdminOverview();
+    } catch (err) {
+        if (errorEl) {
+            errorEl.innerText = err.message || 'Failed to reassign players';
+            errorEl.classList.remove('hidden');
+        }
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i data-lucide="user-check" class="w-4 h-4"></i> Reassign Athletes';
+            initIcons();
+        }
+    }
+}
+
+// ── Admin: Export Players CSV ──
+function exportAdminPlayersCsv() {
+    const searchVal = document.getElementById('admin-players-search')?.value.trim() || '';
+    const sportVal = document.getElementById('admin-players-sport-filter')?.value || 'all';
+    const coachVal = document.getElementById('admin-players-coach-filter')?.value || 'all';
+
+    let url = '/api/admin/export/players?format=csv';
+    if (searchVal) url += `&search=${encodeURIComponent(searchVal)}`;
+    if (sportVal && sportVal !== 'all') url += `&sport=${encodeURIComponent(sportVal)}`;
+    if (coachVal && coachVal !== 'all') url += `&coach=${encodeURIComponent(coachVal)}`;
+
+    fetch(url, {
+        headers: {
+            'Authorization': authToken ? `Bearer ${authToken}` : ''
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('Failed to export CSV');
+        return res.blob();
+    })
+    .then(blob => {
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = 'players-export.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+        showToast('CSV export downloaded successfully!', 'success');
+    })
+    .catch(err => {
+        showToast(err.message || 'CSV export failed', 'error');
+    });
+}
+
+// ── Admin: Audit Log Inspection ─────────────────────────────────────────────
+let adminAuditCurrentPage = 1;
+let adminAuditTotalPages = 1;
+
+async function loadAdminAudit(page = 1) {
+    const tableBody = document.getElementById('admin-audit-table-body');
+    if (!tableBody) return;
+
+    adminAuditCurrentPage = Math.max(1, page);
+
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="5" class="py-10 text-center text-slate-400">
+                <div class="inline-flex items-center gap-2">
+                    <span class="inline-block animate-spin">⏳</span>
+                    <span>Loading audit records...</span>
+                </div>
+            </td>
+        </tr>
+    `;
+
+    try {
+        const res = await api(`/api/admin/audit?page=${adminAuditCurrentPage}&limit=20`);
+        const logs = res.logs || [];
+        adminAuditTotalPages = res.totalPages || 1;
+
+        renderAdminAuditTable(logs, adminAuditCurrentPage, adminAuditTotalPages, res.total || 0);
+    } catch (err) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="py-8 text-center text-rose-500 font-semibold">
+                    <div class="inline-flex items-center gap-2">
+                        <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                        <span>Failed to load audit history: ${escapeHtml(err.message)}</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        initIcons();
+    }
+}
+
+function renderAdminAuditTable(logs, page, totalPages, total) {
+    const tableBody = document.getElementById('admin-audit-table-body');
+    const pageInfo = document.getElementById('admin-audit-page-info');
+    const prevBtn = document.getElementById('admin-audit-prev-btn');
+    const nextBtn = document.getElementById('admin-audit-next-btn');
+
+    if (pageInfo) {
+        pageInfo.innerText = total > 0
+            ? `Page ${page} of ${totalPages} (${total} total event${total === 1 ? '' : 's'})`
+            : 'No events logged';
+    }
+
+    if (prevBtn) prevBtn.disabled = page <= 1;
+    if (nextBtn) nextBtn.disabled = page >= totalPages;
+
+    if (!tableBody) return;
+
+    if (!logs || logs.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="py-12 text-center text-slate-400">
+                    <div class="flex flex-col items-center justify-center gap-2">
+                        <i data-lucide="history" class="w-8 h-8 text-slate-500 stroke-1"></i>
+                        <span class="font-medium text-slate-500">No audit events recorded yet.</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        initIcons();
+        return;
+    }
+
+    tableBody.innerHTML = logs.map(l => {
+        const timestamp = l.timestamp
+            ? new Date(l.timestamp).toLocaleString('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+              })
+            : '—';
+
+        const actionColor = l.action.includes('delete')
+            ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30'
+            : (l.action.includes('reset')
+                ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                : (l.action.includes('create')
+                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                    : 'bg-brand-500/15 text-brand-600 dark:text-brand-400 border-brand-500/30'));
+
+        const targetBadge = l.targetType === 'Staff'
+            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+            : 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20';
+
+        // Format details into tags
+        let detailsHtml = '';
+        if (l.details && typeof l.details === 'object' && Object.keys(l.details).length > 0) {
+            detailsHtml = Object.entries(l.details).map(([k, v]) => {
+                const valStr = Array.isArray(v) ? `${v.length} items` : String(v);
+                return `<span class="inline-block bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[11px] font-mono border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"><strong>${escapeHtml(k)}:</strong> ${escapeHtml(valStr)}</span>`;
+            }).join(' ');
+        } else {
+            detailsHtml = '<span class="text-slate-400 text-xs italic">—</span>';
+        }
+
+        return `
+            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
+                <td class="py-3.5 px-5 border-r border-slate-200 dark:border-slate-800 font-mono text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                    ${escapeHtml(timestamp)}
+                </td>
+                <td class="py-3.5 px-5 border-r border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-xs text-slate-900 dark:text-white">${escapeHtml(l.actorName || 'Admin')}</span>
+                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">(${escapeHtml(l.actorRole || 'admin')})</span>
+                    </div>
+                </td>
+                <td class="py-3.5 px-4 text-center border-r border-slate-200 dark:border-slate-800">
+                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-mono font-bold border ${actionColor}">
+                        ${escapeHtml(l.action)}
+                    </span>
+                </td>
+                <td class="py-3.5 px-5 border-r border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${targetBadge}">
+                            ${escapeHtml(l.targetType)}
+                        </span>
+                        <span class="font-semibold text-xs text-slate-800 dark:text-slate-200 truncate max-w-[150px]">
+                            ${escapeHtml(l.targetName || '—')}
+                        </span>
+                    </div>
+                </td>
+                <td class="py-3.5 px-6">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        ${detailsHtml}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    initIcons();
+}
+
+function changeAdminAuditPage(delta) {
+    const targetPage = adminAuditCurrentPage + delta;
+    if (targetPage >= 1 && targetPage <= adminAuditTotalPages) {
+        loadAdminAudit(targetPage);
     }
 }
 

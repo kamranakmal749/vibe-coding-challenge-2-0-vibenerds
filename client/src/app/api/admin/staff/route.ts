@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import { authenticateRequest } from '@/lib/auth';
 import { generateSecureTemporaryPassword } from '@/lib/utils/credentials';
+import { logAdminAction } from '@/lib/utils/auditLogger';
 
 const User = require('@/lib/models/User');
 const Player = require('@/lib/models/Player');
@@ -155,6 +156,23 @@ export async function POST(req: Request) {
     });
 
     await newUser.save();
+
+    await logAdminAction({
+      actorId: auth.user.id,
+      actorName: auth.user.name || 'Admin',
+      actorRole: auth.user.role || 'admin',
+      actorEmail: auth.user.email || '',
+      action: 'staff:create',
+      targetType: 'Staff',
+      targetId: newUser._id.toString(),
+      targetName: newUser.name,
+      details: {
+        username: newUser.username,
+        role: newUser.role,
+        email: newUser.email || null,
+        temporaryPasswordIssued: true,
+      },
+    });
 
     return NextResponse.json(
       {

@@ -43,15 +43,40 @@ Sign in with any of the pre-seeded accounts (or select the role tab and click **
 
 ---
 
-## Admin Staff Management
+## Admin Features & System Operations
 
-The Admin role possesses full staff lifecycle management privileges directly in the workspace (`/app` > **Staff** sidebar navigation):
-- **Create Staff**: Admins can provision new **Coach** and **Scout** accounts with unique usernames (3–30 chars), optional emails, and secure passwords (minimum 8 characters or 1-click cryptographically generated temporary password).
+The Admin role possesses full governance, athlete lifecycle management, staff provisioning, and audit oversight directly from the workspace (`/app`):
+
+### 1. Staff Management (`/app` > Staff)
+- **Provision Staff Accounts**: Create new **Coach** and **Scout** accounts with unique usernames (3–30 chars), optional emails, and secure passwords (minimum 8 characters or 1-click cryptographically generated temporary password).
 - **One-Time Credential Reveal**: Account creation and password resets present a one-time credential modal with individual and bulk copy actions.
 - **Mandatory First-Time Password Change**: Newly created staff accounts have `mustChangePassword = true` enforced on the server, requiring a permanent password change upon their first login.
-- **Edit & Reset Password**: Admins can edit names, update emails, and trigger secure password resets.
-- **Safe Staff Deletion**: Deleting a coach with assigned athletes is guarded: it requires either reassigning the athletes to another coach or will be blocked with a clear error. Scouts can be deleted freely, and admins cannot delete themselves.
-- **Seeding Baseline Notice**: Any staff accounts or athletes added via the live UI are stored live in MongoDB Atlas `academy_final`. Re-running `node scripts/seed.js` will reset the database back to the seeded baseline (27 users, 24 players).
+- **Edit & Reset Password**: Edit names, update emails, and trigger secure password resets.
+- **Guarded Staff Deletion**: Deleting a coach with assigned athletes requires either reassigning the athletes to another coach or is blocked with a clear warning. Scouts can be removed freely, and admins cannot delete themselves.
+
+### 2. Player Management (`/app` > Players)
+- **Centralized Directory**: View all academy athletes across sports with real-time dynamic stats: attendance rate (%), matches played, assigned coach, age, and trial readiness.
+- **Search & Multi-Filter**: Filter athletes instantly by sport (Football, Cricket, Basketball), assigned coach, or text search matching athlete name, username, ID, or coach name.
+- **Profile Editing**: Edit athlete name, age (5–50), sport, coach assignment, and default participation mode (practice, match, both). Updates automatically sync the linked user login account.
+- **Temporary Password Reset**: Generate or assign a temporary password (min 8 chars) that sets `mustChangePassword = true`. Credentials are shown **once** in a secure modal with a 1-click copy action.
+- **Cascade Deletion**: Safely removes the athlete AND permanently deletes their associated user login account (`User.deleteMany`), strips roster entries from draft/unsaved sessions, and removes selections from upcoming matches while preserving historical completed match integrity. Requires an explicit `{ confirm: true }` guard.
+- **Bulk Coach Reassignment**: Select multiple athletes via row checkboxes (or select all) and reassign them to another coach in a single atomic operation.
+
+### 3. Audit Log (`/app` > Audit Log)
+- **Immutable Operation Trail**: Real-time chronological tracking of all administrative actions, including staff creation, editing, password resets, and deletions, as well as player editing, password resets, deletions, and coach reassignments.
+- **Strict Credential Privacy**: Passwords, secrets, and sensitive tokens are strictly sanitized and redacted before any audit record is persisted (`details` never stores passwords).
+- **Paginated Inspection**: Browse audit history with server-side pagination, timestamps, actor details, action tags, and structured operation details.
+
+### 4. Player Directory CSV Export
+- **One-Click Export**: Export the full athlete directory or current filter subset to CSV via `GET /api/admin/export/players?format=csv`.
+- **Columns Exported**: Player ID, Full Name, Username, Sport, Age, Coach, Default Participation, Attendance %, Matches Played, Trial Ready Status, and Registration Date.
+
+### 5. Academy Overview Breakdowns (`/app` > Overview)
+- **Attendance Turnout by Sport**: Average attendance percentage and visual progress bars across Football, Cricket, and Basketball.
+- **Trial-Ready Breakdown by Sport**: Proportion and count of athletes meeting readiness thresholds (>= 75% attendance and >= 2 valid matches played) per sport.
+
+> [!NOTE]
+> **Live Edits & Seeding Notice**: All staff and athlete modifications, password resets, and deletions are persisted immediately in MongoDB Atlas `academy_final`. If the database is re-seeded using `node scripts/seed.js`, all collections will be reset to the clean baseline (27 users, 24 players).
 
 ---
 

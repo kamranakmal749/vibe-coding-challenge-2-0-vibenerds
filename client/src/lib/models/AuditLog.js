@@ -1,61 +1,91 @@
-// src/models/AuditLog.js
-// Persistent audit logging for critical administrative events (e.g., PLAYER_DELETED)
+// client/src/lib/models/AuditLog.js
+// Persistent audit logging for administrative actions and system events
 const mongoose = require('mongoose');
 
 const auditLogSchema = new mongoose.Schema({
   action: {
     type: String,
     required: true,
-    enum: ['PLAYER_DELETED', 'USER_DELETED', 'DATA_PURGED'],
-    default: 'PLAYER_DELETED',
-    index: true
+    index: true,
+    trim: true,
   },
-  adminId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+  // Primary actor fields
+  actorId: {
+    type: mongoose.Schema.Types.Mixed,
     required: true,
-    index: true
+    index: true,
   },
-  adminName: {
+  actorName: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
-  adminEmail: {
+  actorRole: {
+    type: String,
+    default: 'admin',
+    trim: true,
+  },
+  actorEmail: {
     type: String,
     lowercase: true,
     trim: true,
-    default: ''
+    default: '',
   },
-  targetId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    index: true
+  // Legacy alias compatibility
+  adminId: {
+    type: mongoose.Schema.Types.Mixed,
+    index: true,
   },
+  adminName: {
+    type: String,
+    trim: true,
+  },
+  // Target entity
   targetType: {
     type: String,
     required: true,
-    default: 'Player'
+    default: 'Staff',
+    trim: true,
+    index: true,
   },
+  targetId: {
+    type: mongoose.Schema.Types.Mixed,
+    default: null,
+    index: true,
+  },
+  targetName: {
+    type: String,
+    default: '',
+    trim: true,
+  },
+  // Freeform details (strictly sanitized of sensitive credentials)
   details: {
-    playerName: { type: String, required: true },
-    playerSport: { type: String, default: '' },
-    playerInternalId: { type: String, default: '' },
-    username: { type: String, default: '' }
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
   },
   ip: {
     type: String,
-    default: ''
+    default: '',
   },
   userAgent: {
     type: String,
-    default: ''
+    default: '',
   },
   timestamp: {
     type: Date,
     default: Date.now,
-    index: true
-  }
+    index: true,
+  },
 }, { timestamps: true });
 
-module.exports = mongoose.model('AuditLog', auditLogSchema);
+// Pre-save hook: populate legacy aliases if not explicitly provided
+auditLogSchema.pre('save', function () {
+  if (this.actorId && !this.adminId) {
+    this.adminId = this.actorId;
+  }
+  if (this.actorName && !this.adminName) {
+    this.adminName = this.actorName;
+  }
+});
+
+module.exports = mongoose.models.AuditLog || mongoose.model('AuditLog', auditLogSchema);
