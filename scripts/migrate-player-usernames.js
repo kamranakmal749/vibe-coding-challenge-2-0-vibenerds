@@ -4,9 +4,9 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const mongoose = require('mongoose');
-const Player = require('../src/models/Player');
-const User = require('../src/models/User');
-const { generatePlayerId } = require('../src/utils/idGenerator');
+const Player = require('../legacy/src/models/Player');
+const User = require('../legacy/src/models/User');
+const { generatePlayerId } = require('../legacy/src/utils/idGenerator');
 
 async function migratePlayerUsernames() {
   if (mongoose.connection.readyState === 0) {

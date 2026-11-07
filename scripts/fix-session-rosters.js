@@ -19,9 +19,9 @@
 const mongoose = require('mongoose');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
-const Session = require('../src/models/Session');
-const Player = require('../src/models/Player');
-const User = require('../src/models/User');
+const Session = require('../legacy/src/models/Session');
+const Player = require('../legacy/src/models/Player');
+const User = require('../legacy/src/models/User');
 
 const DRY_RUN = process.argv.includes('--dry-run');
 

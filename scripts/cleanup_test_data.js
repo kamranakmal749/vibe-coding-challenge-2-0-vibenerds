@@ -3,10 +3,10 @@ dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const Player = require('../src/models/Player');
-const Match = require('../src/models/Match');
-const Session = require('../src/models/Session');
-const MatchParticipation = require('../src/models/MatchParticipation');
+const Player = require('../legacy/src/models/Player');
+const Match = require('../legacy/src/models/Match');
+const Session = require('../legacy/src/models/Session');
+const MatchParticipation = require('../legacy/src/models/MatchParticipation');
 
 async function main() {
   await mongoose.connect(process.env.MONGODB_URI);

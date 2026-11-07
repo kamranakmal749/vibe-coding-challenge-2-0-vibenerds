@@ -108,7 +108,7 @@ async function printDbStats() {
 function startExpress() {
   return new Promise((resolve, reject) => {
     console.log(`Starting Express backend on PORT=${expressPort} against ${parityUri.split('@')[1]}...`);
-    const child = spawn('node', ['server.js'], {
+    const child = spawn('node', ['legacy/server.js'], {
       env: {
         ...process.env,
         PORT: String(expressPort),

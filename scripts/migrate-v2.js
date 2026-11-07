@@ -8,9 +8,9 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const mongoose = require('mongoose');
-const Player   = require('../src/models/Player');
-const Session  = require('../src/models/Session');
-const Match    = require('../src/models/Match');
+const Player   = require('../legacy/src/models/Player');
+const Session  = require('../legacy/src/models/Session');
+const Match    = require('../legacy/src/models/Match');
 
 async function migrate() {
   if (mongoose.connection.readyState === 0) {

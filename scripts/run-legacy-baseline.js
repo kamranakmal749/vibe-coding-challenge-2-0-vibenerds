@@ -58,4 +58,4 @@ for (const file of files) {
 
 console.log('\n--- LEGACY TEST RESULTS ON ACADEMY_PARITY ---');
 console.table(results);
-fs.writeFileSync('legacy_baseline_parity.json', JSON.stringify(results, null, 2));
+fs.writeFileSync('legacy/legacy_baseline_parity.json', JSON.stringify(results, null, 2));

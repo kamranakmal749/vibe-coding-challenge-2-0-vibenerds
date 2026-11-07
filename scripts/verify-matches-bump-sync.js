@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const expressMatchesFile = path.resolve(__dirname, '../src/routes/matches.js');
+const expressMatchesFile = path.resolve(__dirname, '../legacy/src/routes/matches.js');
 const expressContent = fs.readFileSync(expressMatchesFile, 'utf8');
 
 // Parse all route handlers and their broadcastServerSync calls from Express source

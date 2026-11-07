@@ -4,12 +4,12 @@ require('dns').setServers(['8.8.8.8', '1.1.1.1']);
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const mongoose = require('mongoose');
-const User     = require('../src/models/User');
-const Player   = require('../src/models/Player');
-const Session  = require('../src/models/Session');
-const Match    = require('../src/models/Match');
-const MatchParticipation = require('../src/models/MatchParticipation');
-const Counter  = require('../src/models/Counter');
+const User     = require('../legacy/src/models/User');
+const Player   = require('../legacy/src/models/Player');
+const Session  = require('../legacy/src/models/Session');
+const Match    = require('../legacy/src/models/Match');
+const MatchParticipation = require('../legacy/src/models/MatchParticipation');
+const Counter  = require('../legacy/src/models/Counter');
 
 function maskUri(uri) {
   if (!uri) return '';

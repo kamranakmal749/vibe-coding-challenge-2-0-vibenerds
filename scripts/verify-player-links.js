@@ -4,12 +4,12 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const mongoose = require('mongoose');
-const Player = require('../src/models/Player');
-const User = require('../src/models/User');
-const Session = require('../src/models/Session');
-const Match = require('../src/models/Match');
-const MatchParticipation = require('../src/models/MatchParticipation');
-const { enrichPlayer } = require('../src/routes/players');
+const Player = require('../legacy/src/models/Player');
+const User = require('../legacy/src/models/User');
+const Session = require('../legacy/src/models/Session');
+const Match = require('../legacy/src/models/Match');
+const MatchParticipation = require('../legacy/src/models/MatchParticipation');
+const { enrichPlayer } = require('../legacy/src/routes/players');
 
 async function verifyPlayerLinks() {
   if (mongoose.connection.readyState === 0) {

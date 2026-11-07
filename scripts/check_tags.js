@@ -1,5 +1,5 @@
 const fs = require('fs');
-const html = fs.readFileSync('index.html', 'utf8');
+const html = fs.readFileSync('legacy/public/index.html', 'utf8');
 
 // Parse tags with line numbers
 const regex = /<\/?([a-zA-Z0-9\-]+)(?:\s+[^>]*)?>/g;

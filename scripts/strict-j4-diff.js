@@ -3,8 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const expressMatchesPath = path.resolve(__dirname, '../src/routes/matches.js');
-const expressScoutPath = path.resolve(__dirname, '../src/routes/scout.js');
+const expressMatchesPath = path.resolve(__dirname, '../legacy/src/routes/matches.js');
+const expressScoutPath = path.resolve(__dirname, '../legacy/src/routes/scout.js');
 
 // Map of Express route handlers to Next.js handler files
 const routeMapping = [

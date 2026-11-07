@@ -18,7 +18,7 @@ const rootAppRoutes = [
 
 // 2. Extract routes from src/routes/*.js
 const expressRoutes = [...rootAppRoutes];
-const routesDir = path.resolve(__dirname, '../src/routes');
+const routesDir = path.resolve(__dirname, '../legacy/src/routes');
 const files = fs.readdirSync(routesDir);
 
 for (const file of files) {

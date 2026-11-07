@@ -2,8 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const expressMatchesFile = path.resolve(__dirname, '../src/routes/matches.js');
-const expressScoutFile = path.resolve(__dirname, '../src/routes/scout.js');
+const expressMatchesFile = path.resolve(__dirname, '../legacy/src/routes/matches.js');
+const expressScoutFile = path.resolve(__dirname, '../legacy/src/routes/scout.js');
 
 function extractExpressErrors(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');

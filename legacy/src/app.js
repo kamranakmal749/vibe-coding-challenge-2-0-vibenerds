@@ -3,6 +3,7 @@ const dns = require('dns');
 try { dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']); } catch (_) {}
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 const authRoutes    = require('./routes/auth');
 const playerRoutes  = require('./routes/players');
@@ -24,7 +25,8 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.use(express.static('.')); // Serve index.html from project root
+const publicDir = path.join(__dirname, '../public');
+app.use(express.static(publicDir)); // Serve index.html from legacy/public
 
 // ── API Routes ────────────────────────────────────────────────
 app.use('/api/auth',     authRoutes);
@@ -38,6 +40,6 @@ app.use('/api/sync',     syncRoutes);
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 // ── Catch-all: return SPA ─────────────────────────────────────
-app.get('/{*path}', (_req, res) => res.sendFile('index.html', { root: '.' }));
+app.get('/{*path}', (_req, res) => res.sendFile('index.html', { root: publicDir }));
 
 module.exports = app;
