@@ -1,4 +1,5 @@
-// scripts/seed.js  –  Creates demo users and players for hackathon verification under new rules.
+require('dns').setServers(['8.8.8.8', '1.1.1.1']);
+// scripts/seed.js – Creates test users and players for production verification.
 // Run: node scripts/seed.js
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
@@ -9,6 +10,18 @@ const Session  = require('../src/models/Session');
 const Match    = require('../src/models/Match');
 const MatchParticipation = require('../src/models/MatchParticipation');
 const Counter  = require('../src/models/Counter');
+
+function maskUri(uri) {
+  if (!uri) return '';
+  return uri.replace(/\/\/(.*):(.*)@/, '//$1:****@');
+}
+
+function extractDbName(uri) {
+  if (!uri) return '';
+  const withoutQuery = uri.split('?')[0];
+  const parts = withoutQuery.split('/');
+  return parts[parts.length - 1] || '';
+}
 
 const DEMO_USERS = [
   { _id: new mongoose.Types.ObjectId('65f000000000000000000001'), name: 'Academy Admin', username: 'admin',  email: 'admin@maidandesk.com', password: 'admin123',  role: 'admin'  },
@@ -34,6 +47,29 @@ function getDateOffset(daysAgo, hour = 10) {
 }
 
 async function seed() {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    console.error('FATAL: MONGODB_URI environment variable is not defined.');
+    process.exit(1);
+  }
+
+  const dbName = extractDbName(uri);
+  const maskedUri = maskUri(uri);
+
+  console.log(`[SEED GUARD] Target Database: ${dbName}`);
+  console.log(`[SEED GUARD] Target URI: ${maskedUri}`);
+
+  // Hard safety guard: refuse to run unless DB name is EXACTLY academy_final AND ALLOW_PRODUCTION_DB=true
+  if (dbName !== 'academy_final') {
+    console.error(`FATAL: Guard Refusal! Target database "${dbName}" is not "academy_final". Seeding is strictly forbidden to protect backup databases.`);
+    process.exit(1);
+  }
+
+  if (process.env.ALLOW_PRODUCTION_DB !== 'true') {
+    console.error('FATAL: Guard Refusal! ALLOW_PRODUCTION_DB must be set to "true" to seed academy_final.');
+    process.exit(1);
+  }
+
   await mongoose.connect(process.env.MONGODB_URI);
   console.log('Connected to MongoDB Atlas');
 

@@ -24,9 +24,9 @@ Maidan Desk is a comprehensive sports academy management and talent scouting pla
 
 ---
 
-## Demo Credentials
+## Test Credentials
 
-Sign in with any of the pre-seeded demo accounts (or use the 1-click quick-fill buttons on the login page):
+Sign in with any of the pre-seeded accounts (or use the 1-click quick-fill buttons on the login page):
 
 | Role | Username | Password | Purpose & Capabilities |
 |---|---|---|---|

@@ -16,23 +16,49 @@ if (!cached) {
   cached = (globalThis as any).mongooseConnection = { conn: null, promise: null };
 }
 
+export function extractDbNameFromUri(uri: string): string {
+  try {
+    const withoutQuery = uri.split('?')[0];
+    const slashIdx = withoutQuery.lastIndexOf('/');
+    if (slashIdx !== -1) {
+      return withoutQuery.slice(slashIdx + 1);
+    }
+  } catch (_) {}
+  return '';
+}
+
 /**
  * Validates the MongoDB URI against database name safety invariants.
- * Allows only academy_dev or academy_parity by default.
- * When ALLOW_PRODUCTION_DB=true is set, any database name is permitted.
- * Never logs the URI or hardcodes a specific production DB name.
+ * - When ALLOW_PRODUCTION_DB is unset or false:
+ *   Allows only development/parity databases (academy_dev or academy_parity).
+ * - When ALLOW_PRODUCTION_DB=true:
+ *   Refuses any database other than the configured production database
+ *   (process.env.PRODUCTION_DB_NAME || 'academy_final'). This prevents accidental
+ *   writes to backup databases (academy, academy_dev, academy_demo).
+ * Never logs credentials or full URI strings.
  */
 export function validateDatabaseUri(
   uri: string,
-  allowProductionDb: boolean = process.env.ALLOW_PRODUCTION_DB === 'true'
+  allowProductionDb: boolean = process.env.ALLOW_PRODUCTION_DB === 'true',
+  configuredProductionDb: string = process.env.PRODUCTION_DB_NAME || 'academy_final'
 ): void {
   if (!uri) {
     throw new Error('Database connection failed: MONGODB_URI environment variable is not defined');
   }
 
-  const isAllowedDb = uri.includes('/academy_dev') || uri.includes('/academy_parity');
+  const dbName = extractDbNameFromUri(uri);
 
-  if (!isAllowedDb && !allowProductionDb) {
+  if (allowProductionDb) {
+    if (dbName !== configuredProductionDb) {
+      throw new Error(
+        `Database connection refused: MONGODB_URI in production must target the configured database (${configuredProductionDb})`
+      );
+    }
+    return;
+  }
+
+  const isAllowedDb = dbName === 'academy_dev' || dbName === 'academy_parity';
+  if (!isAllowedDb) {
     throw new Error(
       'Database connection refused: MONGODB_URI must target academy_dev or academy_parity unless ALLOW_PRODUCTION_DB=true is set'
     );

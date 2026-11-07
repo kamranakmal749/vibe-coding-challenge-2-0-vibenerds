@@ -49,7 +49,7 @@ The API is fully migrated to Next.js route handlers on MongoDB. The entry portal
 
 ---
 
-## Demo Credentials
+## Test Credentials
 
 You can sign in with any of the following pre-seeded test accounts (also accessible via 1-click quick-fill buttons on `/`):
 

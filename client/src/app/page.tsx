@@ -143,7 +143,7 @@ export default function LoginPage() {
               Sign In
             </h1>
             <p className="login-subtitle">
-              Enter credentials or pick a demo role to access the desk.
+              Enter credentials or pick a role to access the desk.
             </p>
           </div>
 
@@ -214,10 +214,10 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Quick-Fill Demo Roles */}
+          {/* Quick Login Roles */}
           <div className="login-quick-fill-section">
             <p className="login-quick-fill-title">
-              Quick Fill Demo Roles
+              Quick Login
             </p>
             <div className="login-quick-fill-grid">
               <button
