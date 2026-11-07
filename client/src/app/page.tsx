@@ -64,6 +64,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -77,11 +78,11 @@ export default function LoginPage() {
         try {
           const parsed = JSON.parse(user);
           if (parsed?.role === 'scout') {
-            window.location.href = '/app/scout';
+            window.location.replace('/app/scout');
             return;
           }
         } catch (_) {}
-        window.location.href = '/app';
+        window.location.replace('/app');
         return;
       }
     } catch (_) {}
@@ -164,16 +165,18 @@ export default function LoginPage() {
       // Store in localStorage using the EXACT keys and format expected by script.js
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      try {
+        sessionStorage.removeItem('maidan_auth_redirected');
+      } catch (_) {}
 
-      // Redirect to scout radar for scout role, or SPA workspace for others
-      if (data.user?.role === 'scout') {
-        window.location.href = '/app/scout';
-      } else {
-        window.location.href = '/app';
-      }
+      // Keep button in loading state ("Signing you in...") and redirect cleanly
+      setIsRedirecting(true);
+
+      const targetPath = data.user?.role === 'scout' ? '/app/scout' : '/app';
+      window.location.replace(targetPath);
+      return;
     } catch (err: any) {
       setError(err.message || 'Login failed. Please check credentials.');
-    } finally {
       setLoading(false);
     }
   }
@@ -256,6 +259,7 @@ export default function LoginPage() {
                   aria-selected={isSelected}
                   aria-controls={`panel-${role.id}`}
                   tabIndex={isSelected ? 0 : -1}
+                  disabled={loading || isRedirecting}
                   onClick={() => handleRoleSelect(role.id)}
                   onKeyDown={(e) => handleTabKeyDown(e, idx)}
                   className={`login-role-tab${isSelected ? ' active' : ''}`}
@@ -305,6 +309,7 @@ export default function LoginPage() {
                   placeholder={currentRoleConfig.usernamePlaceholder}
                   className="login-input"
                   autoComplete="username"
+                  disabled={loading || isRedirecting}
                   required
                 />
               </div>
@@ -324,16 +329,22 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   className="login-input"
                   autoComplete="current-password"
+                  disabled={loading || isRedirecting}
                   required
                 />
               </div>
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isRedirecting}
                 className="login-submit-btn"
               >
-                {loading ? (
+                {isRedirecting ? (
+                  <>
+                    <span className="login-spinner">⏳</span>
+                    <span>Signing you in...</span>
+                  </>
+                ) : loading ? (
                   <>
                     <span className="login-spinner">⏳</span>
                     <span>Authenticating...</span>
@@ -351,6 +362,7 @@ export default function LoginPage() {
             <div className="login-test-creds-container">
               <button
                 type="button"
+                disabled={loading || isRedirecting}
                 onClick={fillTestCredentials}
                 className="login-test-creds-btn"
               >

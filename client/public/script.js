@@ -395,10 +395,11 @@ function logout() {
     try {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        sessionStorage.removeItem('maidan_auth_redirected');
     } catch (_) {}
 
     if (window.location.pathname !== '/') {
-        window.location.href = '/';
+        window.location.replace('/');
     }
 }
 
@@ -8494,26 +8495,86 @@ window.addEventListener('beforeunload', () => {
     stopGreetingTimer();
 });
 
+function hideLoadingSplash() {
+    const splash = document.getElementById('app-loading-splash');
+    if (splash) {
+        splash.style.opacity = '0';
+        setTimeout(() => {
+            splash.remove();
+            document.documentElement.classList.remove('app-splash-active');
+        }, 180);
+    } else {
+        document.documentElement.classList.remove('app-splash-active');
+    }
+}
+
+function handleAuthInitFailure(reason) {
+    console.warn('[AuthInit] Redirecting to login:', reason);
+    try {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+    } catch (_) {}
+
+    const redirected = sessionStorage.getItem('maidan_auth_redirected');
+    if (!redirected) {
+        sessionStorage.setItem('maidan_auth_redirected', 'true');
+        window.location.replace('/');
+    } else {
+        hideLoadingSplash();
+        window.location.replace('/');
+    }
+}
+
 // On page load: check if already logged in with JWT
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     applySavedTheme();
     initIcons();
     initSidebarResizer();
 
     const storedUser = localStorage.getItem('user');
-    if (authToken && storedUser) {
+    if (!authToken || !storedUser) {
+        handleAuthInitFailure('Missing auth credentials');
+        return;
+    }
+
+    try {
+        currentUser = JSON.parse(storedUser);
+        if (currentUser.role === 'scout') {
+            window.location.replace('/app/scout');
+            return;
+        }
+
+        // Render immediately with cached profile for instantaneous display
+        renderAppForUser(currentUser.role, currentUser);
+        if (currentUser.role === 'player' && currentUser.mustChangePassword) {
+            openMandatoryPasswordChangeModal();
+        }
+
+        // Validate token with /api/auth/me to ensure it's still valid
         try {
-            currentUser = JSON.parse(storedUser);
-            renderAppForUser(currentUser.role, currentUser);
-            if (currentUser.role === 'player' && currentUser.mustChangePassword) {
-                openMandatoryPasswordChangeModal();
+            const meRes = await fetch('/api/auth/me', {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            if (meRes.status === 401 || meRes.status === 403) {
+                handleAuthInitFailure('Session expired or unauthorized');
+                return;
             }
-        } catch {
-            logout();
+            if (meRes.ok) {
+                const freshUser = await meRes.json();
+                if (freshUser && freshUser.role) {
+                    currentUser = { ...currentUser, ...freshUser };
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    sessionStorage.removeItem('maidan_auth_redirected');
+                }
+            }
+        } catch (fetchErr) {
+            console.warn('[AuthInit] Network error checking /api/auth/me; continuing with cached session:', fetchErr);
         }
-    } else {
-        if (window.location.pathname !== '/') {
-            window.location.href = '/';
-        }
+    } catch (parseErr) {
+        console.error('[AuthInit] Corrupt user profile JSON in localStorage:', parseErr);
+        handleAuthInitFailure('Corrupt session');
+        return;
+    } finally {
+        hideLoadingSplash();
     }
 });
