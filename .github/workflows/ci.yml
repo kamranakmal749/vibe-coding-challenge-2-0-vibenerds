@@ -29,6 +29,10 @@ jobs:
         working-directory: ./client
         run: npm test
 
+      - name: Run TypeScript typecheck
+        working-directory: ./client
+        run: npm run typecheck
+
       - name: Build client Next.js application
         working-directory: ./client
         env:

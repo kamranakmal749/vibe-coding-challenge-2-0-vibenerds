@@ -8,7 +8,7 @@ const JWT_SECRET = 'test-jwt-secret-admin-player-audit-unit';
 process.env.JWT_SECRET = JWT_SECRET;
 process.env.MONGODB_URI = 'mongodb://localhost:27017/academy_dev';
 process.env.ALLOW_PRODUCTION_DB = 'false';
-process.env.NODE_ENV = 'test';
+(process.env as any).NODE_ENV = 'test';
 process.env.SIMULATE_NO_TX = 'true';
 
 // Prime the global mongoose connection cache to avoid network connections

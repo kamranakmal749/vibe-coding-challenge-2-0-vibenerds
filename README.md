@@ -149,10 +149,18 @@ Configure the following environment variables (defined in `client/.env.local` fo
 
 ## Guarded Database Seeding
 
-The seed script includes an explicit safety guard that refuses to execute unless the target database name in `MONGODB_URI` equals `academy_final` AND `ALLOW_PRODUCTION_DB=true`:
+> [!WARNING]
+> **DO NOT run database seeding during standard evaluation or testing.**
+> The live deployment at [https://maidandesk.vercel.app](https://maidandesk.vercel.app) is already fully seeded and operational. Running `scripts/seed.js` will permanently drop and reset all existing collections (`users`, `players`, `sessions`, `matches`, `matchparticipations`, `counters`). An evaluator never needs to seed the database to evaluate the application.
+
+For authorized developers setting up a fresh local or staging database, `scripts/seed.js` is protected by **multi-tier safety guards**:
+1. Target database in `MONGODB_URI` must be strictly `academy_final`.
+2. `ALLOW_PRODUCTION_DB=true` must be set.
+3. An explicit destructive confirmation variable `CONFIRM_DESTRUCTIVE_SEED="I_ACKNOWLEDGE_THIS_DESTROYS_DATA"` is strictly required to prevent accidental execution from automated scripts or ambient shell environments:
 
 ```powershell
 $env:ALLOW_PRODUCTION_DB = "true"
+$env:CONFIRM_DESTRUCTIVE_SEED = "I_ACKNOWLEDGE_THIS_DESTROYS_DATA"
 $env:MONGODB_URI = "mongodb+srv://<user>:<password>@<cluster-host>/academy_final?retryWrites=true&w=majority"
 node scripts/seed.js
 ```

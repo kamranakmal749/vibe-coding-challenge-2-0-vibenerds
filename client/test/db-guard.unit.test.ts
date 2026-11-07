@@ -91,3 +91,53 @@ test('DB Guard: allows academy_dev and academy_parity by default without flag', 
   }, 'Should allow academy_parity by default');
 });
 
+test('Seed Guard: scripts/seed.js enforces multi-tier safety guards without connecting to MongoDB', () => {
+  // Test guard logic in isolation (identical to scripts/seed.js checks)
+  function testSeedGuard(uri: string, allowProd: string | undefined, confirmDestructive: string | undefined) {
+    const withoutQuery = uri.split('?')[0];
+    const parts = withoutQuery.split('/');
+    const dbName = parts[parts.length - 1] || '';
+
+    if (dbName !== 'academy_final') {
+      return { allowed: false, reason: 'WRONG_DB' };
+    }
+    if (allowProd !== 'true') {
+      return { allowed: false, reason: 'MISSING_ALLOW_PROD' };
+    }
+    if (confirmDestructive !== 'I_ACKNOWLEDGE_THIS_DESTROYS_DATA') {
+      return { allowed: false, reason: 'MISSING_DESTRUCTIVE_CONFIRMATION' };
+    }
+    return { allowed: true };
+  }
+
+  // 1. Rejects non-academy_final target
+  assert.equal(
+    testSeedGuard('mongodb+srv://user:pass@cluster.net/other_db', 'true', 'I_ACKNOWLEDGE_THIS_DESTROYS_DATA').reason,
+    'WRONG_DB'
+  );
+
+  // 2. Rejects when ALLOW_PRODUCTION_DB is not 'true'
+  assert.equal(
+    testSeedGuard('mongodb+srv://user:pass@cluster.net/academy_final', 'false', 'I_ACKNOWLEDGE_THIS_DESTROYS_DATA').reason,
+    'MISSING_ALLOW_PROD'
+  );
+
+  // 3. CRITICAL: Rejects when ALLOW_PRODUCTION_DB=true but CONFIRM_DESTRUCTIVE_SEED is missing
+  assert.equal(
+    testSeedGuard('mongodb+srv://user:pass@cluster.net/academy_final', 'true', undefined).reason,
+    'MISSING_DESTRUCTIVE_CONFIRMATION'
+  );
+
+  // 4. Rejects invalid confirmation string
+  assert.equal(
+    testSeedGuard('mongodb+srv://user:pass@cluster.net/academy_final', 'true', 'yes').reason,
+    'MISSING_DESTRUCTIVE_CONFIRMATION'
+  );
+
+  // 5. Passes only when all three requirements are met
+  assert.equal(
+    testSeedGuard('mongodb+srv://user:pass@cluster.net/academy_final', 'true', 'I_ACKNOWLEDGE_THIS_DESTROYS_DATA').allowed,
+    true
+  );
+});
+

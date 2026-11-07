@@ -25,7 +25,7 @@ test('MATCHES - Decision C: x-mock-now ignored when ALLOW_MOCK_NOW is not set an
   const oldEnv = process.env.NODE_ENV;
   const oldFlag = process.env.ALLOW_MOCK_NOW;
   try {
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV = 'production';
     delete process.env.ALLOW_MOCK_NOW;
 
     const effective = getEffectiveNow(fakeReq);
@@ -42,7 +42,7 @@ test('MATCHES - Decision C: x-mock-now ignored when ALLOW_MOCK_NOW is not set an
     const effectiveMocked = getEffectiveNow(fakeReq);
     assert.equal(effectiveMocked.getUTCFullYear(), 2030);
   } finally {
-    process.env.NODE_ENV = oldEnv;
+    (process.env as any).NODE_ENV = oldEnv;
     if (oldFlag) process.env.ALLOW_MOCK_NOW = oldFlag;
     else delete process.env.ALLOW_MOCK_NOW;
   }

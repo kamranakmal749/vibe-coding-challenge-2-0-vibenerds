@@ -115,14 +115,33 @@ async function seed() {
   console.log(`[SEED GUARD] Target Database: ${dbName}`);
   console.log(`[SEED GUARD] Target URI: ${maskedUri}`);
 
-  // Hard safety guard: refuse to run unless DB name is EXACTLY academy_final AND ALLOW_PRODUCTION_DB=true
+  // Multi-tier safety guards:
+  // 1. Target database must be EXACTLY "academy_final"
   if (dbName !== 'academy_final') {
-    console.error(`FATAL: Guard Refusal! Target database "${dbName}" is not "academy_final". Seeding is strictly forbidden to protect backup databases.`);
+    console.error(`FATAL: Guard Refusal! Target database "${dbName}" is not "academy_final". Seeding is strictly forbidden to protect backup and foreign databases.`);
     process.exit(1);
   }
 
+  // 2. Production override flag must be explicitly set
   if (process.env.ALLOW_PRODUCTION_DB !== 'true') {
-    console.error('FATAL: Guard Refusal! ALLOW_PRODUCTION_DB must be set to "true" to seed academy_final.');
+    console.error('FATAL: Guard Refusal! ALLOW_PRODUCTION_DB must be set to "true" to authorize database operations.');
+    process.exit(1);
+  }
+
+  // 3. Destructive confirmation flag: prevents accidental invocation when ALLOW_PRODUCTION_DB is set in CI or shell
+  if (process.env.CONFIRM_DESTRUCTIVE_SEED !== 'I_ACKNOWLEDGE_THIS_DESTROYS_DATA') {
+    console.error('================================================================================');
+    console.error('🚨 FATAL: DESTRUCTIVE SEED GUARD REFUSAL');
+    console.error('================================================================================');
+    console.error('scripts/seed.js irreversibly deletes all existing users, players, sessions,');
+    console.error('matches, participations, and counters before recreating the baseline dataset.');
+    console.error('');
+    console.error('To prevent accidental data loss in live evaluation environments,');
+    console.error('ALLOW_PRODUCTION_DB=true alone CANNOT authorize destructive seeding.');
+    console.error('');
+    console.error('To proceed, you must explicitly set:');
+    console.error('  CONFIRM_DESTRUCTIVE_SEED="I_ACKNOWLEDGE_THIS_DESTROYS_DATA"');
+    console.error('================================================================================');
     process.exit(1);
   }
 

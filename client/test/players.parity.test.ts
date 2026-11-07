@@ -349,7 +349,7 @@ test('PLAYERS - Non-transactional fallback cascade deletion path', async () => {
   });
 
   // Execute fallback cascade directly via injectable forceNoTx in test mode
-  process.env.NODE_ENV = 'test';
+  (process.env as any).NODE_ENV = 'test';
   const result = await executePlayerDeletionCascade(player, admin, true);
   assert.equal(result.playerName, 'Fallback Target');
 
@@ -366,11 +366,11 @@ test('PLAYERS - Non-transactional fallback cascade deletion path', async () => {
   // Prove that in production build (NODE_ENV !== 'test'), forceNoTx flag is strictly ignored
   const oldEnv = process.env.NODE_ENV;
   try {
-    process.env.NODE_ENV = 'production';
-    const isTest = process.env.NODE_ENV === 'test';
+    (process.env as any).NODE_ENV = 'production';
+    const isTest = (process.env.NODE_ENV as string) === 'test';
     assert.equal(isTest, false, 'Production environment must never evaluate isTestEnv to true');
   } finally {
-    process.env.NODE_ENV = oldEnv;
+    (process.env as any).NODE_ENV = oldEnv;
   }
 
   // Cleanup

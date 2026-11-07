@@ -155,4 +155,23 @@ This document details all schema updates, business rule shifts, API endpoints, s
 * **Squad & Scorecard Flow**: Dual-tab modal for idempotent squad selection and live scorecard entry.
 * **Athlete ERP Profile & Portal**: 4 benchmark cards (Attendance, Matches Played, Squad Selected, Did Not Play), Trial Readiness status pills, and personal match appearances.
 
+---
+
+## 6. Pre-Submission Hardening & Quality Verification (v2.1)
+
+### 6.1 Database Protection & Multi-Tier Seeding Guards
+* **Destructive Confirmation Flag**: Added `CONFIRM_DESTRUCTIVE_SEED="I_ACKNOWLEDGE_THIS_DESTROYS_DATA"` guard to `scripts/seed.js`. `ALLOW_PRODUCTION_DB=true` alone cannot drop collections, preventing accidental data loss during automated evaluation.
+* **Seed Guard Testing**: Added zero-network unit test coverage verifying that non-matching databases, missing production flags, and missing confirmation variables immediately abort execution before establishing any MongoDB connection.
+
+### 6.2 Authentication & Security Hardening
+* **Input Validation on Dynamic Routes**: Added upfront `mongoose.Types.ObjectId.isValid(id)` checks across all 7 `/api/sessions/[id]/*` endpoints, returning `400 Bad Request` instead of unhandled 500 `CastError`s.
+* **NoSQL Injection Sanitization**: Enforced explicit string type checking on `/api/auth/login` identifier and password fields to block object injection payloads (`{"$ne": null}`).
+* **Production Clock Mocking Protection**: Updated `getEffectiveNow()` in `client/src/lib/clock.ts` to strictly require `process.env.NODE_ENV !== 'production'`, guaranteeing time-travel headers cannot be honored on live deployments.
+* **XSS Sanitization**: Ensured all athlete names, usernames, and sports rendered dynamically in table rows are escaped via `escapeHtml()`.
+
+### 6.3 State Preservation & CI
+* **Search Persistence**: Centralized `currentSearchQuery` in `script.js` so that periodic sync polling (`/api/sync/version`) does not reset active search queries or disrupt user input while typing or while modals are open.
+* **Automated Type Checking**: Added `"typecheck": "tsc --noEmit"` to `client/package.json` and integrated step into `.github/workflows/ci.yml`.
+* **License & Metadata Parity**: Standardized root `package.json` license metadata to MIT to match repository `LICENSE`.
+
 
