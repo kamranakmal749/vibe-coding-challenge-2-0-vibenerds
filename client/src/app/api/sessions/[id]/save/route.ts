@@ -1,5 +1,6 @@
 // client/src/app/api/sessions/[id]/save/route.ts
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectToDatabase from '@/lib/db';
 import { authenticateRequest } from '@/lib/auth';
 import { bumpSync } from '@/lib/sync';
@@ -25,6 +26,9 @@ export async function PATCH(
     if (auth.errorResponse) return auth.errorResponse;
 
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: 'Invalid session ID format' }, { status: 400 });
+    }
     const session = await Session.findById(id);
     if (!session) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });

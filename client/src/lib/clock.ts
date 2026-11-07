@@ -78,7 +78,8 @@ export function getMatchUnlockDateTime(match: any): Date {
  */
 export function getEffectiveNow(req?: Request): Date {
   const isMockAllowed =
-    process.env.NODE_ENV === 'test' || process.env.ALLOW_MOCK_NOW === 'true';
+    process.env.NODE_ENV !== 'production' &&
+    (process.env.NODE_ENV === 'test' || process.env.ALLOW_MOCK_NOW === 'true');
 
   if (isMockAllowed && req) {
     let mockVal: string | null = null;

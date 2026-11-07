@@ -517,7 +517,8 @@ async function handleIncomingSyncEvent(payload) {
                 return;
             }
 
-            // Do not disrupt user input while typing inside search box or any form inputs
+            // Do not disrupt user input while typing inside search box, any form inputs, or while a modal is open
+            const isModalOpen = Boolean(document.getElementById('app-modal') && !document.getElementById('app-modal').classList.contains('hidden'));
             const activeEl = document.activeElement;
             const isTyping = activeEl && (
                 activeEl.id === 'header-global-search' ||
@@ -526,7 +527,7 @@ async function handleIncomingSyncEvent(payload) {
                 activeEl.isContentEditable
             );
 
-            if (isTyping) {
+            if (isTyping || isModalOpen) {
                 // Refresh cached players silently in background without re-rendering DOM table
                 try {
                     const freshPlayers = await api('/api/players');
@@ -3009,11 +3010,11 @@ function renderCoachPlayersTable(players) {
                 <td class="py-4 px-6 border-r border-slate-200/80 dark:border-slate-800/80">
                     <div class="flex items-center gap-3.5">
                         <div class="w-9 h-9 rounded-full bg-brand-500/15 text-brand-600 dark:text-brand-400 border border-brand-500/25 flex items-center justify-center font-bold text-sm shrink-0">
-                            ${p.name.charAt(0)}
+                            ${escapeHtml((p.name || '').trim().charAt(0).toUpperCase())}
                         </div>
                         <div>
-                            <span class="font-bold text-slate-900 dark:text-white text-sm block">${p.name}</span>
-                            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Age ${p.age}</span>
+                            <span class="font-bold text-slate-900 dark:text-white text-sm block">${escapeHtml(p.name)}</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Age ${escapeHtml(p.age)}</span>
                         </div>
                     </div>
                 </td>
@@ -3021,7 +3022,7 @@ function renderCoachPlayersTable(players) {
                 <!-- 3. Sport -->
                 <td class="py-4 px-5 border-r border-slate-200/80 dark:border-slate-800/80">
                     <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                        ${p.sport}
+                        ${escapeHtml(p.sport)}
                     </span>
                 </td>
 

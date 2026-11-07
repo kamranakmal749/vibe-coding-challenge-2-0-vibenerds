@@ -14,9 +14,10 @@ export async function POST(req: Request) {
     await connectToDatabase();
     const body = await req.json().catch(() => ({}));
     const { identifier, username, email, password } = body;
-    const rawId = (identifier || email || username || '').trim().toLowerCase();
+    const rawIdentifier = typeof identifier === 'string' ? identifier : typeof email === 'string' ? email : typeof username === 'string' ? username : '';
+    const rawId = rawIdentifier.trim().toLowerCase();
 
-    if (!rawId || !password) {
+    if (!rawId || typeof password !== 'string' || !password) {
       return NextResponse.json(
         { error: 'Username or email and password required' },
         { status: 400 }
