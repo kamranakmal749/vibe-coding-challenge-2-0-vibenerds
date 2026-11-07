@@ -2712,6 +2712,43 @@ async function submitCreateSession() {
     }
 }
 
+// ── Unified Session Roster Eligibility ───────────────────────────────────────
+function isPlayerEligibleForSession(player, session) {
+    if (!player || !session) return false;
+
+    // 1. Sport check (case-insensitive)
+    const pSport = (player.sport || '').trim().toLowerCase();
+    const sSport = (session.sport || '').trim().toLowerCase();
+    if (!pSport || !sSport || pSport !== sSport) return false;
+
+    // 2. Coach check
+    const pCoach = player.coach ? (player.coach._id || player.coach).toString() : null;
+    const sCoach = session.coach ? (session.coach._id || session.coach).toString() : null;
+    if (pCoach && sCoach && pCoach !== sCoach) return false;
+
+    // 3. Registration date check (registeredOn <= session date end of day)
+    if (player.registeredOn && session.date) {
+        const regDate = new Date(player.registeredOn);
+        const sessDate = new Date(session.date);
+        if (!isNaN(regDate.getTime()) && !isNaN(sessDate.getTime())) {
+            const sessEndLocal = new Date(sessDate);
+            sessEndLocal.setHours(23, 59, 59, 999);
+            const sessEndUtc = new Date(sessDate);
+            sessEndUtc.setUTCHours(23, 59, 59, 999);
+            const latestAllowed = sessEndLocal > sessEndUtc ? sessEndLocal : sessEndUtc;
+            if (regDate > latestAllowed) return false;
+        }
+    }
+
+    // 4. Default participation check: must include practice ('practice' or 'both')
+    const defaultPart = (player.defaultParticipation || 'both').toLowerCase();
+    if (defaultPart !== 'practice' && defaultPart !== 'both') {
+        return false;
+    }
+
+    return true;
+}
+
 async function openSessionRosterView(sessionId, options = {}) {
     if (!sessionId) return;
     try {
@@ -2737,9 +2774,9 @@ async function openSessionRosterView(sessionId, options = {}) {
             return;
         }
 
-        // Filter all registered players for this session's sport
+        // Filter all registered and eligible players for this session
         const sportPlayers = (cachedPlayers || []).filter(p => {
-            return (p.sport || '').trim().toLowerCase() === (session.sport || '').trim().toLowerCase();
+            return isPlayerEligibleForSession(p, session);
         });
 
         if (!isEditing) {
@@ -3531,13 +3568,9 @@ function renderSessionDetailsView(session) {
     const sessionCoachId = session.coach ? (session.coach._id || session.coach).toString() : null;
 
     if (!hasRecordedAttendance) {
-        // Attendance NOT taken yet. Every athlete registered in this sport up to this date is in the draft roster.
+        // Attendance NOT taken yet. Every athlete registered in this sport up to this date who is eligible is in the draft roster.
         const sportAthletes = (cachedPlayers || []).filter(p => {
-            if ((p.sport || '').toLowerCase() !== (session.sport || '').toLowerCase()) return false;
-            const pCoach = p.coach ? (p.coach._id || p.coach).toString() : null;
-            if (sessionCoachId && pCoach && pCoach !== sessionCoachId) return false;
-            const registeredOn = p.registeredOn ? new Date(p.registeredOn) : null;
-            return !registeredOn || registeredOn <= sessionDayEnd;
+            return isPlayerEligibleForSession(p, session);
         }).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
         activeDetailsPlayers = sportAthletes.map(p => ({
@@ -3615,14 +3648,11 @@ function renderSessionDetailsView(session) {
             };
         });
 
-        const otherPlayers = (cachedPlayers || []).filter(p => {
+        // Any eligible player not in session.attendance snapshot is displayed with inRoster: true and 'not_recorded'
+        const otherEligiblePlayers = (cachedPlayers || []).filter(p => {
             const pid = p._id.toString();
             if (rosterIds.has(pid)) return false;
-            if ((p.sport || '').toLowerCase() !== (session.sport || '').toLowerCase()) return false;
-            const pCoach = p.coach ? (p.coach._id || p.coach).toString() : null;
-            if (sessionCoachId && pCoach && pCoach !== sessionCoachId) return false;
-            const registeredOn = p.registeredOn ? new Date(p.registeredOn) : null;
-            return !registeredOn || registeredOn <= sessionDayEnd;
+            return isPlayerEligibleForSession(p, session);
         }).sort((a, b) => (a.name || '').localeCompare(b.name || '')).map(p => ({
             _id: p._id.toString(),
             name: p.name,
@@ -3630,10 +3660,10 @@ function renderSessionDetailsView(session) {
             sport: p.sport,
             isReady: !!p.isReady,
             sessionStatus: 'not_recorded',
-            inRoster: false
+            inRoster: true
         }));
 
-        activeDetailsPlayers = [...playersForSession, ...otherPlayers];
+        activeDetailsPlayers = [...playersForSession, ...otherEligiblePlayers];
     }
 
     // Clear search input
@@ -3735,9 +3765,10 @@ function renderSessionPlayersTable(players) {
     }
 
     tableBody.innerHTML = players.map((p, idx) => {
-        const inRoster = p.inRoster !== false && p.sessionStatus !== 'not_recorded';
+        const isEligible = p.inRoster !== false && p.sessionStatus !== 'not_in_roster';
         const isPresent = (p.sessionStatus || 'absent').toLowerCase() === 'present';
         const isNotTaken = !hasRecordedAttendance || p.sessionStatus === 'not_taken';
+        const isNotRecorded = p.sessionStatus === 'not_recorded';
 
         const readinessHtml = p.isReady
             ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 whitespace-nowrap shadow-2xs">
@@ -3748,11 +3779,18 @@ function renderSessionPlayersTable(players) {
                </span>`;
 
         let statusHtml;
-        if (!inRoster) {
+        if (!isEligible) {
             statusHtml = `
-                <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 whitespace-nowrap shadow-2xs" title="Enrolled by this date but not part of this saved session's recorded roster. Not counted as absent.">
+                <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 whitespace-nowrap shadow-2xs" title="Not eligible for this session roster">
                     <i data-lucide="minus-circle" class="w-3.5 h-3.5"></i>
                     <span>NOT IN ROSTER</span>
+                </span>
+            `;
+        } else if (isNotRecorded) {
+            statusHtml = `
+                <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 whitespace-nowrap shadow-2xs" title="Eligible roster athlete with no attendance record saved for this session">
+                    <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i>
+                    <span>NOT RECORDED</span>
                 </span>
             `;
         } else if (isNotTaken) {

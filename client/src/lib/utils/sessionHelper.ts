@@ -1,12 +1,13 @@
 // client/src/lib/utils/sessionHelper.ts
 import { sportRegex } from './sport';
+import { isPlayerEligibleForSession } from '../roster';
 
 const Player = require('../models/Player');
 
 /**
  * Draft roster synchronization
  * A draft session is mutable. Keep its roster aligned with every player the
- * coach currently has in that sport. Saved sessions are snapshots and are
+ * coach currently has in that sport who is eligible. Saved sessions are snapshots and are
  * deliberately never changed here.
  */
 export async function syncDraftRoster(session: any) {
@@ -20,9 +21,13 @@ export async function syncDraftRoster(session: any) {
     const players = await Player.find({
       coach: coachId,
       sport: sportRegex(session.sport),
-    }).select('_id');
+    });
 
-    session.initialRosterPlayerIds = players.map((p: any) => p._id);
+    const eligiblePlayerIds = players
+      .filter((p: any) => isPlayerEligibleForSession(p, session))
+      .map((p: any) => p._id);
+
+    session.initialRosterPlayerIds = eligiblePlayerIds;
     session.createdWithCount = session.initialRosterPlayerIds.length;
     changed = true;
   }
@@ -70,8 +75,10 @@ export async function mergeAttendancePayload(session: any, attendance: any) {
     const activePlayers = await Player.find({
       coach: coachId,
       sport: sportRegex(session.sport),
-    }).select('_id');
-    activePlayers.forEach((p: any) => rosterIds.add(p._id.toString()));
+    });
+    activePlayers
+      .filter((p: any) => isPlayerEligibleForSession(p, session))
+      .forEach((p: any) => rosterIds.add(p._id.toString()));
   }
 
   if (rosterIds.size === 0) {
@@ -126,4 +133,3 @@ export async function mergeAttendancePayload(session: any, attendance: any) {
     };
   });
 }
-
