@@ -1,45 +1,78 @@
 # Maidan Desk — Sports Academy OS
 
-Maidan Desk is a comprehensive sports academy management and talent scouting platform engineered for Dumka Sports Academy. It unifies multi-sport player development, attendance session tracking, match scheduling, scoring, and professional scouting evaluations across four core roles: Admin, Coach, Scout, and Athlete.
+Maidan Desk is a comprehensive sports academy management and talent scouting platform engineered for Dumka Sports Academy across multi-sport athlete operations (Football, Cricket, Basketball). It streamlines daily attendance logging, match scheduling, dynamic squad eligibility, scoring, performance star tracking, and professional scouting evaluation.
 
 ---
 
-## Architecture & Migration Status
+## Architecture & Tech Stack
 
-- **Backend**: **100% migrated to Next.js App Router route handlers** (`client/src/app/api/**/route.ts`). All 35 REST endpoints across authentication, player profiles, attendance sessions, match lifecycles, scouting radar, and sync operate natively on MongoDB Atlas with HS256 JWT security and strict Indian Standard Time (`Asia/Kolkata`, UTC+05:30) validation.
-- **Frontend**: Hybrid architecture in transition:
-  - **Native React Entry & Auth (`/`)**: High-performance React client component (`client/src/app/page.tsx`) with dark glassmorphism, 1-click demo role fill, and automatic session restoration.
-  - **Native React Scout Radar (`/app/scout`)**: Dedicated Next.js React client component for scouting talent discovery, real-time trial readiness indicators, and performance star evaluations.
-  - **Academy Workspace SPA (`/app`)**: The battle-tested management single-page application is served directly by Next.js via route rewrite, preserving complete operational parity for all administrative, coaching, and athlete workflows while native React pages are progressively ported.
-- **Database**: MongoDB Atlas with atomic sync tracking (`syncstates`), optimistic locking, and strict database environment guards.
+- **Framework**: Next.js 15 (located in `client/`)
+- **Backend API**: 100% migrated to Next.js App Router route handlers in `client/src/app/api/` (35 endpoints across auth, players, attendance sessions, match lifecycles, scouting radar, and sync).
+- **Database**: MongoDB Atlas with atomic sync tracking (`syncstates`), optimistic concurrency locking, and strict database safety guards.
+- **Authentication**: HS256 JWT auth read strictly from environment variables without default fallback secrets.
+- **Frontend Architecture**:
+  - **Native React Entry (`/`)**: Dark glassmorphic React login client component with 1-click Quick Login role selection and automatic session restoration.
+  - **Native React Scout Radar (`/app/scout`)**: Dedicated React client component for scouting talent discovery, real-time trial readiness indicators, and performance star evaluations.
+  - **Main Academy Workspace (`/app`)**: The main UI is the original battle-tested vanilla JS application served directly by Next.js at `/app` via route rewrite.
+  - **Legacy Notice**: The Express codebase in the repo root (`src/`, `server.js`) is legacy and is **not used** by the deployed Next.js application.
 
 ---
 
-## Live Deployment Placeholder
+## Live Deployment
 
-- **Live URL**: `https://<your-maidandesk-app>.vercel.app`
-- **Entry Point**: `https://<your-maidandesk-app>.vercel.app/`
-- **SPA Workspace**: `https://<your-maidandesk-app>.vercel.app/app`
-- **Scout Portal**: `https://<your-maidandesk-app>.vercel.app/app/scout`
+- **Live Application URL**: `<LIVE_URL>`
+- **Entry & Login Portal**: `<LIVE_URL>/`
+- **Scout Radar (Native React)**: `<LIVE_URL>/app/scout`
+- **Academy Workspace (Main UI)**: `<LIVE_URL>/app`
 
 ---
 
 ## Test Credentials
 
-Sign in with any of the pre-seeded accounts (or use the 1-click quick-fill buttons on the login page):
+Sign in with any of the pre-seeded accounts (or use the 1-click **Quick Login** buttons on the login page):
 
-| Role | Username | Password | Purpose & Capabilities |
-|---|---|---|---|
-| **Admin** | `admin` | `admin123` | Academy-wide oversight, athlete registrations, coach assignments, audit logs |
-| **Coach** | `coach` | `coach123` | Daily session attendance locking, match scheduling, dynamic roster eligibility, scoring |
-| **Scout** | `scout` | `scout123` | Trial-ready player discovery radar ($\ge 75\%$ attendance & $\ge 2$ matches), star badges |
-| **Player** | `md260001` | `player123` | Athlete portal: personal session attendance, match history, readiness status |
+| Role | Username | Password | Athlete / Profile Details | Scouting Readiness Status |
+|---|---|---|---|---|
+| **Admin** | `admin` | `admin123` | Academy Admin | System oversight & registrations |
+| **Coach** | `coach` | `coach123` | Coach Sharma | Attendance locking & match operations |
+| **Scout** | `scout` | `scout123` | Scout Verma | Talent discovery & trial evaluations |
+| **Player** | `md260001` | `player123` | Kamran Akmal (Football) | **READY** (100% attendance, 2 matches) |
+| **Player** | `md260003` | `player123` | Aadil Azhar (Football) | **NOT READY** (50% attendance, 1 match) |
+
+> **Dataset Scope**: The academy database contains **24 seeded players, 10 trial-ready, plus any added** through the registration interface.
 
 ---
 
-## Local Run & Build Steps
+## Environment Variables
 
-The Next.js application is located in the `client/` directory:
+Configure the following environment variables (defined in `client/.env.local` for local execution, or in the Vercel Dashboard for production):
+
+| Variable | Description | Requirement | Example Value |
+|---|---|:---:|---|
+| `MONGODB_URI` | MongoDB Atlas connection string. **Must end in `/academy_final`**. | **Required** | `mongodb+srv://<user>:<password>@<cluster-host>/academy_final?retryWrites=true&w=majority` |
+| `JWT_SECRET` | Secret key for signing HS256 JWT tokens (min 32 characters, no default value). | **Required** | `your_secure_random_production_jwt_secret_min_32_chars` |
+| `ALLOW_PRODUCTION_DB` | Safety guard flag enabling production database connections. Enforces connection exclusively to `academy_final`. | **Required** | `true` |
+
+> [!CAUTION]
+> `ALLOW_MOCK_NOW` must **NOT** be set in production. Time-travel mocking is restricted strictly to local automated testing.
+
+---
+
+## Guarded Database Seeding
+
+The seed script includes an explicit safety guard that refuses to execute unless the target database name in `MONGODB_URI` equals `academy_final` AND `ALLOW_PRODUCTION_DB=true`:
+
+```powershell
+$env:ALLOW_PRODUCTION_DB = "true"
+$env:MONGODB_URI = "mongodb+srv://<user>:<password>@<cluster-host>/academy_final?retryWrites=true&w=majority"
+node scripts/seed.js
+```
+
+---
+
+## Local Development & Run Steps
+
+The Next.js application resides entirely in the `client/` directory:
 
 ```bash
 # 1. Navigate to the client directory
@@ -49,37 +82,30 @@ cd client
 npm install
 
 # 3. Configure local environment variables
-# Copy .env.example to .env.local (git-ignored)
+# Copy client/.env.example to client/.env.local (git-ignored)
 cp .env.example .env.local
 
-# Provide your MongoDB Atlas URI and JWT Secret in client/.env.local:
-# MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/academy_parity?retryWrites=true&w=majority
-# JWT_SECRET=your_jwt_secret_key_min_32_characters
-
-# 4. Start the development server
+# 4. Start local development server
 npm run dev
 # Server boots at http://localhost:3000
 
-# 5. Production build & run locally
+# 5. Production build & local start
 npm run build
 npm run start
 ```
 
 ---
 
-## Vercel Deployment Steps
+## Vercel Deployment Instructions
 
-1. **Import Repository**:
-   - In the Vercel Dashboard, import this repository.
-2. **Configure Root Directory**:
-   - In **Project Settings** > **General**, set **Root Directory** to `client`.
-   - Framework preset will automatically detect **Next.js**.
-3. **Environment Variables**:
-   In **Project Settings** > **Environment Variables**, configure:
-   - `MONGODB_URI`: Your MongoDB Atlas connection URI string.
-   - `JWT_SECRET`: Random secret string (minimum 32 characters) for HS256 tokens.
-   - `ALLOW_PRODUCTION_DB`: Set to `true` to permit connection to production database names.
-   > [!CAUTION]
-   > Do **NOT** set `ALLOW_MOCK_NOW` in production. Time-mocking is strictly reserved for automated testing.
-4. **Deploy**:
-   - Trigger deployment. Vercel will build the Next.js bundle and serverless route handlers cleanly.
+1. **Import Repository**: In the Vercel Dashboard, import this repository.
+2. **Project Settings**:
+   - Set **Root Directory** to `client`.
+   - Framework Preset: **Next.js** (automatically detected from `client/package.json`).
+   - No custom build overrides or additional configuration required.
+3. **Configure Environment Variables**:
+   In **Settings** > **Environment Variables**, add:
+   - `MONGODB_URI`: Connection string ending in `/academy_final`.
+   - `JWT_SECRET`: Random secret string (minimum 32 characters).
+   - `ALLOW_PRODUCTION_DB`: Set to `true`.
+4. **Deploy**: Trigger deployment. Vercel will execute `next build` and deploy the route handlers and static assets cleanly.
